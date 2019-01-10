@@ -16,15 +16,15 @@ return [
 
     /*
      * This is the per-page limit for your tier ("Free" by default)
-     * Adjust this to 500 if you are on the "Pro" tier or to whatever you want
-     * if you are in the Partner Program.
+     * Adjust this to 500 if you are on the "Pro" tier or in the Partner Program
+     * or to 5000 if you are in the "Enterprise" tier.
      */
     'per_page_limit' => 50,
 
     /*
      * This is the offset limit for your tier ("Free" by default)
-     * Adjust this to 5000 if you are on the "Pro" tier or to whatever you want
-     * if you are in the Partner Program.
+     * Adjust this to 5000 if you are on the "Pro" tier or in the Partner Program
+     * or to 0 (to turn it off) if you are in the "Enterprise" tier.
      */
     'offset_limit' => 150,
 ];

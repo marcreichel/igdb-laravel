@@ -199,8 +199,13 @@ class Builder
      */
     public function offset(int $offset): self
     {
-        $offset = min($offset, config('igdb.offset_limit', 150));
-        $this->query->put('offset', $offset);
+        $tierMaximum = max(0, config('igdb.offset_limit', 150));
+        if ($tierMaximum === 0) {
+            $this->query->put('offset', $offset);
+        } else {
+            $offset = min($offset, config('igdb.offset_limit', 150));
+            $this->query->put('offset', $offset);
+        }
 
         return $this;
     }
@@ -1323,7 +1328,7 @@ class Builder
                 $message = 'Invalid User key or no user key';
                 throw new UnauthorizedException($message);
             }
-        } elseif($exception instanceof ServerException) {
+        } elseif ($exception instanceof ServerException) {
             if ($exception->getCode() === Response::HTTP_SERVICE_UNAVAILABLE) {
                 $message = 'IGDB is down right now. Please try again later.';
                 throw new ServiceUnavailableException($message);
