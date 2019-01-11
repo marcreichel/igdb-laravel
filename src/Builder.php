@@ -82,7 +82,11 @@ class Builder
         '>=',
         '!=',
         '!=',
-        '~'
+        '~',
+        'like',
+        'ilike',
+        'not like',
+        'not ilike',
     ];
 
     /**
@@ -252,7 +256,7 @@ class Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param $field
+     * @param string $key
      * @param string $operator
      * @param string|null $value
      * @param string $boolean
@@ -260,17 +264,17 @@ class Builder
      * @return $this
      */
     public function where(
-        $field,
+        string $key,
         $operator = null,
         $value = null,
         $boolean = '&'
     ) {
-        if (is_callable($field)) {
-            return $this->whereNested($field, $boolean);
+        if (is_callable($key)) {
+            return $this->whereNested($key, $boolean);
         }
 
-        if (is_array($field)) {
-            return $this->addArrayOfWheres($field, $boolean, 'where');
+        if (is_array($key)) {
+            return $this->addArrayOfWheres($key, $boolean, 'where');
         }
 
         [$value, $operator] = $this->prepareValueAndOperator(
@@ -278,18 +282,67 @@ class Builder
         );
 
         $select = $this->query->get('fields', new Collection());
-        if (!$select->contains($field) && !$select->contains('*')) {
-            $this->query->put('fields', $select->push($field));
+        if (!$select->contains($key) && !$select->contains('*')) {
+            $this->query->put('fields', $select->push($key));
         }
 
         $where = $this->query->get('where', new Collection());
 
-        if (collect($this->dates)->has($field) && $this->dates[$field] === 'date') {
+        if (collect($this->dates)->has($key) && $this->dates[$key] === 'date') {
             $value = $this->castDate($value);
         }
-        $value = json_encode($value);
-        $where->push(($where->count() ? $boolean . ' ' : '') . $field . ' ' . $operator . ' ' . $value);
 
+        if ($operator === 'like' && is_string($value)) {
+            $this->whereLike($key, $value, true, $boolean);
+        } elseif ($operator === 'ilike' && is_string($value)) {
+            $this->whereLike($key, $value, false, $boolean);
+        } elseif ($operator === 'not like' && is_string($value)) {
+            $this->whereNotLike($key, $value, true, $boolean);
+        } elseif ($operator === 'not ilike' && is_string($value)) {
+            $this->whereNotLike($key, $value, false, $boolean);
+        } else {
+            $value = json_encode($value);
+            $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
+            $this->query->put('where', $where);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add a "where like" clause to the query.
+     *
+     * @param string $key
+     * @param string $value
+     * @param bool $caseSensitive
+     * @param string $boolean
+     *
+     * @return \MarcReichel\IGDBLaravel\Builder
+     */
+    public function whereLike(
+        string $key,
+        string $value,
+        $caseSensitive = true,
+        $boolean = '&'
+    ): self {
+        $where = $this->query->get('where', new Collection());
+
+        $hasPrefix = starts_with($value, '%');
+        $hasSuffix = ends_with($value, '%');
+
+        if ($hasPrefix) {
+            $value = substr($value, 1);
+        }
+        if ($hasSuffix) {
+            $value = substr($value, 0, -1);
+        }
+
+        $operator = $caseSensitive ? '=' : '~';
+        $prefix = $hasPrefix ? '*' : '';
+        $suffix = $hasSuffix ? '*' : '';
+        $value = json_encode($value);
+
+        $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $value . $suffix);
 
         $this->query->put('where', $where);
 
@@ -297,9 +350,87 @@ class Builder
     }
 
     /**
+     * Add a "or where like" clause to the query.
+     *
+     * @param string $key
+     * @param string $value
+     * @param bool $caseSensitive
+     * @param string $boolean
+     *
+     * @return \MarcReichel\IGDBLaravel\Builder
+     */
+    public function orWhereLike(
+        string $key,
+        string $value,
+        bool $caseSensitive = true,
+        $boolean = '|'
+    ) {
+        return $this->whereLike($key, $value, $caseSensitive, $boolean);
+    }
+
+    /**
+     * Add a "where not like" clause to the query.
+     *
+     * @param string $key
+     * @param string $value
+     * @param bool $caseSensitive
+     * @param string $boolean
+     *
+     * @return $this
+     */
+    public function whereNotLike(
+        string $key,
+        string $value,
+        $caseSensitive = true,
+        $boolean = '&'
+    ) {
+        $where = $this->query->get('where', new Collection());
+
+        $hasPrefix = starts_with($value, '%');
+        $hasSuffix = ends_with($value, '%');
+
+        if ($hasPrefix) {
+            $value = substr($value, 1);
+        }
+        if ($hasSuffix) {
+            $value = substr($value, 0, -1);
+        }
+
+        $operator = $caseSensitive ? '!=' : '!~';
+        $prefix = $hasPrefix ? '*' : '';
+        $suffix = $hasSuffix ? '*' : '';
+        $value = json_encode($value);
+
+        $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $value . $suffix);
+
+        $this->query->put('where', $where);
+
+        return $this;
+    }
+
+    /**
+     * Add a "or where not like" clause to the query.
+     *
+     * @param string $key
+     * @param string $value
+     * @param bool $caseSensitive
+     * @param string $boolean
+     *
+     * @return \MarcReichel\IGDBLaravel\Builder
+     */
+    public function orWhereNotLike(
+        string $key,
+        string $value,
+        $caseSensitive = true,
+        $boolean = '|'
+    ) {
+        return $this->whereNotLike($key, $value, $caseSensitive, $boolean);
+    }
+
+    /**
      * Add an "or where" clause to the query.
      *
-     * @param $field
+     * @param string $key
      * @param null $operator
      * @param null $value
      * @param string $boolean
@@ -307,7 +438,7 @@ class Builder
      * @return Builder
      */
     public function orWhere(
-        $field,
+        string $key,
         $operator = null,
         $value = null,
         $boolean = '|'
@@ -316,7 +447,7 @@ class Builder
             $value, $operator, func_num_args() === 2
         );
 
-        return $this->where($field, $operator, $value, $boolean);
+        return $this->where($key, $operator, $value, $boolean);
     }
 
     /**
@@ -361,20 +492,20 @@ class Builder
     /**
      * Add an array of where clauses to the query.
      *
-     * @param $field
+     * @param $key
      * @param $boolean
      * @param string $method
      *
      * @return mixed
      */
-    protected function addArrayOfWheres($field, $boolean, $method = 'where')
+    protected function addArrayOfWheres($key, $boolean, $method = 'where')
     {
         return $this->whereNested(function ($query) use (
-            $field,
+            $key,
             $method,
             $boolean
         ) {
-            foreach ($field as $key => $value) {
+            foreach ($key as $key => $value) {
                 if (is_numeric($key) && is_array($value)) {
                     $query->{$method}(...array_values($value));
                 } else {
@@ -1088,15 +1219,15 @@ class Builder
     /**
      * Add an "sort" clause to the query.
      *
-     * @param string $field
+     * @param string $key
      * @param string $direction
      *
      * @return $this
      */
-    public function orderBy(string $field, string $direction = 'asc')
+    public function orderBy(string $key, string $direction = 'asc')
     {
         if (!$this->query->has('search')) {
-            $this->query->put('sort', $field . ' ' . $direction);
+            $this->query->put('sort', $key . ' ' . $direction);
         }
 
         return $this;
@@ -1105,13 +1236,13 @@ class Builder
     /**
      * Add an "sort desc" clause to the query.
      *
-     * @param string $field
+     * @param string $key
      *
      * @return \MarcReichel\IGDBLaravel\Builder
      */
-    public function orderByDesc(string $field)
+    public function orderByDesc(string $key)
     {
-        return $this->orderBy($field, 'desc');
+        return $this->orderBy($key, 'desc');
     }
 
     /**
@@ -1271,6 +1402,7 @@ class Builder
      */
     public function get()
     {
+        dd($this->getQuery());
         if ($this->endpoint) {
 
             $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
