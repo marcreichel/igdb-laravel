@@ -351,6 +351,22 @@ instead use `findOrFail`. This will throw an
 `MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException` if no result were
 found.
 
+#### Relationships (Extends)
+
+To extend your result use the `with`-method:
+
+```php
+$game = Game::with(['cover', 'artworks'])->get();
+```
+
+By default, every field (`*`) of the relationship is selected.
+If you want to define the fields of the relationship yourself you have to define
+the relationship as the array-key and the fields as an array:
+
+```php
+$game = Game::with(['cover' => ['url', 'image_id'])->get();
+```
+
 ### Reading properties
 
 #### Model-based approach
