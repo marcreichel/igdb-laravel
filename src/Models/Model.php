@@ -272,6 +272,11 @@ class Model
     {
         $attributes = collect($this->attributes);
         $relations = collect($this->relations)->map(function($relation) {
+            if (is_array($relation)) {
+                return collect($relation)->map(function($single) {
+                    return $single->toArray();
+                });
+            }
             return $relation->toArray();
         });
         return $attributes->merge($relations)->sortKeys()->toArray();
@@ -284,6 +289,11 @@ class Model
     {
         $attributes = collect($this->attributes);
         $relations = collect($this->relations)->map(function($relation) {
+            if (is_array($relation)) {
+                return collect($relation)->map(function($single) {
+                    return $single->toJson();
+                });
+            }
             return $relation->toJson();
         });
         return $attributes->merge($relations)->sortKeys()->toJson();
