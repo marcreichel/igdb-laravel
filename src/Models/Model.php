@@ -266,19 +266,15 @@ class Model
     }
 
     /**
-     * @return \Illuminate\Support\Collection
-     */
-    private function getAttributes(): \Illuminate\Support\Collection
-    {
-        return collect($this->attributes)->merge($this->relations);
-    }
-
-    /**
      * @return array
      */
     public function toArray(): array
     {
-        return $this->getAttributes()->toArray();
+        $attributes = $this->attributes;
+        $relations = collect($this->relations)->map(function($relation) {
+            return $relation->toArray();
+        });
+        return $attributes->merge($relations)->toArray();
     }
 
     /**
@@ -286,6 +282,10 @@ class Model
      */
     public function toJson(): string
     {
-        return $this->getAttributes()->toJson();
+        $attributes = $this->attributes;
+        $relations = collect($this->relations)->map(function($relation) {
+            return $relation->toJson();
+        });
+        return $attributes->merge($relations)->toJson();
     }
 }
