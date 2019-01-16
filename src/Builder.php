@@ -301,7 +301,7 @@ class Builder
         } elseif ($operator === 'not ilike' && is_string($value)) {
             $this->whereNotLike($key, $value, false, $boolean);
         } else {
-            $value = json_encode($value);
+            $value = !is_numeric($value) ? json_encode($value) : $value;
             $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
             $this->query->put('where', $where);
         }
@@ -1402,7 +1402,6 @@ class Builder
      */
     public function get()
     {
-        dd($this->getQuery());
         if ($this->endpoint) {
 
             $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
@@ -1466,9 +1465,7 @@ class Builder
                 throw new ServiceUnavailableException($message);
             }
             if ($exception->getCode() === Response::HTTP_INTERNAL_SERVER_ERROR) {
-                $message = 'IGDB is not working properly right now. '
-                    . 'You could report this at https://www.igdb.com/feedbacks/new';
-                throw new ServiceException($message);
+                throw new ServiceException($exception->getMessage());
             }
         }
     }
@@ -1520,9 +1517,47 @@ class Builder
      */
     public function first()
     {
-        $data = $this->forPage(1, 1)->get();
+        $data = $this->get();
 
         return collect($data)->first();
+    }
+
+    /**
+     * @return mixed
+     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     */
+    public function count()
+    {
+        if ($this->endpoint) {
+
+            $this->endpoint = str_finish($this->endpoint, '/') . 'count';
+
+            $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
+
+            if (!$this->cacheLifetime) {
+                Cache::forget($cacheKey);
+            }
+
+            $data = Cache::remember($cacheKey, $this->cacheLifetime,
+                function () {
+                    try {
+                        return (int)json_decode($this->client->get($this->endpoint,
+                            [
+                                'body' => $this->getQuery()
+                            ])->getBody())['count'];
+                    } catch (\Exception $exception) {
+                        $this->handleRequestException($exception);
+                    }
+
+                    return null;
+                });
+
+            $this->initClient();
+
+            return $data;
+        }
+
+        throw new MissingEndpointException('Please provide an endpoint.');
     }
 
     /**

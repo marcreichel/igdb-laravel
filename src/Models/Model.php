@@ -23,6 +23,11 @@ class Model
 
     private static $instance;
 
+    /**
+     * Model constructor.
+     *
+     * @param array $properties
+     */
     public function __construct($properties = [])
     {
         $this->builder = new Builder($this);
@@ -34,21 +39,41 @@ class Model
         $this->setEndpoint();
     }
 
+    /**
+     * @param $field
+     *
+     * @return mixed
+     */
     public function __get($field)
     {
         return $this->getAttribute($field);
     }
 
+    /**
+     * @param $method
+     * @param $parameters
+     *
+     * @return mixed
+     */
     public function __call($method, $parameters)
     {
         return $this->forwardCallTo($this->newQuery(), $method, $parameters);
     }
 
+    /**
+     * @param $method
+     * @param $parameters
+     *
+     * @return mixed
+     */
     public static function __callStatic($method, $parameters)
     {
         return (new static)->$method(...$parameters);
     }
 
+    /**
+     * @return mixed
+     */
     public static function all()
     {
         return (new static)->limit(config('igdb.per_page_limit', 50))
@@ -60,6 +85,9 @@ class Model
         $this->identifier = collect($this->attributes)->get('id');
     }
 
+    /**
+     * @param array $attributes
+     */
     protected function setAttributes(array $attributes)
     {
         $this->attributes = collect($attributes)->filter(function ($value) {
@@ -78,6 +106,9 @@ class Model
         })->toArray();
     }
 
+    /**
+     * @param array $attributes
+     */
     protected function setRelations(array $attributes)
     {
         $this->relations = collect($attributes)
@@ -91,6 +122,13 @@ class Model
             })->toArray();
     }
 
+    /**
+     * @param $object
+     * @param $method
+     * @param $parameters
+     *
+     * @return mixed
+     */
     public function forwardCallTo($object, $method, $parameters)
     {
         try {
@@ -100,11 +138,19 @@ class Model
         }
     }
 
+    /**
+     * @return \MarcReichel\IGDBLaravel\Builder
+     */
     public function newQuery()
     {
         return new Builder($this);
     }
 
+    /**
+     * @param $fields
+     *
+     * @return \MarcReichel\IGDBLaravel\Models\Model
+     */
     public function getInstance($fields)
     {
         if (is_null(self::$instance)) {
@@ -115,11 +161,22 @@ class Model
         return self::$instance;
     }
 
+    /**
+     * @param $field
+     *
+     * @return mixed
+     */
     public function getAttribute($field)
     {
         return collect($this->attributes)->merge($this->relations)->get($field);
     }
 
+    /**
+     * @param $property
+     * @param $value
+     *
+     * @return array
+     */
     private function mapToModel($property, $value)
     {
         $class = $this->getClassNameForProperty($property);
@@ -150,6 +207,11 @@ class Model
         return $value;
     }
 
+    /**
+     * @param $property
+     *
+     * @return bool|mixed|string
+     */
     protected function getClassNameForProperty($property)
     {
         if (collect($this->casts)->has($property)) {
@@ -175,6 +237,11 @@ class Model
         return false;
     }
 
+    /**
+     * @param $value
+     *
+     * @return array
+     */
     protected function getProperties($value)
     {
         return collect($value)->toArray();
@@ -190,8 +257,35 @@ class Model
         }
     }
 
+    /**
+     * @return mixed
+     */
     protected function getEndpoint()
     {
         return $this->endpoint;
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    private function getAttributes(): \Illuminate\Support\Collection
+    {
+        return collect($this->attributes)->merge($this->relations);
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->getAttributes()->toArray();
+    }
+
+    /**
+     * @return string
+     */
+    public function toJson(): string
+    {
+        return $this->getAttributes()->toJson();
     }
 }
