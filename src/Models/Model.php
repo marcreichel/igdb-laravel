@@ -270,11 +270,11 @@ class Model
      */
     public function toArray(): array
     {
-        $attributes = $this->attributes;
+        $attributes = collect($this->attributes);
         $relations = collect($this->relations)->map(function($relation) {
             return $relation->toArray();
         });
-        return $attributes->merge($relations)->toArray();
+        return $attributes->merge($relations)->sortKeys()->toArray();
     }
 
     /**
@@ -282,10 +282,10 @@ class Model
      */
     public function toJson(): string
     {
-        $attributes = $this->attributes;
+        $attributes = collect($this->attributes);
         $relations = collect($this->relations)->map(function($relation) {
             return $relation->toJson();
         });
-        return $attributes->merge($relations)->toJson();
+        return $attributes->merge($relations)->sortKeys()->toJson();
     }
 }
