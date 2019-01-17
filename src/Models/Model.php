@@ -275,7 +275,7 @@ class Model
             if (is_array($relation)) {
                 return collect($relation)->map(function($single) {
                     return $single->toArray();
-                });
+                })->toArray();
             }
             return $relation->toArray();
         });
@@ -292,7 +292,7 @@ class Model
             if (is_array($relation)) {
                 return collect($relation)->map(function($single) {
                     return $single->toJson();
-                });
+                })->toJson();
             }
             return $relation->toJson();
         });

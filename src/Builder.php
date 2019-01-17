@@ -264,7 +264,7 @@ class Builder
      * @return $this
      */
     public function where(
-        string $key,
+        $key,
         $operator = null,
         $value = null,
         $boolean = '&'
