@@ -8,11 +8,12 @@ return [
 
     /*
      * This package caches queries automatically.
-     * Here you can set how long each query should be cached.
+     * Here you can set how long (in seconds) each query should be cached (by
+     * default).
      *
      * To turn cache off set this value to 0
      */
-    'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 60),
+    'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
 
     /*
      * This is the per-page limit for your tier ("Free" by default)

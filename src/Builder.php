@@ -269,7 +269,7 @@ class Builder
         $value = null,
         $boolean = '&'
     ) {
-        if (is_callable($key)) {
+        if ($key instanceof Closure) {
             return $this->whereNested($key, $boolean);
         }
 
@@ -1284,13 +1284,13 @@ class Builder
     /**
      * Overwrite the cache lifetime for this query.
      *
-     * @param int $minutes
+     * @param mixed $seconds
      *
      * @return $this
      */
-    public function cache(int $minutes): self
+    public function cache($seconds): self
     {
-        $this->cacheLifetime = $minutes;
+        $this->cacheLifetime = $seconds;
 
         return $this;
     }
@@ -1406,7 +1406,7 @@ class Builder
 
             $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
 
-            if (!$this->cacheLifetime) {
+            if (is_int($this->cacheLifetime) && $this->cacheLifetime === 0) {
                 Cache::forget($cacheKey);
             }
 
