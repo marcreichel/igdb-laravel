@@ -276,12 +276,10 @@ class Model implements Arrayable, Jsonable
     {
         $attributes = collect($this->attributes);
         $relations = collect($this->relations)->map(function($relation) {
-            if (is_array($relation)) {
-                return collect($relation)->map(function($single) {
-                    return $single->toArray();
-                })->toArray();
+            if($relation instanceof Arrayable){
+                return $relation->toArray();
             }
-            return $relation->toArray();
+            return $relation;
         });
         return $attributes->merge($relations)->sortKeys()->toArray();
     }
