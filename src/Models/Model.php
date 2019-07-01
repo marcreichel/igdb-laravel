@@ -2,15 +2,17 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-use Carbon\Carbon;
 use Error;
+use Carbon\Carbon;
 use BadMethodCallException;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\Builder;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Contracts\Support\Arrayable;
 use MarcReichel\IGDBLaravel\Traits\HasAttributes;
 use MarcReichel\IGDBLaravel\Traits\HasRelationships;
 
-class Model
+class Model implements Arrayable, Jsonable
 {
     use HasAttributes,
         HasRelationships;
@@ -266,6 +268,8 @@ class Model
     }
 
     /**
+     * Get the instance as an array.
+     *
      * @return array
      */
     public function toArray(): array
@@ -283,19 +287,13 @@ class Model
     }
 
     /**
+     * Convert the object to its JSON representation.
+     *
+     * @param  int  $options
      * @return string
      */
-    public function toJson(): string
+    public function toJson($options = 0): string
     {
-        $attributes = collect($this->attributes);
-        $relations = collect($this->relations)->map(function($relation) {
-            if (is_array($relation)) {
-                return collect($relation)->map(function($single) {
-                    return $single->toJson();
-                })->toJson();
-            }
-            return $relation->toJson();
-        });
-        return $attributes->merge($relations)->sortKeys()->toJson();
+        return collect($this->toArray())->toJson($options);
     }
 }
