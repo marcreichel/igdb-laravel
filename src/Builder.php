@@ -492,22 +492,22 @@ class Builder
     /**
      * Add an array of where clauses to the query.
      *
-     * @param $key
+     * @param $arrayOfWheres
      * @param $boolean
      * @param string $method
      *
      * @return mixed
      */
-    protected function addArrayOfWheres($key, $boolean, $method = 'where')
+    protected function addArrayOfWheres($arrayOfWheres, $boolean, $method = 'where')
     {
         return $this->whereNested(function ($query) use (
-            $key,
+            $arrayOfWheres,
             $method,
             $boolean
         ) {
-            foreach ($key as $key => $value) {
+            foreach ($arrayOfWheres as $key => $value) {
                 if (is_numeric($key) && is_array($value)) {
-                    $query->{$method}(...array_values($value));
+                    $query->$method(...array_values($value));
                 } else {
                     $query->$method($key, '=', $value, $boolean);
                 }
