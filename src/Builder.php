@@ -993,7 +993,7 @@ class Builder
      */
     public function whereNull(string $key, $boolean = '&')
     {
-        return $this->whereHas($key, $boolean);
+        return $this->whereHasNot($key, $boolean);
     }
 
     /**
@@ -1006,7 +1006,7 @@ class Builder
      */
     public function whereNotNull(string $key, $boolean = '&')
     {
-        return $this->whereHasNot($key, $boolean);
+        return $this->whereHas($key, $boolean);
     }
 
     /**
