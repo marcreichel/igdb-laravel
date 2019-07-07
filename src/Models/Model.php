@@ -121,7 +121,7 @@ class Model implements Arrayable, Jsonable
                     })->toArray();
                 }
                 return $this->mapToModel($key, $value);
-            })->toArray();
+            });
     }
 
     /**
