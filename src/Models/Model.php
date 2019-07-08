@@ -185,7 +185,7 @@ class Model implements ArrayAccess, Arrayable, Jsonable
                 if (is_array($value)) {
                     return collect($value)->map(function($value) use ($key) {
                         return $this->mapToModel($key, $value);
-                    })->toArray();
+                    });
                 }
                 return $this->mapToModel($key, $value);
             });
