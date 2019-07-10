@@ -3,6 +3,7 @@
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Error;
+use ArrayAccess;
 use Carbon\Carbon;
 use BadMethodCallException;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use MarcReichel\IGDBLaravel\Traits\HasAttributes;
 use MarcReichel\IGDBLaravel\Traits\HasRelationships;
 
-class Model implements Arrayable, Jsonable
+class Model implements ArrayAccess, Arrayable, Jsonable
 {
     use HasAttributes,
         HasRelationships;
@@ -51,6 +52,72 @@ class Model implements Arrayable, Jsonable
         return $this->getAttribute($field);
     }
 
+    /**
+     * @param $field
+     *
+     * @param $value
+     */
+    public function __set($field, $value)
+    {
+        $this->attributes[$field] = $value;
+    }
+
+    /**
+     * @param mixed $field
+     *
+     * @return bool
+     */
+    public function offsetExists($field)
+    {
+        return isset($this->attributes[$field]) || isset($this->relations[$field]);
+    }
+
+    /**
+     * @param mixed $field
+     *
+     * @return mixed
+     */
+    public function offsetGet($field)
+    {
+        return $this->getAttribute($field);
+    }
+
+    /**
+     * @param mixed $field
+     *
+     * @return mixed
+     */
+    public function offsetSet($field, $value)
+    {
+        $this->attributes[$field] = $value;
+    }
+
+    /**
+     * @param mixed $field
+     */
+    public function offsetUnset($field)
+    {
+        unset($this->attributes[$field], $this->relations[$field]);
+    }
+
+    /**
+     * @param $field
+     *
+     * @return bool
+     */
+    public function __isset($field)
+    {
+        return $this->offsetExists($field);
+    }
+
+    /**
+     * @param $field
+     */
+    public function __unset($field)
+    {
+        $this->offsetUnset($field);
+    }
+    
     /**
      * @param $method
      * @param $parameters
@@ -118,10 +185,10 @@ class Model implements Arrayable, Jsonable
                 if (is_array($value)) {
                     return collect($value)->map(function($value) use ($key) {
                         return $this->mapToModel($key, $value);
-                    })->toArray();
+                    });
                 }
                 return $this->mapToModel($key, $value);
-            })->toArray();
+            });
     }
 
     /**
