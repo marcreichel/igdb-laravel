@@ -2,8 +2,8 @@
 
 namespace MarcReichel\IGDBLaravel;
 
-use Closure;
 use Carbon\Carbon;
+use Closure;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
@@ -11,6 +11,8 @@ use Illuminate\Http\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
@@ -66,7 +68,7 @@ class Builder
         'change_date' => 'date',
         'start_date' => 'date',
         'published_at' => 'date',
-        'first_release_date' => 'date'
+        'first_release_date' => 'date',
     ];
 
     /**
@@ -144,8 +146,8 @@ class Builder
             'base_uri' => 'https://api-v3.igdb.com/',
             'headers' => [
                 'user-key' => config('igdb.api_token'),
-                'User-Agent' => 'IGDB-Laravel-Wrapper/0.1-Dev'
-            ]
+                'User-Agent' => 'IGDB-Laravel-Wrapper/0.1-Dev',
+            ],
         ]);
     }
 
@@ -277,9 +279,8 @@ class Builder
             return $this->addArrayOfWheres($key, $boolean, 'where');
         }
 
-        [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
 
         $select = $this->query->get('fields', new Collection());
         if (!$select->contains($key) && !$select->contains('*')) {
@@ -327,8 +328,8 @@ class Builder
     ): self {
         $where = $this->query->get('where', new Collection());
 
-        $hasPrefix = starts_with($value, '%');
-        $hasSuffix = ends_with($value, '%');
+        $hasPrefix = Str::startsWith($value, '%');
+        $hasSuffix = Str::endsWith($value, '%');
 
         if ($hasPrefix) {
             $value = substr($value, 1);
@@ -386,8 +387,8 @@ class Builder
     ) {
         $where = $this->query->get('where', new Collection());
 
-        $hasPrefix = starts_with($value, '%');
-        $hasSuffix = ends_with($value, '%');
+        $hasPrefix = Str::startsWith($value, '%');
+        $hasSuffix = Str::endsWith($value, '%');
 
         if ($hasPrefix) {
             $value = substr($value, 1);
@@ -443,9 +444,8 @@ class Builder
         $value = null,
         $boolean = '|'
     ) {
-        [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -478,15 +478,15 @@ class Builder
      *
      * Prevents using Null values with invalid operators.
      *
-     * @param  string $operator
-     * @param  mixed $value
+     * @param string $operator
+     * @param mixed $value
      *
      * @return bool
      */
     protected function invalidOperatorAndValue($operator, $value)
     {
-        return is_null($value) && in_array($operator, $this->operators) &&
-            !in_array($operator, ['=', '!=']);
+        return is_null($value) && in_array($operator,
+                $this->operators) && !in_array($operator, ['=', '!=']);
     }
 
     /**
@@ -498,8 +498,11 @@ class Builder
      *
      * @return mixed
      */
-    protected function addArrayOfWheres($arrayOfWheres, $boolean, $method = 'where')
-    {
+    protected function addArrayOfWheres(
+        $arrayOfWheres,
+        $boolean,
+        $method = 'where'
+    ) {
         return $this->whereNested(function ($query) use (
             $arrayOfWheres,
             $method,
@@ -576,13 +579,11 @@ class Builder
         $prefix = '(',
         $suffix = ')'
     ) {
-        if (
-            (!in_array($prefix, ['(', '[', '{']) || !in_array($suffix,
-                    [')', ']', '}'])) ||
-            ($prefix == '(' && $suffix != ')') ||
-            ($prefix == '[' && $suffix != ']') ||
-            ($prefix == '{' && $suffix != '}')
-        ) {
+        if ((!in_array($prefix, ['(', '[', '{']) || !in_array($suffix, [
+                        ')',
+                        ']',
+                        '}',
+                    ])) || ($prefix == '(' && $suffix != ')') || ($prefix == '[' && $suffix != ']') || ($prefix == '{' && $suffix != '}')) {
             $message = 'Prefix and Suffix must be "()", "[]" or "{}".';
             throw new InvalidArgumentException($message);
         }
@@ -593,8 +594,7 @@ class Builder
             return !is_numeric($value) ? '"' . (string)$value . '"' : $value;
         })->implode(',');
 
-        $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' '
-            . $operator . ' ' . $prefix . $valuesString . $suffix);
+        $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $valuesString . $suffix);
 
         $this->query->put('where', $where);
 
@@ -895,8 +895,8 @@ class Builder
             $withBoundaries
         ) {
             $operator = ($withBoundaries ? '=' : '');
-            $query->where($key, '>' . $operator, $first)
-                ->where($key, '<' . $operator, $second);
+            $query->where($key, '>' . $operator, $first)->where($key,
+                    '<' . $operator, $second);
         }, $boolean);
 
         return $this;
@@ -954,8 +954,8 @@ class Builder
             $withBoundaries
         ) {
             $operator = ($withBoundaries ? '=' : '');
-            $query->where($key, '<' . $operator, $first)
-                ->orWhere($key, '>' . $operator, $second);
+            $query->where($key, '<' . $operator, $first)->orWhere($key,
+                    '>' . $operator, $second);
         }, $boolean);
 
         return $this;
@@ -1047,9 +1047,8 @@ class Builder
      */
     public function whereDate(string $key, $operator, $value, $boolean = '&')
     {
-        [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
 
         if ($operator === '>') {
             $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
@@ -1071,8 +1070,7 @@ class Builder
             $start = Carbon::parse($value)->startOfDay()->timestamp;
             $end = Carbon::parse($value)->endOfDay()->timestamp;
 
-            return $this->whereNotBetween($key, $start, $end,
-                false, $boolean);
+            return $this->whereNotBetween($key, $start, $end, false, $boolean);
         }
 
         $start = Carbon::parse($value)->startOfDay()->timestamp;
@@ -1108,9 +1106,8 @@ class Builder
      */
     public function whereYear(string $key, $operator, $value, $boolean = '&')
     {
-        [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
 
         if ($operator === '>') {
             $value = Carbon::create($value)->endOfYear()->timestamp;
@@ -1123,8 +1120,7 @@ class Builder
             return $this->where($key, $operator, $value, $boolean);
         } elseif ($operator === '<=') {
             $value = Carbon::create($value)->endOfYear()->timestamp;
-            return $this->where($key, $operator, $value,
-                $boolean);
+            return $this->where($key, $operator, $value, $boolean);
         }
 
         $start = Carbon::create($value)->startOfYear()->timestamp;
@@ -1313,7 +1309,7 @@ class Builder
             }
             return $value;
         })->map(function ($value, $key) {
-            return str_finish($key . ' ' . $value, ';');
+            return Str::finish($key . ' ' . $value, ';');
         })->unique()->sort()->implode("\n");
     }
 
@@ -1327,7 +1323,7 @@ class Builder
     public function endpoint(string $endpoint)
     {
         if ($this->class === null) {
-            $this->endpoint = str_start($endpoint, '/');
+            $this->endpoint = Str::start($endpoint, '/');
         }
 
         return $this;
@@ -1355,13 +1351,13 @@ class Builder
 
                 $reflectionNamespace = $reflectionClass->getNamespaceName();
 
-                if (starts_with($reflectionNamespace, $neededNamespace)) {
+                if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
                     $this->class = get_class($model);
 
                     $class = class_basename($this->class);
 
-                    $this->endpoint = ($model->privateEndpoint ? '/private' : '') .
-                        str_start(snake_case(str_plural($class)), '/');
+                    $this->endpoint = ($model->privateEndpoint ? '/private' : '') . Str::start(Str::snake(Str::plural($class)),
+                            '/');
                 }
             } catch (\ReflectionException $e) {
             }
@@ -1372,9 +1368,7 @@ class Builder
         }
 
         if ($this->endpoint === null) {
-            $message = 'Construction-Parameter of Builder must be a string or '
-                . 'a Class which extends ' . $neededNamespace . '\\Model. '
-                . ucfirst(gettype($model)) . ' given.';
+            $message = 'Construction-Parameter of Builder must be a string or ' . 'a Class which extends ' . $neededNamespace . '\\Model. ' . ucfirst(gettype($model)) . ' given.';
             throw new InvalidArgumentException($message);
         }
     }
@@ -1415,7 +1409,7 @@ class Builder
                     try {
                         return collect(json_decode($this->client->get($this->endpoint,
                             [
-                                'body' => $this->getQuery()
+                                'body' => $this->getQuery(),
                             ])->getBody()));
                     } catch (\Exception $exception) {
                         $this->handleRequestException($exception);
@@ -1501,7 +1495,7 @@ class Builder
         if ($this->class) {
             $model = class_basename($this->class);
         } else {
-            $model = studly_case(str_singular($this->endpoint));
+            $model = Str::studly(Str::singular($this->endpoint));
         }
 
         $message = sprintf('%s with id %d not found.', $model, $id);
@@ -1530,7 +1524,7 @@ class Builder
     {
         if ($this->endpoint) {
 
-            $this->endpoint = str_finish($this->endpoint, '/') . 'count';
+            $this->endpoint = Str::finish($this->endpoint, '/') . 'count';
 
             $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
 
@@ -1543,7 +1537,7 @@ class Builder
                     try {
                         return (int)json_decode($this->client->get($this->endpoint,
                             [
-                                'body' => $this->getQuery()
+                                'body' => $this->getQuery(),
                             ])->getBody())['count'];
                     } catch (\Exception $exception) {
                         $this->handleRequestException($exception);
@@ -1574,9 +1568,9 @@ class Builder
         }
 
         if ($this->class) {
-            $model = str_plural(class_basename($this->class));
+            $model = Str::plural(class_basename($this->class));
         } else {
-            $model = studly_case(str_plural($this->endpoint));
+            $model = Str::studly(Str::plural($this->endpoint));
         }
 
         $message = sprintf('No %s found.', $model);
