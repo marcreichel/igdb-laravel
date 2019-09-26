@@ -322,7 +322,7 @@ class Model implements ArrayAccess, Arrayable, Jsonable
             $class = class_basename(get_class($this));
 
             $this->endpoint = ($this->privateEndpoint ? '/private' : '') .
-                str_start(snake_case(str_plural($class)), '/');
+                Str::start(Str::snake(Str::plural($class)), '/');
         }
     }
 
