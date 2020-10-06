@@ -1362,7 +1362,7 @@ class Builder
     public function endpoint(string $endpoint)
     {
         if ($this->class === null) {
-            $this->endpoint = Str::start($endpoint, '/');
+            $this->endpoint = $endpoint;
         }
 
         return $this;
