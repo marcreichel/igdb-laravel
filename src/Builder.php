@@ -143,10 +143,10 @@ class Builder
     private function initClient(): void
     {
         $this->client = new Client([
-            'base_uri' => 'https://api-v3.igdb.com/',
+            'base_uri' => 'https://api.igdb.com/v4/',
             'headers' => [
-                'user-key' => config('igdb.api_token'),
-                'User-Agent' => 'IGDB-Laravel-Wrapper/0.1-Dev',
+                'Accept' => 'application/json',
+                'Client-ID' => config('igdb.credentials.client_id'),
             ],
         ]);
     }
@@ -1406,7 +1406,7 @@ class Builder
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
                 function () {
                     try {
-                        return collect(json_decode($this->client->get($this->endpoint,
+                        return collect(json_decode($this->client->post($this->endpoint,
                             [
                                 'body' => $this->getQuery(),
                             ])->getBody()));
