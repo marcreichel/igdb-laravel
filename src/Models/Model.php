@@ -19,7 +19,6 @@ class Model implements ArrayAccess, Arrayable, Jsonable
         HasRelationships;
 
     public $identifier;
-    public $privateEndpoint = false;
 
     protected $endpoint;
     public $builder;
@@ -321,8 +320,7 @@ class Model implements ArrayAccess, Arrayable, Jsonable
         if (!$this->endpoint) {
             $class = class_basename(get_class($this));
 
-            $this->endpoint = ($this->privateEndpoint ? '/private' : '') .
-                Str::start(Str::snake(Str::plural($class)), '/');
+            $this->endpoint = Str::snake(Str::plural($class));
         }
     }
 

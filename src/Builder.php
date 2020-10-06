@@ -1356,8 +1356,7 @@ class Builder
 
                     $class = class_basename($this->class);
 
-                    $this->endpoint = ($model->privateEndpoint ? '/private' : '') . Str::start(Str::snake(Str::plural($class)),
-                            '/');
+                    $this->endpoint = Str::snake(Str::plural($class));
                 }
             } catch (\ReflectionException $e) {
             }
