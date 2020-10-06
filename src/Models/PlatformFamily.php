@@ -3,7 +3,7 @@
 namespace MarcReichel\IGDBLaravel\Models;
 
 
-class TimeToBeat extends Model
+class PlatformFamily extends Model
 {
 
 }
