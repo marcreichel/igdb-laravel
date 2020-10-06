@@ -244,13 +244,7 @@ class Builder
      */
     public function offset(int $offset): self
     {
-        $tierMaximum = max(0, config('igdb.offset_limit', 150));
-        if ($tierMaximum === 0) {
-            $this->query->put('offset', $offset);
-        } else {
-            $offset = min($offset, config('igdb.offset_limit', 150));
-            $this->query->put('offset', $offset);
-        }
+        $this->query->put('offset', $offset);
 
         return $this;
     }
