@@ -67,8 +67,6 @@ $games = Game::where('first_release_date', '>=', 1546297200)->get();
 
 Here's a list of all available Models:
 
-- Achievement
-- AchievementIcon
 - AgeRating
 - AgeRatingContentDescription
 - AlternativeName
@@ -81,7 +79,6 @@ Here's a list of all available Models:
 - CompanyWebsite
 - Cover
 - ExternalGame
-- Feed
 - Franchise
 - Game
 - GameEngine
@@ -95,28 +92,18 @@ Here's a list of all available Models:
 - InvolvedCompany
 - Keyword
 - MultiplayerMode
-- Page
-- PageBackground
-- PageLogo
-- PageWebsite
 - Platform
+- PlatformFamily
 - PlatformLogo
 - PlatformVersion
 - PlatformVersionCompany
 - PlatformVersionReleaseDate
 - PlatformWebsite
 - PlayerPerspective
-- ProductFamily
-- Pulse
-- PulseGroup
-- PulseSource
-- PulseUrl
 - ReleaseDate
 - Screenshot
 - Search
 - Theme
-- TimeToBeat
-- Title
 - Website
 
 ### Query Builder
