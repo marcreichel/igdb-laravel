@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Closure;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\Paginator;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use MarcReichel\IGDBLaravel\Exceptions\ServiceException;
@@ -167,6 +169,43 @@ class Builder
     protected function resetCacheLifetime(): void
     {
         $this->cacheLifetime = config('igdb.cache_lifetime');
+    }
+
+    /**
+     * Retrieves an Access Token from Twitch.
+     *
+     * @return string
+     * @throws AuthenticationException
+     */
+    protected function retrieveAccessToken(): string
+    {
+        $accessTokenCacheKey = 'igdb_cache.access_token';
+
+        if ($accessToken = Cache::get($accessTokenCacheKey, false)) {
+            return $accessToken;
+        }
+
+        try {
+            $guzzleClient = new Client();
+            $response = $guzzleClient->post(
+                'https://id.twitch.tv/oauth2/token?'
+                .'client_id='.config('igdb.credentials.client_id')
+                .'&client_secret='.config('igdb.credentials.client_secret')
+                .'&grant_type=client_credentials'
+            )->getBody();
+        } catch (GuzzleException $exception) {
+            $response = '';
+        }
+
+        $response = json_decode($response, true);
+
+        if (isset($response['access_token']) && $response['expires_in']) {
+            Cache::put($accessTokenCacheKey, (string) $response['access_token'], (int) $response['expires_in']);
+
+            return (string) $response['access_token'];
+        } else {
+            throw new AuthenticationException('Access Token could not be retrieved from Twitch.');
+        }
     }
 
     /**
@@ -1391,10 +1430,12 @@ class Builder
      * Execute the query.
      *
      * @return mixed|string
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException|AuthenticationException
      */
     public function get()
     {
+        $accessToken = $this->retrieveAccessToken();
+
         if ($this->endpoint) {
 
             $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
@@ -1404,10 +1445,13 @@ class Builder
             }
 
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () {
+                function () use ($accessToken) {
                     try {
                         return collect(json_decode($this->client->post($this->endpoint,
                             [
+                                'headers' => [
+                                    'Authorization' => 'Bearer '.$accessToken,
+                                ],
                                 'body' => $this->getQuery(),
                             ])->getBody()));
                     } catch (\Exception $exception) {
