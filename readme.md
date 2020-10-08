@@ -1,6 +1,6 @@
 # IGDB Laravel Wrapper
 
-This is a Laravel-Wrapper for version 3 of the [IGDB API](https://api.igdb.com/) (Apicalypse).
+This is a Laravel-Wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse).
 
 ## Basic installation
 
