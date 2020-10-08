@@ -23,9 +23,12 @@ This is the default content of the config file:
 ```php
 return [
     /*
-     * This is the API Token you got from https://api.igdb.com
+     * These are the credentials you got from https://dev.twitch.tv/console/apps
      */
-    'api_token' => env('IGDB_TOKEN', ''),
+    'credentials' => [
+        'client_id' => env('TWITCH_CLIENT_ID', ''),
+        'client_secret' => env('TWITCH_CLIENT_SECRET', ''),
+    ],
 
     /*
      * This package caches queries automatically (for 1 hour per default).
@@ -39,11 +42,6 @@ return [
      * This is the per-page limit for your tier.
      */
     'per_page_limit' => 500,
-
-    /*
-     * This is the offset limit for your tier.
-     */
-    'offset_limit' => 5000,
 ];
 ```
 
