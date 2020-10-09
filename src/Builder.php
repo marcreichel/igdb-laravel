@@ -1559,6 +1559,8 @@ class Builder
      */
     public function count()
     {
+        $accessToken = $this->retrieveAccessToken();
+
         if ($this->endpoint) {
 
             $this->endpoint = Str::finish($this->endpoint, '/') . 'count';
@@ -1570,10 +1572,13 @@ class Builder
             }
 
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () {
+                function () use ($accessToken) {
                     try {
                         return (int)json_decode($this->client->get($this->endpoint,
                             [
+                                'headers' => [
+                                    'Authorization' => 'Bearer '.$accessToken,
+                                ],
                                 'body' => $this->getQuery(),
                             ])->getBody())['count'];
                     } catch (\Exception $exception) {
