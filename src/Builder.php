@@ -1555,7 +1555,7 @@ class Builder
 
     /**
      * @return mixed
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException|AuthenticationException
      */
     public function count()
     {
