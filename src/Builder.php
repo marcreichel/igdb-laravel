@@ -1580,7 +1580,7 @@ class Builder
                                     'Authorization' => 'Bearer '.$accessToken,
                                 ],
                                 'body' => $this->getQuery(),
-                            ])->getBody())['count'];
+                            ])->getBody(), true)['count'];
                     } catch (\Exception $exception) {
                         $this->handleRequestException($exception);
                     }
