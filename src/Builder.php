@@ -1554,6 +1554,8 @@ class Builder
     }
 
     /**
+     * Return the total "count" result of the query.
+     *
      * @return mixed
      * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException|AuthenticationException
      */
