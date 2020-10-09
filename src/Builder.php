@@ -1574,7 +1574,7 @@ class Builder
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
                 function () use ($accessToken) {
                     try {
-                        return (int)json_decode($this->client->get($this->endpoint,
+                        return (int)json_decode($this->client->post($this->endpoint,
                             [
                                 'headers' => [
                                     'Authorization' => 'Bearer '.$accessToken,
