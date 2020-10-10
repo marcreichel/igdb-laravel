@@ -1554,11 +1554,15 @@ class Builder
     }
 
     /**
+     * Return the total "count" result of the query.
+     *
      * @return mixed
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException|AuthenticationException
      */
     public function count()
     {
+        $accessToken = $this->retrieveAccessToken();
+
         if ($this->endpoint) {
 
             $this->endpoint = Str::finish($this->endpoint, '/') . 'count';
@@ -1570,12 +1574,15 @@ class Builder
             }
 
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () {
+                function () use ($accessToken) {
                     try {
-                        return (int)json_decode($this->client->get($this->endpoint,
+                        return (int)json_decode($this->client->post($this->endpoint,
                             [
+                                'headers' => [
+                                    'Authorization' => 'Bearer '.$accessToken,
+                                ],
                                 'body' => $this->getQuery(),
-                            ])->getBody())['count'];
+                            ])->getBody(), true)['count'];
                     } catch (\Exception $exception) {
                         $this->handleRequestException($exception);
                     }
