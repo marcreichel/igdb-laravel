@@ -1,5 +1,10 @@
 # IGDB Laravel Wrapper
 
+[![Latest Stable Version](https://poser.pugx.org/marcreichel/igdb-laravel/v)](//packagist.org/packages/marcreichel/igdb-laravel)
+[![Total Downloads](https://poser.pugx.org/marcreichel/igdb-laravel/downloads)](//packagist.org/packages/marcreichel/igdb-laravel)
+[![Latest Unstable Version](https://poser.pugx.org/marcreichel/igdb-laravel/v/unstable)](//packagist.org/packages/marcreichel/igdb-laravel)
+[![License](https://poser.pugx.org/marcreichel/igdb-laravel/license)](//packagist.org/packages/marcreichel/igdb-laravel)
+
 This is a Laravel-Wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse).
 
 ## Basic installation
