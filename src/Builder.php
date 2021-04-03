@@ -335,7 +335,7 @@ class Builder
         } elseif ($operator === 'not ilike' && is_string($value)) {
             $this->whereNotLike($key, $value, false, $boolean);
         } else {
-            $value = !is_numeric($value) ? json_encode($value) : $value;
+            $value = !is_int($value) ? json_encode($value) : $value;
             $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
             $this->query->put('where', $where);
         }
