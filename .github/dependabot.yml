@@ -11,10 +11,3 @@ updates:
       interval: "daily"
     assignees:
       - "marcreichel"
-      
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    assignees:
-      - "marcreichel"
