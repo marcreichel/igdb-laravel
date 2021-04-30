@@ -4,7 +4,7 @@
     "keywords": ["laravel", "api-wrapper", "igdb", "igdb-api", "apicalypse", "wrapper"],
     "require": {
         "php": "^7.2 | ^7.3 | ^7.4 | ^8.0",
-        "laravel/framework": "^^8.40.0",
+        "laravel/framework": "^8.40.0",
         "guzzlehttp/guzzle": "~6.0|~7.0",
         "ext-json": "*"
     },
