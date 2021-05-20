@@ -349,7 +349,7 @@ If you want to define the fields of the relationship yourself you have to define
 the relationship as the array-key and the fields as an array:
 
 ```php
-$game = Game::with(['cover' => ['url', 'image_id'])->get();
+$game = Game::with(['cover' => ['url', 'image_id']])->get();
 ```
 
 ### Reading properties
