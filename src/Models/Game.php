@@ -9,6 +9,8 @@ class Game extends Model
         'dlcs' => self::class,
         'expansions' => self::class,
         'parent_game' => self::class,
+        'remakes' => self::class,
+        'remasters' => self::class,
         'similar_games' => self::class,
         'standalone_expansions' => self::class,
         'version_parent' => self::class,
