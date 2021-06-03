@@ -217,7 +217,7 @@ class Builder
      */
     public function limit(int $limit): self
     {
-        $limit = min($limit, config('igdb.per_page_limit', 50));
+        $limit = min($limit, 500);
         $this->query->put('limit', $limit);
 
         return $this;

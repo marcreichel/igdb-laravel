@@ -42,11 +42,6 @@ return [
      * To turn cache off set this value to 0
      */
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
-
-    /*
-     * This is the per-page limit for your tier.
-     */
-    'per_page_limit' => 500,
 ];
 ```
 
@@ -306,7 +301,7 @@ $games = Game::get();
 
 #### All
 
-If you just want to get "all" results (limited to the per_page_limit of your tier)
+If you just want to get "all" results (limited to a maximum of 500)
 just call the `all`-Method directly on your model:
 
 ```php

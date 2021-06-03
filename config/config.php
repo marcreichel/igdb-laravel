@@ -16,9 +16,4 @@ return [
      * To turn cache off set this value to 0
      */
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
-
-    /*
-     * This is the per-page limit for your tier.
-     */
-    'per_page_limit' => 500,
 ];
