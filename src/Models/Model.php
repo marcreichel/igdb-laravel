@@ -6,10 +6,19 @@ use Error;
 use ArrayAccess;
 use Carbon\Carbon;
 use BadMethodCallException;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Str;
+use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Builder;
 use Illuminate\Contracts\Support\{Jsonable, Arrayable};
 use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
+use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
+use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookUrlException;
+use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
+use ReflectionClass;
 
 /**
  * Class Model
@@ -345,7 +354,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
     /**
      * @return string
      */
-    protected function getEndpoint(): string
+    public function getEndpoint(): string
     {
         return $this->endpoint;
     }
@@ -378,5 +387,63 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
     public function toJson($options = 0): string
     {
         return collect($this->toArray())->toJson($options);
+    }
+
+    /**
+     * @param string $url
+     * @param string $method
+     *
+     * @return Webhook
+     * @throws AuthenticationException
+     * @throws GuzzleException|WebhookSecretMissingException|InvalidWebhookMethodException|InvalidWebhookUrlException
+     */
+    public static function createWebhook(string $url, string $method): Webhook
+    {
+        if (!config('igdb.webhook_secret')) {
+            throw new WebhookSecretMissingException();
+        }
+
+        if (!$parsedUrl = parse_url($url)) {
+            throw new InvalidWebhookUrlException($url);
+        }
+
+        $reflectionClass = new ReflectionClass(Method::class);
+        $allowedMethods = array_values($reflectionClass->getConstants());
+
+        if (!in_array($method, $allowedMethods, true)) {
+            throw new InvalidWebhookMethodException();
+        }
+
+        $self = (new static);
+
+        $endpoint = $self->endpoint . '/webhooks';
+
+        $client = new Client([
+            'base_uri' => ApiHelper::IGDB_BASE_URI,
+            'headers' => [
+                'Accept' => 'application/json',
+                'Client-ID' => config('igdb.credentials.client_id'),
+                'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
+            ],
+        ]);
+
+        parse_str($parsedUrl['query'] ?? '', $queryParams);
+
+        $collection = collect($queryParams);
+
+        $collection->put('x_igdb_endpoint', $self->getEndpoint());
+        $collection->put('x_igdb_method', $method);
+
+        $modifiedQueryString = http_build_query($collection->toArray());
+        $newUrl = ($parsedUrl['scheme'] ?? 'http') . '://' . $parsedUrl['host'] . $parsedUrl['path']
+            . ($modifiedQueryString ? '?' . $modifiedQueryString : '');
+
+        return new Webhook(...collect(json_decode($client->post($endpoint, [
+            'form_params' => [
+                'url' => $newUrl,
+                'method' => $method,
+                'secret' => config('igdb.webhook_secret'),
+            ],
+        ])->getBody(), true))->first());
     }
 }

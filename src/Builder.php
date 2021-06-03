@@ -155,7 +155,7 @@ class Builder
     private function initClient(): void
     {
         $this->client = new Client([
-            'base_uri' => 'https://api.igdb.com/v4/',
+            'base_uri' => ApiHelper::IGDB_BASE_URI,
             'headers' => [
                 'Accept' => 'application/json',
                 'Client-ID' => config('igdb.credentials.client_id'),

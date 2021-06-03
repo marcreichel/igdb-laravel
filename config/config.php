@@ -16,4 +16,12 @@ return [
      * To turn cache off set this value to 0
      */
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
+
+    /*
+     * Default webhook secret.
+     *
+     * This needs to be a string of your choice in order to use the webhook
+     * functionality.
+     */
+    'webhook_secret' => env('IGDB_WEBHOOK_SECRET', null),
 ];

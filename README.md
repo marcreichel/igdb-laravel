@@ -379,9 +379,89 @@ if ($game) {
 If you used the Query Builder itself you must check if a property exists
 yourself.
 
+## ✨ Webhooks (since v2.3.0)
+
+Since version 2.3.0 of this package you can create webhooks and handle their requests with ease. 🎉
+
+### Initial setup
+
+#### Configuration
+
+Inside your `config/igdb.php` file you need to have a `webhook_secret` of your choice like so (you only need to create this if you upgraded from a prior version of this package. New installations have this configured automatically):
+
+```php
+return [
+    // ...
+    // Other configs
+    // ...
+
+    'webhook_secret' => env('IGDB_WEBHOOK_SECRET', null)
+];
+```
+
+And then set a secret inside your `.env` file:
+
+```dotenv
+IGDB_WEBHOOK_SECRET=yoursecret
+```
+
+#### Routing
+
+Create a POST route where you want to handle the incoming webhook requests and simply call `Webhook::handle($request)`:
+
+```php
+use Illuminate\Http\Request;
+use MarcReichel\IGDBLaravel\Models\Webhook;
+
+Route::post('webhook/handle', function (Request $request) {
+    return Webhook::handle($request);
+})->name('handle-webhook');
+```
+
+That's it!
+
+### Creating a webhook
+
+Let's say we want to be informed whenever a new game is created on https://igdb.com.
+
+First of all we need to inform IGDB that we want to be informed.
+
+For this we create a webhook like so:
+
+```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
+Game::createWebhook(route('handle-webhook'), 'create');
+```
+
+The first parameter describes the route where we want to handle the webhook.
+The second parameter needs to be one of `create`, `update` or `delete` according to
+which event we want to listen for.
+
+### Listen for events
+
+Now that we have created our webhook we can listen for a specific event - in our case
+when a game is created.
+
+For this we create a Laravel EventListener or for sake of simplicity we just listen for an event
+inside the `boot()` method of our `app/providers/EventServiceProvider.php`:
+
+```php
+use MarcReichel\IGDBLaravel\Events\GameCreated;
+use Illuminate\Support\Facades\Event;
+
+public function boot()
+{
+    Event::listen(function (GameCreated $event) {
+        // $event->game holds the game data
+    });
+}
+```
+
+Further information on how to set up event listeners can be found on the [official docs](https://laravel.com/docs/events).
+
 ## TODO List
 
-- Refactor code (beautify code)
 - Write unit tests
 
 ## Contribution
