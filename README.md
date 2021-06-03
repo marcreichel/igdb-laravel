@@ -1,8 +1,9 @@
 # IGDB Laravel Wrapper
 
-[![Packagist Version](https://img.shields.io/packagist/v/marcreichel/igdb-laravel?style=flat-square)](//packagist.org/packages/marcreichel/igdb-laravel)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/marcreichel/igdb-laravel?style=flat-square)](//packagist.org/packages/marcreichel/igdb-laravel)
-[![GitHub](https://img.shields.io/github/license/marcreichel/igdb-laravel?style=flat-square)](//packagist.org/packages/marcreichel/igdb-laravel)
+[![Packagist Version](https://img.shields.io/packagist/v/marcreichel/igdb-laravel?style=flat-square)](https://packagist.org/packages/marcreichel/igdb-laravel)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/marcreichel/igdb-laravel?style=flat-square)](https://packagist.org/packages/marcreichel/igdb-laravel)
+[![GitHub](https://img.shields.io/github/license/marcreichel/igdb-laravel?style=flat-square)](https://packagist.org/packages/marcreichel/igdb-laravel)
+[![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev)
 
 This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse).
 
