@@ -4,11 +4,11 @@ namespace MarcReichel\IGDBLaravel\Enums\ExternalGame;
 
 class Category
 {
-    const STEAM = 1;
-    const GOG = 5;
-    const YOUTUBE = 10;
-    const MICROSOFT = 11;
-    const APPLE = 13;
-    const TWITCH = 14;
-    const ANDROID = 15;
+    public const STEAM = 1;
+    public const GOG = 5;
+    public const YOUTUBE = 10;
+    public const MICROSOFT = 11;
+    public const APPLE = 13;
+    public const TWITCH = 14;
+    public const ANDROID = 15;
 }

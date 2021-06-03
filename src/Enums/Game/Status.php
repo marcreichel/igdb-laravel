@@ -4,10 +4,11 @@ namespace MarcReichel\IGDBLaravel\Enums\Game;
 
 class Status
 {
-    const RELEASED = 0;
-    const ALPHA = 2;
-    const BETA = 3;
-    const EARLY_ACCESS = 4;
-    const OFFLINE = 5;
-    const CANCELLED = 6;
+    public const RELEASED = 0;
+    public const ALPHA = 2;
+    public const BETA = 3;
+    public const EARLY_ACCESS = 4;
+    public const OFFLINE = 5;
+    public const CANCELLED = 6;
+    public const RUMORED = 7;
 }

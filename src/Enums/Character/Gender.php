@@ -4,7 +4,7 @@ namespace MarcReichel\IGDBLaravel\Enums\Character;
 
 class Gender
 {
-    const MALE = 1;
-    const FEMALE = 2;
-    const OTHER = 3;
+    public const MALE = 0;
+    public const FEMALE = 1;
+    public const OTHER = 2;
 }

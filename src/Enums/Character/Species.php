@@ -4,9 +4,9 @@ namespace MarcReichel\IGDBLaravel\Enums\Character;
 
 class Species
 {
-    const HUMAN = 1;
-    const ALIEN = 2;
-    const ANIMAL = 3;
-    const ANDROID = 4;
-    const UNKNOWN = 5;
+    public const HUMAN = 1;
+    public const ALIEN = 2;
+    public const ANIMAL = 3;
+    public const ANDROID = 4;
+    public const UNKNOWN = 5;
 }

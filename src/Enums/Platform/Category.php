@@ -4,10 +4,10 @@ namespace MarcReichel\IGDBLaravel\Enums\Platform;
 
 class Category
 {
-    const CONSOLE = 1;
-    const ARCADE = 2;
-    const PLATFORM = 3;
-    const OPERATING_SYSTEM = 4;
-    const PORTABLE_CONSOLE = 5;
-    const COMPUTER = 6;
+    public const CONSOLE = 1;
+    public const ARCADE = 2;
+    public const PLATFORM = 3;
+    public const OPERATING_SYSTEM = 4;
+    public const PORTABLE_CONSOLE = 5;
+    public const COMPUTER = 6;
 }

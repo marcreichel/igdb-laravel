@@ -4,16 +4,16 @@ namespace MarcReichel\IGDBLaravel\Enums\AgeRating;
 
 class Rating
 {
-    const THREE = 1;
-    const SEVEN = 2;
-    const TWELVE = 3;
-    const SIXTEEN = 4;
-    const EIGHTEEN = 5;
-    const RP = 6;
-    const EC = 7;
-    const E = 8;
-    const E10 = 9;
-    const T = 10;
-    const M = 11;
-    const AO = 12;
+    public const THREE = 1;
+    public const SEVEN = 2;
+    public const TWELVE = 3;
+    public const SIXTEEN = 4;
+    public const EIGHTEEN = 5;
+    public const RP = 6;
+    public const EC = 7;
+    public const E = 8;
+    public const E10 = 9;
+    public const T = 10;
+    public const M = 11;
+    public const AO = 12;
 }
