@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\AgeRating;
 
-
 class Rating
 {
     const THREE = 1;

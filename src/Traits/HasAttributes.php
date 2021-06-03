@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Traits;
 
-
 trait HasAttributes
 {
     public $attributes = [];

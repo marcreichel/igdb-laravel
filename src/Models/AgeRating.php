@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-
 class AgeRating extends Model
 {
     protected $casts = [

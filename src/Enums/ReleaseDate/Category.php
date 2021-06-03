@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\ReleaseDate;
 
-
 class Category
 {
     const YYYYMMMMDD = 0;

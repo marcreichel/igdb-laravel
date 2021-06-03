@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\PlatformVersionReleaseDate;
 
-
 class Region
 {
     const EUROPE = 1;

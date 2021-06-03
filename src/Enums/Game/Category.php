@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Game;
 
-
 class Category
 {
     const MAIN_GAME = 0;

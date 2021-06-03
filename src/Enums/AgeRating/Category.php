@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\AgeRating;
 
-
 class Category
 {
     const ESRB = 1;

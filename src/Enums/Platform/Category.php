@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Platform;
 
-
 class Category
 {
     const CONSOLE = 1;

@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\ExternalGame;
 
-
 class Category
 {
     const STEAM = 1;

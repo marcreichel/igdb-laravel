@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-
 class GameVersionFeatureValue extends Model
 {
     protected $casts = [

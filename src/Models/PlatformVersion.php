@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-
 class PlatformVersion extends Model
 {
     protected $casts = [

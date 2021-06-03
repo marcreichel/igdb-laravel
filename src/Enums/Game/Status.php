@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Game;
 
-
 class Status
 {
     const RELEASED = 0;

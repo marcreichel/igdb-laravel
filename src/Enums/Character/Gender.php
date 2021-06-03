@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Character;
 
-
 class Gender
 {
     const MALE = 1;

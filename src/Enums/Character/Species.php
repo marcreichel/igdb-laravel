@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Character;
 
-
 class Species
 {
     const HUMAN = 1;

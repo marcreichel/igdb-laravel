@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-
 class Game extends Model
 {
     protected $casts = [

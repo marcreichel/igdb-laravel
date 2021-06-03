@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\AgeRatingContentDescription;
 
-
 class Category
 {
     const PEGI = 1;

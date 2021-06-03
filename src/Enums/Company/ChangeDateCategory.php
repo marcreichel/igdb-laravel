@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Company;
 
-
 class ChangeDateCategory
 {
     const YYYYMMMMDD = 0;

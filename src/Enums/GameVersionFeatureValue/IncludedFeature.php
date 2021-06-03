@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\GameVersionFeatureValue;
 
-
 class IncludedFeature
 {
     const NOT_INCLUDED = 0;

@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\PlatformWebsite;
 
-
 class Category
 {
     const OFFICIAL = 1;

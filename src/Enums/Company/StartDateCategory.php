@@ -2,7 +2,6 @@
 
 namespace MarcReichel\IGDBLaravel\Enums\Company;
 
-
 class StartDateCategory
 {
     const YYYYMMMMDD = 0;
