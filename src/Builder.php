@@ -4,15 +4,16 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
+use Illuminate\Config\Repository;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
@@ -21,6 +22,8 @@ use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use MarcReichel\IGDBLaravel\Exceptions\ServiceException;
 use MarcReichel\IGDBLaravel\Exceptions\ServiceUnavailableException;
 use MarcReichel\IGDBLaravel\Exceptions\UnauthorizedException;
+use ReflectionClass;
+use ReflectionException;
 
 class Builder
 {
@@ -55,7 +58,7 @@ class Builder
     /**
      * The cache lifetime.
      *
-     * @var \Illuminate\Config\Repository|mixed
+     * @var Repository|mixed
      */
     private $cacheLifetime;
 
@@ -110,24 +113,25 @@ class Builder
     /**
      * Set the fields to be selected.
      *
-     * @param string ...$fields
+     * @param mixed $fields
      *
-     * @return $this
+     * @return self
      */
     public function select($fields): self
     {
-        $fields = collect(is_array($fields) ? $fields : func_get_args());
+        $fields = is_array($fields) ? $fields : func_get_args();
+        $collection = collect(is_array($fields) ? $fields : func_get_args());
 
-        if ($fields->isEmpty()) {
-            $fields->push('*');
+        if ($collection->isEmpty()) {
+            $collection->push('*');
         }
 
-        $fields = $fields->filter(function ($field) {
+        $collection = $collection->filter(function ($field) {
             return !strpos($field, '.');
         })->flatten();
 
-        if ($fields->count() === 0) {
-            $fields->push('*');
+        if ($collection->count() === 0) {
+            $collection->push('*');
         }
 
         $this->query->put('fields', $fields);
@@ -135,6 +139,9 @@ class Builder
         return $this;
     }
 
+    /**
+     * @return void
+     */
     protected function init(): void
     {
         $this->initClient();
@@ -142,6 +149,9 @@ class Builder
         $this->resetCacheLifetime();
     }
 
+    /**
+     * @return void
+     */
     private function initClient(): void
     {
         $this->client = new Client([
@@ -165,6 +175,8 @@ class Builder
 
     /**
      * Reset the cache lifetime.
+     *
+     * @return void
      */
     protected function resetCacheLifetime(): void
     {
@@ -187,25 +199,25 @@ class Builder
 
         try {
             $guzzleClient = new Client();
-            $response = $guzzleClient->post(
-                'https://id.twitch.tv/oauth2/token?'
-                .'client_id='.config('igdb.credentials.client_id')
-                .'&client_secret='.config('igdb.credentials.client_secret')
-                .'&grant_type=client_credentials'
-            )->getBody();
+            $query = http_build_query([
+                'client_id' => config('igdb.credentials.client_id'),
+                'client_secret' => config('igdb.credentials.client_secret'),
+                'grant_type' => 'client_credentials',
+            ]);
+            $response = json_decode($guzzleClient->post(
+                'https://id.twitch.tv/oauth2/token?' . $query
+            )->getBody(), true);
+
+            if (isset($response['access_token']) && $response['expires_in']) {
+                Cache::put($accessTokenCacheKey, (string)$response['access_token'], (int)$response['expires_in']);
+
+                $accessToken = (string)$response['access_token'];
+            }
         } catch (GuzzleException $exception) {
-            $response = '';
-        }
-
-        $response = json_decode($response, true);
-
-        if (isset($response['access_token']) && $response['expires_in']) {
-            Cache::put($accessTokenCacheKey, (string) $response['access_token'], (int) $response['expires_in']);
-
-            return (string) $response['access_token'];
-        } else {
             throw new AuthenticationException('Access Token could not be retrieved from Twitch.');
         }
+
+        return $accessToken;
     }
 
     /**
@@ -213,7 +225,7 @@ class Builder
      *
      * @param int $limit
      *
-     * @return Builder
+     * @return self
      */
     public function limit(int $limit): self
     {
@@ -228,7 +240,7 @@ class Builder
      *
      * @param int $limit
      *
-     * @return Builder
+     * @return self
      */
     public function take(int $limit): self
     {
@@ -240,7 +252,7 @@ class Builder
      *
      * @param int $offset
      *
-     * @return Builder
+     * @return self
      */
     public function offset(int $offset): self
     {
@@ -254,7 +266,7 @@ class Builder
      *
      * @param int $offset
      *
-     * @return Builder
+     * @return self
      */
     public function skip(int $offset): self
     {
@@ -264,12 +276,12 @@ class Builder
     /**
      * Set the limit and offset for a given page.
      *
-     * @param $page
+     * @param     $page
      * @param int $perPage
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
-    public function forPage($page, $perPage = 10): self
+    public function forPage($page, int $perPage = 10): self
     {
         return $this->skip(($page - 1) * $perPage)->take($perPage);
     }
@@ -279,7 +291,7 @@ class Builder
      *
      * @param string $query
      *
-     * @return Builder
+     * @return self
      */
     public function search(string $query): self
     {
@@ -291,25 +303,25 @@ class Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param string $key
-     * @param string $operator
-     * @param string|null $value
-     * @param string $boolean
+     * @param mixed      $key
+     * @param mixed|null $operator
+     * @param mixed|null $value
+     * @param string     $boolean
      *
-     * @return $this
+     * @return self
      */
     public function where(
         $key,
         $operator = null,
         $value = null,
-        $boolean = '&'
-    ) {
+        string $boolean = '&'
+    ): self {
         if ($key instanceof Closure) {
             return $this->whereNested($key, $boolean);
         }
 
         if (is_array($key)) {
-            return $this->addArrayOfWheres($key, $boolean, 'where');
+            return $this->addArrayOfWheres($key, $boolean);
         }
 
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
@@ -326,14 +338,16 @@ class Builder
             $value = $this->castDate($value);
         }
 
-        if ($operator === 'like' && is_string($value)) {
-            $this->whereLike($key, $value, true, $boolean);
-        } elseif ($operator === 'ilike' && is_string($value)) {
-            $this->whereLike($key, $value, false, $boolean);
-        } elseif ($operator === 'not like' && is_string($value)) {
-            $this->whereNotLike($key, $value, true, $boolean);
-        } elseif ($operator === 'not ilike' && is_string($value)) {
-            $this->whereNotLike($key, $value, false, $boolean);
+        if (is_string($value)) {
+            if ($operator === 'like') {
+                $this->whereLike($key, $value, true, $boolean);
+            } elseif ($operator === 'ilike') {
+                $this->whereLike($key, $value, false, $boolean);
+            } elseif ($operator === 'not like') {
+                $this->whereNotLike($key, $value, true, $boolean);
+            } elseif ($operator === 'not ilike') {
+                $this->whereNotLike($key, $value, false, $boolean);
+            }
         } else {
             $value = !is_int($value) ? json_encode($value) : $value;
             $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
@@ -348,16 +362,16 @@ class Builder
      *
      * @param string $key
      * @param string $value
-     * @param bool $caseSensitive
+     * @param bool   $caseSensitive
      * @param string $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
     public function whereLike(
         string $key,
         string $value,
-        $caseSensitive = true,
-        $boolean = '&'
+        bool $caseSensitive = true,
+        string $boolean = '&'
     ): self {
         $where = $this->query->get('where', new Collection());
 
@@ -388,17 +402,17 @@ class Builder
      *
      * @param string $key
      * @param string $value
-     * @param bool $caseSensitive
+     * @param bool   $caseSensitive
      * @param string $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
     public function orWhereLike(
         string $key,
         string $value,
         bool $caseSensitive = true,
-        $boolean = '|'
-    ) {
+        string $boolean = '|'
+    ): self {
         return $this->whereLike($key, $value, $caseSensitive, $boolean);
     }
 
@@ -407,17 +421,17 @@ class Builder
      *
      * @param string $key
      * @param string $value
-     * @param bool $caseSensitive
+     * @param bool   $caseSensitive
      * @param string $boolean
      *
-     * @return $this
+     * @return self
      */
     public function whereNotLike(
         string $key,
         string $value,
-        $caseSensitive = true,
-        $boolean = '&'
-    ) {
+        bool $caseSensitive = true,
+        string $boolean = '&'
+    ): self {
         $where = $this->query->get('where', new Collection());
 
         $hasPrefix = Str::startsWith($value, '%');
@@ -447,36 +461,36 @@ class Builder
      *
      * @param string $key
      * @param string $value
-     * @param bool $caseSensitive
+     * @param bool   $caseSensitive
      * @param string $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
     public function orWhereNotLike(
         string $key,
         string $value,
-        $caseSensitive = true,
-        $boolean = '|'
-    ) {
+        bool $caseSensitive = true,
+        string $boolean = '|'
+    ): self {
         return $this->whereNotLike($key, $value, $caseSensitive, $boolean);
     }
 
     /**
      * Add an "or where" clause to the query.
      *
-     * @param string $key
-     * @param null $operator
-     * @param null $value
-     * @param string $boolean
+     * @param string      $key
+     * @param string|null $operator
+     * @param mixed|null  $value
+     * @param string      $boolean
      *
-     * @return Builder
+     * @return self
      */
     public function orWhere(
         string $key,
-        $operator = null,
+        string $operator = null,
         $value = null,
-        $boolean = '|'
-    ) {
+        string $boolean = '|'
+    ): self {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
 
@@ -486,20 +500,22 @@ class Builder
     /**
      * Prepare the value and operator for a where clause.
      *
-     * @param $value
-     * @param $operator
-     * @param bool $useDefault
+     * @param mixed $value
+     * @param mixed $operator
+     * @param bool  $useDefault
      *
      * @return array
      */
     public function prepareValueAndOperator(
         $value,
         $operator,
-        $useDefault = false
-    ) {
+        bool $useDefault = false
+    ): array {
         if ($useDefault) {
             return [$operator, '='];
-        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
+        }
+
+        if ($this->invalidOperatorAndValue($operator, $value)) {
             throw new InvalidArgumentException('Illegal operator and value combination.');
         }
 
@@ -512,30 +528,29 @@ class Builder
      * Prevents using Null values with invalid operators.
      *
      * @param string $operator
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @return bool
      */
-    protected function invalidOperatorAndValue($operator, $value)
+    protected function invalidOperatorAndValue(string $operator, $value): bool
     {
-        return is_null($value) && in_array($operator,
-                $this->operators) && !in_array($operator, ['=', '!=']);
+        return is_null($value) && in_array($operator, $this->operators, true) && !in_array($operator, ['=', '!=']);
     }
 
     /**
      * Add an array of where clauses to the query.
      *
-     * @param $arrayOfWheres
-     * @param $boolean
+     * @param array  $arrayOfWheres
+     * @param string $boolean
      * @param string $method
      *
-     * @return mixed
+     * @return self
      */
     protected function addArrayOfWheres(
-        $arrayOfWheres,
-        $boolean,
-        $method = 'where'
-    ) {
+        array $arrayOfWheres,
+        string $boolean,
+        string $method = 'where'
+    ): self {
         return $this->whereNested(function ($query) use (
             $arrayOfWheres,
             $method,
@@ -554,18 +569,18 @@ class Builder
     /**
      * Add a nested where statement to the query.
      *
-     * @param \Closure $callback
-     * @param string $boolean
+     * @param Closure $callback
+     * @param string  $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
-    protected function whereNested(Closure $callback, $boolean = '&'): self
+    protected function whereNested(Closure $callback, string $boolean = '&'): self
     {
         $class = $this->class;
         if ($class) {
-            call_user_func($callback, $query = new Builder(new $class()));
+            $callback($query = new Builder(new $class()));
         } else {
-            call_user_func($callback, $query = new Builder($this->endpoint));
+            $callback($query = new Builder($this->endpoint));
         }
 
         return $this->addNestedWhereQuery($query, $boolean);
@@ -577,9 +592,9 @@ class Builder
      * @param $query
      * @param $boolean
      *
-     * @return $this
+     * @return self
      */
-    protected function addNestedWhereQuery($query, $boolean)
+    protected function addNestedWhereQuery($query, $boolean): self
     {
         $where = $this->query->get('where', new Collection());
 
@@ -596,27 +611,23 @@ class Builder
      * Add a "where in" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return $this
+     * @return self
      */
     public function whereIn(
         string $key,
         array $values,
-        $boolean = '&',
-        $operator = '=',
-        $prefix = '(',
-        $suffix = ')'
-    ) {
-        if ((!in_array($prefix, ['(', '[', '{']) || !in_array($suffix, [
-                        ')',
-                        ']',
-                        '}',
-                    ])) || ($prefix == '(' && $suffix != ')') || ($prefix == '[' && $suffix != ']') || ($prefix == '{' && $suffix != '}')) {
+        string $boolean = '&',
+        string $operator = '=',
+        string $prefix = '(',
+        string $suffix = ')'
+    ): self {
+        if (($prefix === '(' && $suffix !== ')') || ($prefix === '[' && $suffix !== ']') || ($prefix === '{' && $suffix !== '}')) {
             $message = 'Prefix and Suffix must be "()", "[]" or "{}".';
             throw new InvalidArgumentException($message);
         }
@@ -624,7 +635,7 @@ class Builder
         $where = $this->query->get('where', new Collection());
 
         $valuesString = collect($values)->map(function ($value) {
-            return !is_numeric($value) ? '"' . (string)$value . '"' : $value;
+            return !is_numeric($value) ? '"' . $value . '"' : $value;
         })->implode(',');
 
         $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $valuesString . $suffix);
@@ -638,22 +649,22 @@ class Builder
      * Add an "or where in" clause to the query.
      *
      * @param string $key
-     * @param array $value
+     * @param array  $value
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereIn(
         string $key,
         array $value,
-        $boolean = '|',
-        $operator = '=',
-        $prefix = '(',
-        $suffix = ')'
-    ) {
+        string $boolean = '|',
+        string $operator = '=',
+        string $prefix = '(',
+        string $suffix = ')'
+    ): self {
         return $this->whereIn($key, $value, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -662,22 +673,22 @@ class Builder
      * Add an "where in all" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function whereInAll(
         string $key,
         array $values,
-        $boolean = '&',
-        $operator = '=',
-        $prefix = '[',
-        $suffix = ']'
-    ) {
+        string $boolean = '&',
+        string $operator = '=',
+        string $prefix = '[',
+        string $suffix = ']'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -686,22 +697,22 @@ class Builder
      * Add an "or where in all" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereInAll(
         string $key,
         array $values,
-        $boolean = '|',
-        $operator = '=',
-        $prefix = '[',
-        $suffix = ']'
-    ) {
+        string $boolean = '|',
+        string $operator = '=',
+        string $prefix = '[',
+        string $suffix = ']'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -710,22 +721,22 @@ class Builder
      * Add an "where in exact" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function whereInExact(
         string $key,
         array $values,
-        $boolean = '&',
-        $operator = '=',
-        $prefix = '{',
-        $suffix = '}'
-    ) {
+        string $boolean = '&',
+        string $operator = '=',
+        string $prefix = '{',
+        string $suffix = '}'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -734,22 +745,22 @@ class Builder
      * Add an "or where in exact" clause to the query.
      *
      * @param string $key
-     * @param array $values
-     * @param $boolean
-     * @param $operator
-     * @param $prefix
-     * @param $suffix
+     * @param array  $values
+     * @param string $boolean
+     * @param string $operator
+     * @param string $prefix
+     * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereInExact(
         string $key,
         array $values,
-        $boolean,
-        $operator,
-        $prefix,
-        $suffix
-    ) {
+        string $boolean,
+        string $operator,
+        string $prefix,
+        string $suffix
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -758,22 +769,22 @@ class Builder
      * Add an "where not in" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return $this
+     * @return self
      */
     public function whereNotIn(
         string $key,
         array $values,
-        $boolean = '&',
-        $operator = '!=',
-        $prefix = '(',
-        $suffix = ')'
-    ) {
+        string $boolean = '&',
+        string $operator = '!=',
+        string $prefix = '(',
+        string $suffix = ')'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -782,22 +793,22 @@ class Builder
      * Add an "or where not in" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereNotIn(
         string $key,
         array $values,
-        $boolean = '|',
-        $operator = '!=',
-        $prefix = '(',
-        $suffix = ')'
-    ) {
+        string $boolean = '|',
+        string $operator = '!=',
+        string $prefix = '(',
+        string $suffix = ')'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -806,22 +817,22 @@ class Builder
      * Add an "where not in all" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function whereNotInAll(
         string $key,
         array $values,
-        $boolean = '&',
-        $operator = '!=',
-        $prefix = '[',
-        $suffix = ']'
-    ) {
+        string $boolean = '&',
+        string $operator = '!=',
+        string $prefix = '[',
+        string $suffix = ']'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -830,22 +841,22 @@ class Builder
      * Add an "or where not in all" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereNotInAll(
         string $key,
         array $values,
-        $boolean = '|',
-        $operator = '!=',
-        $prefix = '[',
-        $suffix = ']'
-    ) {
+        string $boolean = '|',
+        string $operator = '!=',
+        string $prefix = '[',
+        string $suffix = ']'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -854,22 +865,22 @@ class Builder
      * Add an "where not in exact" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function whereNotInExact(
         string $key,
         array $values,
-        $boolean = '&',
-        $operator = '!=',
-        $prefix = '{',
-        $suffix = '}'
-    ) {
+        string $boolean = '&',
+        string $operator = '!=',
+        string $prefix = '{',
+        string $suffix = '}'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -878,22 +889,22 @@ class Builder
      * Add an "or where not in exact" clause to the query.
      *
      * @param string $key
-     * @param array $values
+     * @param array  $values
      * @param string $boolean
      * @param string $operator
      * @param string $prefix
      * @param string $suffix
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereNotInExact(
         string $key,
         array $values,
-        $boolean = '|',
-        $operator = '!=',
-        $prefix = '{',
-        $suffix = '}'
-    ) {
+        string $boolean = '|',
+        string $operator = '!=',
+        string $prefix = '{',
+        string $suffix = '}'
+    ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
     }
@@ -902,20 +913,20 @@ class Builder
      * Add a where between statement to the query.
      *
      * @param string $key
-     * @param $first
-     * @param $second
-     * @param bool $withBoundaries
+     * @param        $first
+     * @param        $second
+     * @param bool   $withBoundaries
      * @param string $boolean
      *
-     * @return $this
+     * @return self
      */
     public function whereBetween(
         string $key,
         $first,
         $second,
-        $withBoundaries = true,
-        $boolean = '&'
-    ) {
+        bool $withBoundaries = true,
+        string $boolean = '&'
+    ): self {
         if (collect($this->dates)->has($key) && $this->dates[$key] === 'date') {
             $first = $this->castDate($first);
             $second = $this->castDate($second);
@@ -929,7 +940,7 @@ class Builder
         ) {
             $operator = ($withBoundaries ? '=' : '');
             $query->where($key, '>' . $operator, $first)->where($key,
-                    '<' . $operator, $second);
+                '<' . $operator, $second);
         }, $boolean);
 
         return $this;
@@ -939,20 +950,20 @@ class Builder
      * Add a or where between statement to the query.
      *
      * @param string $key
-     * @param $first
-     * @param $second
-     * @param bool $withBoundaries
+     * @param        $first
+     * @param        $second
+     * @param bool   $withBoundaries
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
     public function orWhereBetween(
         string $key,
         $first,
         $second,
-        $withBoundaries = true,
-        $boolean = '|'
-    ) {
+        bool $withBoundaries = true,
+        string $boolean = '|'
+    ): self {
         return $this->whereBetween($key, $first, $second, $withBoundaries,
             $boolean);
     }
@@ -961,20 +972,20 @@ class Builder
      * Add a where not between statement to the query.
      *
      * @param string $key
-     * @param $first
-     * @param $second
-     * @param bool $withBoundaries
+     * @param        $first
+     * @param        $second
+     * @param bool   $withBoundaries
      * @param string $boolean
      *
-     * @return $this
+     * @return self
      */
     public function whereNotBetween(
         string $key,
         $first,
         $second,
-        $withBoundaries = false,
-        $boolean = '&'
-    ) {
+        bool $withBoundaries = false,
+        string $boolean = '&'
+    ): self {
         if (collect($this->dates)->has($key) && $this->dates[$key] === 'date') {
             $first = $this->castDate($first);
             $second = $this->castDate($second);
@@ -988,7 +999,7 @@ class Builder
         ) {
             $operator = ($withBoundaries ? '=' : '');
             $query->where($key, '<' . $operator, $first)->orWhere($key,
-                    '>' . $operator, $second);
+                '>' . $operator, $second);
         }, $boolean);
 
         return $this;
@@ -998,20 +1009,20 @@ class Builder
      * Add a or where not between statement to the query.
      *
      * @param string $key
-     * @param $first
-     * @param $second
-     * @param bool $withBoundaries
+     * @param        $first
+     * @param        $second
+     * @param bool   $withBoundaries
      * @param string $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
     public function orWhereNotBetween(
         string $key,
         $first,
         $second,
-        $withBoundaries = false,
-        $boolean = '|'
-    ) {
+        bool $withBoundaries = false,
+        string $boolean = '|'
+    ): self {
         return $this->whereNotBetween($key, $first, $second, $withBoundaries,
             $boolean);
     }
@@ -1022,9 +1033,9 @@ class Builder
      * @param string $key
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function whereNull(string $key, $boolean = '&')
+    public function whereNull(string $key, string $boolean = '&'): self
     {
         return $this->whereHasNot($key, $boolean);
     }
@@ -1035,9 +1046,9 @@ class Builder
      * @param string $key
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function whereNotNull(string $key, $boolean = '&')
+    public function whereNotNull(string $key, string $boolean = '&'): self
     {
         return $this->whereHas($key, $boolean);
     }
@@ -1048,9 +1059,9 @@ class Builder
      * @param string $key
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function orWhereNull(string $key, $boolean = '|')
+    public function orWhereNull(string $key, string $boolean = '|'): self
     {
         return $this->whereNull($key, $boolean);
     }
@@ -1061,9 +1072,9 @@ class Builder
      * @param string $key
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function orWhereNotNull(string $key, $boolean = '|')
+    public function orWhereNotNull(string $key, string $boolean = '|'): self
     {
         return $this->whereNotNull($key, $boolean);
     }
@@ -1072,13 +1083,13 @@ class Builder
      * Add a "where date" statement to the query.
      *
      * @param string $key
-     * @param $operator
-     * @param $value
+     * @param        $operator
+     * @param        $value
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function whereDate(string $key, $operator, $value, $boolean = '&')
+    public function whereDate(string $key, $operator, $value, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
@@ -1087,27 +1098,32 @@ class Builder
             $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
 
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '>=') {
+        }
+
+        if ($operator === '>=') {
             $value = Carbon::parse($value)->startOfDay()->timestamp;
 
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '<') {
+        }
+
+        if ($operator === '<') {
             $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
 
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '<=') {
+        }
+
+        if ($operator === '<=') {
             $value = Carbon::parse($value)->endOfDay()->timestamp;
 
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '!=') {
-            $start = Carbon::parse($value)->startOfDay()->timestamp;
-            $end = Carbon::parse($value)->endOfDay()->timestamp;
-
-            return $this->whereNotBetween($key, $start, $end, false, $boolean);
         }
 
         $start = Carbon::parse($value)->startOfDay()->timestamp;
         $end = Carbon::parse($value)->endOfDay()->timestamp;
+
+        if ($operator === '!=') {
+            return $this->whereNotBetween($key, $start, $end, false, $boolean);
+        }
 
         return $this->whereBetween($key, $start, $end, true, $boolean);
     }
@@ -1116,13 +1132,13 @@ class Builder
      * Add a "or where date" statement to the query.
      *
      * @param string $key
-     * @param $operator
-     * @param $value
+     * @param        $operator
+     * @param        $value
      * @param string $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
-    public function orWhereDate(string $key, $operator, $value, $boolean = '|')
+    public function orWhereDate(string $key, $operator, $value, string $boolean = '|'): self
     {
         return $this->whereDate($key, $operator, $value, $boolean);
     }
@@ -1131,13 +1147,13 @@ class Builder
      * Add a "where year" statement to the query.
      *
      * @param string $key
-     * @param $operator
-     * @param $value
+     * @param        $operator
+     * @param        $value
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function whereYear(string $key, $operator, $value, $boolean = '&')
+    public function whereYear(string $key, $operator, $value, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
@@ -1145,13 +1161,19 @@ class Builder
         if ($operator === '>') {
             $value = Carbon::create($value)->endOfYear()->timestamp;
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '>=') {
+        }
+
+        if ($operator === '>=') {
             $value = Carbon::create($value)->startOfYear()->timestamp;
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '<') {
+        }
+
+        if ($operator === '<') {
             $value = Carbon::create($value)->startOfYear()->timestamp;
             return $this->where($key, $operator, $value, $boolean);
-        } elseif ($operator === '<=') {
+        }
+
+        if ($operator === '<=') {
             $value = Carbon::create($value)->endOfYear()->timestamp;
             return $this->where($key, $operator, $value, $boolean);
         }
@@ -1166,13 +1188,13 @@ class Builder
      * Add a "or where year" statement to the query.
      *
      * @param string $key
-     * @param $operator
-     * @param $value
+     * @param        $operator
+     * @param        $value
      * @param string $boolean
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
-    public function orWhereYear(string $key, $operator, $value, $boolean = '|')
+    public function orWhereYear(string $key, $operator, $value, string $boolean = '|'): self
     {
         return $this->whereYear($key, $operator, $value, $boolean);
     }
@@ -1183,9 +1205,9 @@ class Builder
      * @param string $relationship
      * @param string $boolean
      *
-     * @return $this
+     * @return self
      */
-    public function whereHas(string $relationship, $boolean = '&')
+    public function whereHas(string $relationship, string $boolean = '&'): self
     {
         $where = $this->query->get('where', new Collection());
 
@@ -1204,9 +1226,9 @@ class Builder
      * @param string $relationship
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function orWhereHas(string $relationship, $boolean = '|')
+    public function orWhereHas(string $relationship, string $boolean = '|'): self
     {
         return $this->whereHas($relationship, $boolean);
     }
@@ -1217,9 +1239,9 @@ class Builder
      * @param string $relationship
      * @param string $boolean
      *
-     * @return $this
+     * @return self
      */
-    public function whereHasNot(string $relationship, $boolean = '&')
+    public function whereHasNot(string $relationship, string $boolean = '&'): self
     {
         $where = $this->query->get('where', new Collection());
 
@@ -1238,9 +1260,9 @@ class Builder
      * @param string $relationship
      * @param string $boolean
      *
-     * @return Builder
+     * @return self
      */
-    public function orWhereHasNot(string $relationship, $boolean = '|')
+    public function orWhereHasNot(string $relationship, string $boolean = '|'): self
     {
         return $this->whereHasNot($relationship, $boolean);
     }
@@ -1251,9 +1273,9 @@ class Builder
      * @param string $key
      * @param string $direction
      *
-     * @return $this
+     * @return self
      */
-    public function orderBy(string $key, string $direction = 'asc')
+    public function orderBy(string $key, string $direction = 'asc'): self
     {
         if (!$this->query->has('search')) {
             $this->query->put('sort', $key . ' ' . $direction);
@@ -1267,9 +1289,9 @@ class Builder
      *
      * @param string $key
      *
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return self
      */
-    public function orderByDesc(string $key)
+    public function orderByDesc(string $key): self
     {
         return $this->orderBy($key, 'desc');
     }
@@ -1279,11 +1301,11 @@ class Builder
      *
      * @param array $relationships
      *
-     * @return $this
+     * @return self
      */
-    public function with(array $relationships)
+    public function with(array $relationships): self
     {
-        $relationships = collect($relationships)->mapWithKeys(function (
+        $relationships = (array)collect($relationships)->mapWithKeys(function (
             $fields,
             $relationship
         ) {
@@ -1315,7 +1337,7 @@ class Builder
      *
      * @param mixed $seconds
      *
-     * @return $this
+     * @return self
      */
     public function cache($seconds): self
     {
@@ -1329,7 +1351,7 @@ class Builder
      *
      * @return string
      */
-    protected function getQuery()
+    protected function getQuery(): string
     {
         return $this->query->map(function ($value, $key) {
             if ($key === 'where') {
@@ -1351,9 +1373,9 @@ class Builder
      *
      * @param string $endpoint
      *
-     * @return $this
+     * @return self
      */
-    public function endpoint(string $endpoint)
+    public function endpoint(string $endpoint): self
     {
         if ($this->class === null) {
             $this->endpoint = $endpoint;
@@ -1366,8 +1388,10 @@ class Builder
      * Set the endpoint from model or string
      *
      * @param $model
+     *
+     * @return void
      */
-    protected function setEndpoint($model)
+    protected function setEndpoint($model): void
     {
         $neededNamespace = __NAMESPACE__ . '\\Models';
 
@@ -1380,7 +1404,7 @@ class Builder
             }
 
             try {
-                $reflectionClass = new \ReflectionClass($parents->last());
+                $reflectionClass = new ReflectionClass($parents->last());
 
                 $reflectionNamespace = $reflectionClass->getNamespaceName();
 
@@ -1391,16 +1415,14 @@ class Builder
 
                     $this->endpoint = Str::snake(Str::plural($class));
                 }
-            } catch (\ReflectionException $e) {
+            } catch (ReflectionException $e) {
             }
-        } else {
-            if (is_string($model)) {
-                $this->endpoint = $model;
-            }
+        } elseif (is_string($model)) {
+            $this->endpoint = $model;
         }
 
         if ($this->endpoint === null) {
-            $message = 'Construction-Parameter of Builder must be a string or ' . 'a Class which extends ' . $neededNamespace . '\\Model. ' . ucfirst(gettype($model)) . ' given.';
+            $message = 'Construction-Parameter of Builder must be a string or a Class which extends ' . $neededNamespace . '\\Model. ' . ucfirst(gettype($model)) . ' given.';
             throw new InvalidArgumentException($message);
         }
     }
@@ -1424,7 +1446,7 @@ class Builder
      * Execute the query.
      *
      * @return mixed|string
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function get()
     {
@@ -1444,11 +1466,11 @@ class Builder
                         return collect(json_decode($this->client->post($this->endpoint,
                             [
                                 'headers' => [
-                                    'Authorization' => 'Bearer '.$accessToken,
+                                    'Authorization' => 'Bearer ' . $accessToken,
                                 ],
                                 'body' => $this->getQuery(),
-                            ])->getBody()));
-                    } catch (\Exception $exception) {
+                            ])->getBody(), true));
+                    } catch (Exception $exception) {
                         $this->handleRequestException($exception);
                     }
 
@@ -1479,11 +1501,13 @@ class Builder
     /**
      * @param $exception
      *
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\ServiceException
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\ServiceUnavailableException
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\UnauthorizedException
+     * @return void
+     *
+     * @throws ServiceException
+     * @throws ServiceUnavailableException
+     * @throws UnauthorizedException
      */
-    private function handleRequestException($exception)
+    private function handleRequestException($exception): void
     {
         if ($exception instanceof ClientException) {
             if ($exception->getCode() === Response::HTTP_UNAUTHORIZED) {
@@ -1507,7 +1531,7 @@ class Builder
      * @param int $id
      *
      * @return mixed|string
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function find(int $id)
     {
@@ -1518,8 +1542,7 @@ class Builder
      * @param int $id
      *
      * @return mixed
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException
+     * @throws MissingEndpointException|ModelNotFoundException|AuthenticationException
      */
     public function findOrFail(int $id)
     {
@@ -1544,7 +1567,7 @@ class Builder
      * Execute the query and get the first result.
      *
      * @return mixed
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function first()
     {
@@ -1557,7 +1580,7 @@ class Builder
      * Return the total "count" result of the query.
      *
      * @return mixed
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function count()
     {
@@ -1579,11 +1602,11 @@ class Builder
                         return (int)json_decode($this->client->post($this->endpoint,
                             [
                                 'headers' => [
-                                    'Authorization' => 'Bearer '.$accessToken,
+                                    'Authorization' => 'Bearer ' . $accessToken,
                                 ],
                                 'body' => $this->getQuery(),
                             ])->getBody(), true)['count'];
-                    } catch (\Exception $exception) {
+                    } catch (Exception $exception) {
                         $this->handleRequestException($exception);
                     }
 
@@ -1600,8 +1623,8 @@ class Builder
 
     /**
      * @return mixed
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException
+     * @throws MissingEndpointException
+     * @throws ModelNotFoundException|AuthenticationException
      */
     public function firstOrFail()
     {
@@ -1626,11 +1649,11 @@ class Builder
      * @param int $limit
      *
      * @return Paginator
-     * @throws \MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException
+     * @throws MissingEndpointException|AuthenticationException
      */
-    public function paginate($limit = 10)
+    public function paginate(int $limit = 10): Paginator
     {
-        $page = request()->get('page', 1);
+        $page = optional(request())->get('page', 1);
 
         $data = $this->forPage($page, $limit)->get();
 

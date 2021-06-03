@@ -8,29 +8,33 @@ use Carbon\Carbon;
 use BadMethodCallException;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\Builder;
-use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Contracts\Support\Arrayable;
-use MarcReichel\IGDBLaravel\Traits\HasAttributes;
-use MarcReichel\IGDBLaravel\Traits\HasRelationships;
+use Illuminate\Contracts\Support\{Jsonable, Arrayable};
+use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
 
-class Model implements ArrayAccess, Arrayable, Jsonable
+/**
+ * Class Model
+ *
+ * @method limit(int $limit)
+ *
+ * @package MarcReichel\IGDBLaravel\Models
+ */
+abstract class Model implements ArrayAccess, Arrayable, Jsonable
 {
-    use HasAttributes,
-        HasRelationships;
-
-    public $identifier;
-
-    protected $endpoint;
-    public $builder;
+    use HasAttributes, HasRelationships;
 
     private static $instance;
+
+    public $identifier;
+    public $builder;
+
+    protected $endpoint;
 
     /**
      * Model constructor.
      *
      * @param array $properties
      */
-    public function __construct($properties = [])
+    public function __construct(array $properties = [])
     {
         $this->builder = new Builder($this);
         self::$instance = $this;
@@ -52,11 +56,12 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $field
+     * @param string $field
+     * @param mixed  $value
      *
-     * @param $value
+     * @return void
      */
-    public function __set($field, $value)
+    public function __set(string $field, $value): void
     {
         $this->attributes[$field] = $value;
     }
@@ -66,7 +71,7 @@ class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return bool
      */
-    public function offsetExists($field)
+    public function offsetExists($field): bool
     {
         return isset($this->attributes[$field]) || isset($this->relations[$field]);
     }
@@ -83,43 +88,48 @@ class Model implements ArrayAccess, Arrayable, Jsonable
 
     /**
      * @param mixed $field
+     * @param mixed $value
      *
-     * @return mixed
+     * @return void
      */
-    public function offsetSet($field, $value)
+    public function offsetSet($field, $value): void
     {
         $this->attributes[$field] = $value;
     }
 
     /**
      * @param mixed $field
+     *
+     * @return void
      */
-    public function offsetUnset($field)
+    public function offsetUnset($field): void
     {
         unset($this->attributes[$field], $this->relations[$field]);
     }
 
     /**
-     * @param $field
+     * @param mixed $field
      *
      * @return bool
      */
-    public function __isset($field)
+    public function __isset($field): bool
     {
         return $this->offsetExists($field);
     }
 
     /**
-     * @param $field
+     * @param mixed $field
+     *
+     * @return void
      */
-    public function __unset($field)
+    public function __unset($field): void
     {
         $this->offsetUnset($field);
     }
-    
+
     /**
-     * @param $method
-     * @param $parameters
+     * @param mixed $method
+     * @param mixed $parameters
      *
      * @return mixed
      */
@@ -129,8 +139,8 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $method
-     * @param $parameters
+     * @param mixed $method
+     * @param mixed $parameters
      *
      * @return mixed
      */
@@ -144,19 +154,23 @@ class Model implements ArrayAccess, Arrayable, Jsonable
      */
     public static function all()
     {
-        return (new static)->limit(config('igdb.per_page_limit', 50))
-            ->get();
+        return (new static)->limit(500)->get();
     }
 
-    protected function setIdentifier()
+    /**
+     * @return void
+     */
+    protected function setIdentifier(): void
     {
         $this->identifier = collect($this->attributes)->get('id');
     }
 
     /**
      * @param array $attributes
+     *
+     * @return void
      */
-    protected function setAttributes(array $attributes)
+    protected function setAttributes(array $attributes): void
     {
         $this->attributes = collect($attributes)->filter(function ($value) {
             if (is_array($value)) {
@@ -176,13 +190,15 @@ class Model implements ArrayAccess, Arrayable, Jsonable
 
     /**
      * @param array $attributes
+     *
+     * @return void
      */
-    protected function setRelations(array $attributes)
+    protected function setRelations(array $attributes): void
     {
         $this->relations = collect($attributes)
             ->diffKeys($this->attributes)->map(function ($value, $key) {
                 if (is_array($value)) {
-                    return collect($value)->map(function($value) use ($key) {
+                    return collect($value)->map(function ($value) use ($key) {
                         return $this->mapToModel($key, $value);
                     });
                 }
@@ -191,9 +207,9 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $object
-     * @param $method
-     * @param $parameters
+     * @param mixed $object
+     * @param mixed $method
+     * @param mixed $parameters
      *
      * @return mixed
      */
@@ -207,19 +223,19 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @return \MarcReichel\IGDBLaravel\Builder
+     * @return Builder
      */
-    public function newQuery()
+    public function newQuery(): Builder
     {
         return new Builder($this);
     }
 
     /**
-     * @param $fields
+     * @param mixed $fields
      *
-     * @return \MarcReichel\IGDBLaravel\Models\Model
+     * @return Model
      */
-    public function getInstance($fields)
+    public function getInstance($fields): Model
     {
         if (is_null(self::$instance)) {
             $model = new static($fields);
@@ -230,7 +246,7 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $field
+     * @param mixed $field
      *
      * @return mixed
      */
@@ -240,43 +256,42 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $property
-     * @param $value
+     * @param mixed $property
+     * @param mixed $value
      *
-     * @return array
+     * @return mixed
      */
     private function mapToModel($property, $value)
     {
         $class = $this->getClassNameForProperty($property);
-        if ($class) {
-            if (is_object($value)) {
-                $properties = $this->getProperties($value);
-                $model = new $class($properties);
 
-                return $model;
-            } else {
-                if (is_array($value)) {
-                    return collect($value)->map(function ($single) use (
-                        $property,
-                        $value,
-                        $class
-                    ) {
-                        if (is_object($single)) {
-                            $properties = $this->getProperties($single);
-                            $model = new $class($properties);
-                            return $model;
-                        }
-                        return $single;
-                    })->toArray();
-                }
-            }
+        if (!$class) {
+            return $value;
         }
 
-        return $value;
+        if (is_object($value)) {
+            $properties = $this->getProperties($value);
+
+            return new $class($properties);
+        }
+
+        if (is_array($value)) {
+            return collect($value)->map(function ($single) use ($class) {
+                if (!is_object($single)) {
+                    return $single;
+                }
+
+                $properties = $this->getProperties($single);
+
+                return new $class($properties);
+            })->toArray();
+        }
+
+        return [];
     }
 
     /**
-     * @param $property
+     * @param mixed $property
      *
      * @return bool|mixed|string
      */
@@ -306,16 +321,19 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      *
      * @return array
      */
-    protected function getProperties($value)
+    protected function getProperties($value): array
     {
         return collect($value)->toArray();
     }
 
-    protected function setEndpoint()
+    /**
+     * @return void
+     */
+    protected function setEndpoint(): void
     {
         if (!$this->endpoint) {
             $class = class_basename(get_class($this));
@@ -325,9 +343,9 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    protected function getEndpoint()
+    protected function getEndpoint(): string
     {
         return $this->endpoint;
     }
@@ -340,11 +358,12 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     public function toArray(): array
     {
         $attributes = collect($this->attributes);
-        $relations = collect($this->relations)->map(function($relation) {
-            if($relation instanceof Arrayable){
-                return $relation->toArray();
+        $relations = collect($this->relations)->map(function ($relation) {
+            if (!$relation instanceof Arrayable) {
+                return $relation;
             }
-            return $relation;
+
+            return $relation->toArray();
         });
         return $attributes->merge($relations)->sortKeys()->toArray();
     }
@@ -352,7 +371,8 @@ class Model implements ArrayAccess, Arrayable, Jsonable
     /**
      * Convert the object to its JSON representation.
      *
-     * @param  int  $options
+     * @param int $options
+     *
      * @return string
      */
     public function toJson($options = 0): string
