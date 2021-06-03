@@ -8,6 +8,9 @@
         "guzzlehttp/guzzle": "~6.0|~7.0",
         "ext-json": "*"
     },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
+    },
     "license": "MIT",
     "authors": [
         {
