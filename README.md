@@ -139,6 +139,8 @@ $games = Game::select(['name', 'first_release_date'])->get();
 $games = Game::search('Fortnite')->get();
 ```
 
+**Attention:** Searchable models are `Character`, `Collection`, `Game`, `Platform` and `Theme`.
+
 #### Where-Clauses
 
 ##### Simple Where Clauses
