@@ -1,6 +1,6 @@
 {
     "name": "marcreichel/igdb-laravel",
-    "description": "A Laravel Wrapper for the IGDB API v3",
+    "description": "A Laravel wrapper for version 4 of the IGDB API (Apicalypse) including webhook handling",
     "keywords": ["laravel", "api-wrapper", "igdb", "igdb-api", "apicalypse", "wrapper"],
     "require": {
         "php": "^7.2 | ^7.3 | ^7.4 | ^8.0",
