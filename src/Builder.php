@@ -188,6 +188,7 @@ class Builder
      *
      * @return string
      * @throws AuthenticationException
+     * @throws GuzzleException
      */
     protected function retrieveAccessToken(): string
     {
@@ -1420,7 +1421,7 @@ class Builder
      * Execute the query.
      *
      * @return mixed|string
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException|GuzzleException
      */
     public function get()
     {
@@ -1443,7 +1444,7 @@ class Builder
                                     'Authorization' => 'Bearer ' . $accessToken,
                                 ],
                                 'body' => $this->getQuery(),
-                            ])->getBody(), true));
+                            ])->getBody(), true, 512, JSON_THROW_ON_ERROR));
                     } catch (Exception $exception) {
                         $this->handleRequestException($exception);
                     }
@@ -1541,7 +1542,7 @@ class Builder
      * Execute the query and get the first result.
      *
      * @return mixed
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException|GuzzleException
      */
     public function first()
     {
@@ -1554,7 +1555,7 @@ class Builder
      * Return the total "count" result of the query.
      *
      * @return mixed
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException|GuzzleException
      */
     public function count()
     {
@@ -1579,7 +1580,7 @@ class Builder
                                     'Authorization' => 'Bearer ' . $accessToken,
                                 ],
                                 'body' => $this->getQuery(),
-                            ])->getBody(), true)['count'];
+                            ])->getBody(), true, 512, JSON_THROW_ON_ERROR)['count'];
                     } catch (Exception $exception) {
                         $this->handleRequestException($exception);
                     }
@@ -1598,7 +1599,7 @@ class Builder
     /**
      * @return mixed
      * @throws MissingEndpointException
-     * @throws ModelNotFoundException|AuthenticationException
+     * @throws ModelNotFoundException|AuthenticationException|GuzzleException
      */
     public function firstOrFail()
     {
@@ -1623,7 +1624,7 @@ class Builder
      * @param int $limit
      *
      * @return Paginator
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException|GuzzleException
      */
     public function paginate(int $limit = 10): Paginator
     {
