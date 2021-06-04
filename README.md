@@ -3,9 +3,9 @@
 [![Packagist Version](https://img.shields.io/packagist/v/marcreichel/igdb-laravel?style=flat-square)](https://packagist.org/packages/marcreichel/igdb-laravel)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/marcreichel/igdb-laravel?style=flat-square)](https://packagist.org/packages/marcreichel/igdb-laravel)
 [![GitHub](https://img.shields.io/github/license/marcreichel/igdb-laravel?style=flat-square)](https://packagist.org/packages/marcreichel/igdb-laravel)
-[![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev)
+[![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?style=flat-square)](https://gitmoji.dev)
 
-This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse).
+This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse) including [webhook handling](#-webhooks-since-v230) since version 2.3.0.
 
 ## Basic installation
 
@@ -42,13 +42,21 @@ return [
      * To turn cache off set this value to 0
      */
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
+
+    /*
+     * Default webhook secret.
+     *
+     * This needs to be a string of your choice in order to use the webhook
+     * functionality.
+     */
+    'webhook_secret' => env('IGDB_WEBHOOK_SECRET', null),
 ];
 ```
 
 ## Usage
 
-If you're familiar with the [Eloquent System](https://laravel.com/docs/master/eloquent)
-and the [Query Builder](https://laravel.com/docs/master/queries) of Laravel you
+If you're familiar with the [Eloquent System](https://laravel.com/docs/eloquent)
+and the [Query Builder](https://laravel.com/docs/queries) of Laravel you
 will love this package as it uses a similar approach.
 
 ### Models
@@ -63,46 +71,7 @@ use MarcReichel\IGDBLaravel\Models\Game;
 $games = Game::where('first_release_date', '>=', 1546297200)->get();
 ```
 
-Here's a list of all available Models:
-
-- AgeRating
-- AgeRatingContentDescription
-- AlternativeName
-- Artwork
-- Character
-- CharacterMugShot
-- Collection
-- Company
-- CompanyLogo
-- CompanyWebsite
-- Cover
-- ExternalGame
-- Franchise
-- Game
-- GameEngine
-- GameEngineLogo
-- GameMode
-- GameVersion
-- GameVersionFeature
-- GameVersionFeatureValue
-- GameVideo
-- Genre
-- InvolvedCompany
-- Keyword
-- MultiplayerMode
-- Platform
-- PlatformFamily
-- PlatformLogo
-- PlatformVersion
-- PlatformVersionCompany
-- PlatformVersionReleaseDate
-- PlatformWebsite
-- PlayerPerspective
-- ReleaseDate
-- Screenshot
-- Search
-- Theme
-- Website
+[Here](src/Models) you can find a list of all available Models.
 
 ### Query Builder
 
@@ -128,6 +97,8 @@ select `*` by default. (**Attention**: This is the opposite behaviour from the
 Apicalypse API)
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::select(['*'])->get();
 
 $games = Game::select(['name', 'first_release_date'])->get();
@@ -136,6 +107,8 @@ $games = Game::select(['name', 'first_release_date'])->get();
 #### Search
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::search('Fortnite')->get();
 ```
 
@@ -146,6 +119,8 @@ $games = Game::search('Fortnite')->get();
 ##### Simple Where Clauses
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::where('first_release_date', '>=', 1546297200)->get();
 ```
 
@@ -153,6 +128,8 @@ For convenience, if you want to verify that a column is equal to a given value,
 you may pass the value directly as the second argument to the `where` method:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::where('name', 'Fortnite')->get();
 ```
 
@@ -162,6 +139,8 @@ You may chain where constraints together as well as add `or` clauses to the quer
 The `orWhere` method accepts the same arguments as the `where` method:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::where('name', 'Fortnite')->orWhere('name', 'Borderlands 2')->get();
 ```
 
@@ -172,6 +151,8 @@ $games = Game::where('name', 'Fortnite')->orWhere('name', 'Borderlands 2')->get(
 The `whereBetween` method verifies that a fields's value is between two values:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereBetween('first_release_date', 1546297200, 1577833199)->get();
 ```
 
@@ -181,6 +162,8 @@ The `whereNotBetween` method verifies that a field's value lies outside of two
 values:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereNotBetween('first_release_date', 1546297200, 1577833199)->get();
 ```
 
@@ -190,6 +173,8 @@ The `whereIn` method verifies that a given field's value is contained within the
 given array:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereIn('category', [0,4])->get();
 ```
 
@@ -199,6 +184,8 @@ The `whereNotIn` method verifies that the given field's value is **not**
 contained in the given array:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereNotIn('category', [0,4])->get();
 ```
 
@@ -211,6 +198,8 @@ Alternatively you could use one of these methods to match against **all** or **e
 The `whereNull` method verifies that the value of the given field is `NULL`:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereNull('first_release_date')->get();
 ```
 
@@ -219,6 +208,8 @@ $games = Game::whereNull('first_release_date')->get();
 The `whereNotNull` method verifies that the field's value is **not** `NULL`:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereNotNull('first_release_date')->get();
 ```
 
@@ -227,6 +218,8 @@ $games = Game::whereNotNull('first_release_date')->get();
 The `whereDate` method may be used to compare a field's value against a date:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereDate('first_release_date', '2019-01-01')->get();
 ```
 
@@ -236,6 +229,8 @@ The `whereYear` method may be used to compare a fields's value against a specifi
 year:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::whereYear('first_release_date', 2019)->get();
 ```
 
@@ -247,6 +242,8 @@ do the exact same thing.
 ##### Parameter Grouping
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::where('name', 'Fortnite')
     ->orWhere(function($query) {
         $query->where('aggregated_rating', '>=', 90)
@@ -264,23 +261,27 @@ by, while the second argument controls the direction of the sort and may be eith
 `asc` or `desc`:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::orderBy('first_release_date', 'asc')->get();
 ```
 
 ##### skip / take
 
 To limit the number of results returned from the query, or to skip a given
-number of results in the query, you may use the `skip` and `take` methods (Both
-methods are limited to your current tier, so make sure you configure them
-correctly in the config file):
+number of results in the query, you may use the `skip` and `take` methods (`take` is limited to a maximum of 500):
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::skip(10)->take(5)->get();
 ```
 
 Alternatively, you may use the `limit` and `offset` methods:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::offset(10)->limit(5)->get();
 ```
 
@@ -290,6 +291,8 @@ You can overwrite the default cache time for one specific query. So you can for
 example turn off caching for a query:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::cache(0)->get();
 ```
 
@@ -298,6 +301,8 @@ $games = Game::cache(0)->get();
 To finally get results for the query, simply call `get`:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::get();
 ```
 
@@ -307,6 +312,8 @@ If you just want to get "all" results (limited to a maximum of 500)
 just call the `all`-Method directly on your model:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $games = Game::all();
 ```
 
@@ -315,6 +322,8 @@ $games = Game::all();
 If you only want one result call the `first`-method after your query:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $game = Game::first();
 ```
 
@@ -324,6 +333,8 @@ If you know the Identifier of the model you can simply call the `find`-method
 with the identifier as a parameter:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $game = Game::find(1905);
 ```
 
@@ -339,6 +350,8 @@ found.
 To extend your result use the `with`-method:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $game = Game::with(['cover', 'artworks'])->get();
 ```
 
@@ -347,6 +360,8 @@ If you want to define the fields of the relationship yourself you have to define
 the relationship as the array-key and the fields as an array:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $game = Game::with(['cover' => ['url', 'image_id']])->get();
 ```
 
@@ -357,6 +372,8 @@ $game = Game::with(['cover' => ['url', 'image_id']])->get();
 If you used the Model-based approach you can simply get a property:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $game = Game::find(1905);
 
 if ($game) {
@@ -367,6 +384,8 @@ if ($game) {
 If you want to access a property which does not exist `null` is returned:
 
 ```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
 $game = Game::find(1905);
 
 if ($game) {
@@ -457,6 +476,8 @@ public function boot()
     });
 }
 ```
+
+[Here](src/Events) you can find a list of all available events.
 
 Further information on how to set up event listeners can be found on the [official docs](https://laravel.com/docs/events).
 
