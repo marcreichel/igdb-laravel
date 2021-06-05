@@ -1471,33 +1471,6 @@ class Builder
     }
 
     /**
-     * @param $exception
-     *
-     * @return void
-     *
-     * @throws ServiceException
-     * @throws ServiceUnavailableException
-     * @throws UnauthorizedException
-     */
-    private function handleRequestException($exception): void
-    {
-        if ($exception instanceof ClientException) {
-            if ($exception->getCode() === Response::HTTP_UNAUTHORIZED) {
-                $message = 'Invalid User key or no user key';
-                throw new UnauthorizedException($message);
-            }
-        } elseif ($exception instanceof ServerException) {
-            if ($exception->getCode() === Response::HTTP_SERVICE_UNAVAILABLE) {
-                $message = 'IGDB is down right now. Please try again later.';
-                throw new ServiceUnavailableException($message);
-            }
-            if ($exception->getCode() === Response::HTTP_INTERNAL_SERVER_ERROR) {
-                throw new ServiceException($exception->getMessage());
-            }
-        }
-    }
-
-    /**
      * Execute a query for a single record by ID.
      *
      * @param int $id
