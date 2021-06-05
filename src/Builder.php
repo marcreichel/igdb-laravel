@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use MarcReichel\IGDBLaravel\Exceptions\ServiceException;
@@ -236,12 +237,12 @@ class Builder
     /**
      * Set the limit and offset for a given page.
      *
-     * @param     $page
+     * @param int $page
      * @param int $perPage
      *
      * @return self
      */
-    public function forPage($page, int $perPage = 10): self
+    public function forPage(int $page, int $perPage = 10): self
     {
         return $this->skip(($page - 1) * $perPage)->take($perPage);
     }
@@ -318,6 +319,36 @@ class Builder
         }
 
         return $this;
+    }
+
+    /**
+     * Add an "or where" clause to the query.
+     *
+     * @param mixed       $key
+     * @param string|null $operator
+     * @param mixed|null  $value
+     * @param string      $boolean
+     *
+     * @return self
+     */
+    public function orWhere(
+        $key,
+        string $operator = null,
+        $value = null,
+        string $boolean = '|'
+    ): self {
+        if ($key instanceof Closure) {
+            return $this->whereNested($key, $boolean);
+        }
+
+        if (is_array($key)) {
+            return $this->addArrayOfWheres($key, $boolean);
+        }
+
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
+
+        return $this->where($key, $operator, $value, $boolean);
     }
 
     /**
@@ -439,28 +470,6 @@ class Builder
     }
 
     /**
-     * Add an "or where" clause to the query.
-     *
-     * @param string      $key
-     * @param string|null $operator
-     * @param mixed|null  $value
-     * @param string      $boolean
-     *
-     * @return self
-     */
-    public function orWhere(
-        string $key,
-        string $operator = null,
-        $value = null,
-        string $boolean = '|'
-    ): self {
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
-
-        return $this->where($key, $operator, $value, $boolean);
-    }
-
-    /**
      * Prepare the value and operator for a where clause.
      *
      * @param mixed $value
@@ -469,7 +478,7 @@ class Builder
      *
      * @return array
      */
-    public function prepareValueAndOperator(
+    private function prepareValueAndOperator(
         $value,
         $operator,
         bool $useDefault = false
@@ -495,7 +504,7 @@ class Builder
      *
      * @return bool
      */
-    protected function invalidOperatorAndValue(string $operator, $value): bool
+    private function invalidOperatorAndValue(string $operator, $value): bool
     {
         return is_null($value) && in_array($operator, $this->operators, true) && !in_array($operator, ['=', '!=']);
     }
@@ -991,178 +1000,6 @@ class Builder
     }
 
     /**
-     * Add a "where null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function whereNull(string $key, string $boolean = '&'): self
-    {
-        return $this->whereHasNot($key, $boolean);
-    }
-
-    /**
-     * Add a "where not null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function whereNotNull(string $key, string $boolean = '&'): self
-    {
-        return $this->whereHas($key, $boolean);
-    }
-
-    /**
-     * Add a "or where null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function orWhereNull(string $key, string $boolean = '|'): self
-    {
-        return $this->whereNull($key, $boolean);
-    }
-
-    /**
-     * Add a "or where not null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function orWhereNotNull(string $key, string $boolean = '|'): self
-    {
-        return $this->whereNotNull($key, $boolean);
-    }
-
-    /**
-     * Add a "where date" statement to the query.
-     *
-     * @param string $key
-     * @param        $operator
-     * @param        $value
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function whereDate(string $key, $operator, $value = null, string $boolean = '&'): self
-    {
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
-
-        if ($operator === '>') {
-            $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '>=') {
-            $value = Carbon::parse($value)->startOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '<') {
-            $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '<=') {
-            $value = Carbon::parse($value)->endOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        $start = Carbon::parse($value)->startOfDay()->timestamp;
-        $end = Carbon::parse($value)->endOfDay()->timestamp;
-
-        if ($operator === '!=') {
-            return $this->whereNotBetween($key, $start, $end, false, $boolean);
-        }
-
-        return $this->whereBetween($key, $start, $end, true, $boolean);
-    }
-
-    /**
-     * Add a "or where date" statement to the query.
-     *
-     * @param string $key
-     * @param        $operator
-     * @param        $value
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function orWhereDate(string $key, $operator, $value, string $boolean = '|'): self
-    {
-        return $this->whereDate($key, $operator, $value, $boolean);
-    }
-
-    /**
-     * Add a "where year" statement to the query.
-     *
-     * @param string $key
-     * @param        $operator
-     * @param        $value
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function whereYear(string $key, $operator, $value = null, string $boolean = '&'): self
-    {
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
-
-        if ($operator === '>') {
-            $value = Carbon::create($value)->endOfYear()->timestamp;
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '>=') {
-            $value = Carbon::create($value)->startOfYear()->timestamp;
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '<') {
-            $value = Carbon::create($value)->startOfYear()->timestamp;
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '<=') {
-            $value = Carbon::create($value)->endOfYear()->timestamp;
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        $start = Carbon::create($value)->startOfYear()->timestamp;
-        $end = Carbon::create($value)->endOfYear()->timestamp;
-
-        return $this->whereBetween($key, $start, $end, true, $boolean);
-    }
-
-    /**
-     * Add a "or where year" statement to the query.
-     *
-     * @param string $key
-     * @param        $operator
-     * @param        $value
-     * @param string $boolean
-     *
-     * @return self
-     */
-    public function orWhereYear(string $key, $operator, $value, string $boolean = '|'): self
-    {
-        return $this->whereYear($key, $operator, $value, $boolean);
-    }
-
-    /**
      * Add a "where has" statement to the query.
      *
      * @param string $relationship
@@ -1231,15 +1068,193 @@ class Builder
     }
 
     /**
+     * Add a "where null" clause to the query.
+     *
+     * @param string $key
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function whereNull(string $key, string $boolean = '&'): self
+    {
+        return $this->whereHasNot($key, $boolean);
+    }
+
+    /**
+     * Add a "or where null" clause to the query.
+     *
+     * @param string $key
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function orWhereNull(string $key, string $boolean = '|'): self
+    {
+        return $this->whereNull($key, $boolean);
+    }
+
+    /**
+     * Add a "where not null" clause to the query.
+     *
+     * @param string $key
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function whereNotNull(string $key, string $boolean = '&'): self
+    {
+        return $this->whereHas($key, $boolean);
+    }
+
+    /**
+     * Add a "or where not null" clause to the query.
+     *
+     * @param string $key
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function orWhereNotNull(string $key, string $boolean = '|'): self
+    {
+        return $this->whereNotNull($key, $boolean);
+    }
+
+    /**
+     * Add a "where date" statement to the query.
+     *
+     * @param string $key
+     * @param mixed $operator
+     * @param mixed|null $value
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function whereDate(string $key, $operator, $value = null, string $boolean = '&'): self
+    {
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
+
+        if ($operator === '>') {
+            $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
+
+            return $this->where($key, $operator, $value, $boolean);
+        }
+
+        if ($operator === '>=') {
+            $value = Carbon::parse($value)->startOfDay()->timestamp;
+
+            return $this->where($key, $operator, $value, $boolean);
+        }
+
+        if ($operator === '<') {
+            $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
+
+            return $this->where($key, $operator, $value, $boolean);
+        }
+
+        if ($operator === '<=') {
+            $value = Carbon::parse($value)->endOfDay()->timestamp;
+
+            return $this->where($key, $operator, $value, $boolean);
+        }
+
+        $start = Carbon::parse($value)->startOfDay()->timestamp;
+        $end = Carbon::parse($value)->endOfDay()->timestamp;
+
+        if ($operator === '!=') {
+            return $this->whereNotBetween($key, $start, $end, false, $boolean);
+        }
+
+        return $this->whereBetween($key, $start, $end, true, $boolean);
+    }
+
+    /**
+     * Add a "or where date" statement to the query.
+     *
+     * @param string $key
+     * @param mixed $operator
+     * @param mixed|null $value
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function orWhereDate(string $key, $operator, $value = null, string $boolean = '|'): self
+    {
+        return $this->whereDate($key, $operator, $value, $boolean);
+    }
+
+    /**
+     * Add a "where year" statement to the query.
+     *
+     * @param string $key
+     * @param mixed $operator
+     * @param mixed|null $value
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function whereYear(string $key, $operator, $value = null, string $boolean = '&'): self
+    {
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
+
+        if ($operator === '=') {
+            $start = Carbon::create($value)->startOfYear()->timestamp;
+            $end = Carbon::create($value)->endOfYear()->timestamp;
+
+            return $this->whereBetween($key, $start, $end, true, $boolean);
+        }
+
+        if ($operator === '>') {
+            $value = Carbon::create($value)->endOfYear()->timestamp;
+        }
+
+        if ($operator === '>=') {
+            $value = Carbon::create($value)->startOfYear()->timestamp;
+        }
+
+        if ($operator === '<') {
+            $value = Carbon::create($value)->startOfYear()->timestamp;
+        }
+
+        if ($operator === '<=') {
+            $value = Carbon::create($value)->endOfYear()->timestamp;
+        }
+
+        return $this->where($key, $operator, $value, $boolean);
+    }
+
+    /**
+     * Add a "or where year" statement to the query.
+     *
+     * @param string $key
+     * @param        $operator
+     * @param        $value
+     * @param string $boolean
+     *
+     * @return self
+     */
+    public function orWhereYear(string $key, $operator, $value, string $boolean = '|'): self
+    {
+        return $this->whereYear($key, $operator, $value, $boolean);
+    }
+
+    /**
      * Add an "sort" clause to the query.
      *
      * @param string $key
      * @param string $direction
      *
      * @return self
+     * @throws InvalidParamsException
      */
     public function orderBy(string $key, string $direction = 'asc'): self
     {
+        if (!in_array($direction, ['asc', 'desc'])) {
+            $message = 'Expected `asc` or `desc` as order direction. `' . $direction . '` given.';
+            throw new InvalidParamsException($message);
+        }
+
         if (!$this->query->has('search')) {
             $this->query->put('sort', $key . ' ' . $direction);
         }
@@ -1298,11 +1313,11 @@ class Builder
     /**
      * Overwrite the cache lifetime for this query.
      *
-     * @param mixed $seconds
+     * @param int $seconds
      *
      * @return self
      */
-    public function cache($seconds): self
+    public function cache(int $seconds): self
     {
         $this->cacheLifetime = $seconds;
 
@@ -1415,43 +1430,42 @@ class Builder
     {
         $endpoint = ApiHelper::retrieveAccessToken();
 
-        if ($this->endpoint) {
-
-            $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
-
-            if (is_int($this->cacheLifetime) && $this->cacheLifetime === 0) {
-                Cache::forget($cacheKey);
-            }
-
-            $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () use ($endpoint) {
-                    return $this->client->withHeaders([
-                            'Authorization' => 'Bearer ' . $endpoint
-                        ])
-                        ->withBody($this->getQuery(), 'plain/text')
-                        ->post($this->endpoint)
-                        ->json();
-                });
-
-            if ($this->class) {
-                $model = $this->class;
-
-                $data = collect($data)->map(function ($result) use ($model) {
-                    $properties = collect($result)->toArray();
-                    $model = new $model($properties);
-
-                    unset($model->builder);
-
-                    return $model;
-                });
-            }
-
-            $this->init();
-
-            return $data;
+        if (!$this->endpoint) {
+            throw new MissingEndpointException('Please provide an endpoint.');
         }
 
-        throw new MissingEndpointException('Please provide an endpoint.');
+        $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
+
+        if (is_int($this->cacheLifetime) && $this->cacheLifetime === 0) {
+            Cache::forget($cacheKey);
+        }
+
+        $data = Cache::remember($cacheKey, $this->cacheLifetime,
+            function () use ($endpoint) {
+                return $this->client->withHeaders([
+                    'Authorization' => 'Bearer ' . $endpoint
+                ])
+                    ->withBody($this->getQuery(), 'plain/text')
+                    ->post($this->endpoint)
+                    ->json();
+            });
+
+        if ($this->class) {
+            $model = $this->class;
+
+            $data = collect($data)->map(function ($result) use ($model) {
+                $properties = collect($result)->toArray();
+                $model = new $model($properties);
+
+                unset($model->builder);
+
+                return $model;
+            });
+        }
+
+        $this->init();
+
+        return $data;
     }
 
     /**
@@ -1527,48 +1541,9 @@ class Builder
      */
     public function first()
     {
-        $data = $this->get();
+        $data = $this->skip(0)->take(1)->get();
 
         return collect($data)->first();
-    }
-
-    /**
-     * Return the total "count" result of the query.
-     *
-     * @return mixed
-     * @throws MissingEndpointException|AuthenticationException
-     */
-    public function count()
-    {
-        $accessToken = ApiHelper::retrieveAccessToken();
-
-        if ($this->endpoint) {
-
-            $endpoint = Str::finish($this->endpoint, '/count');
-
-            $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
-
-            if (!$this->cacheLifetime) {
-                Cache::forget($cacheKey);
-            }
-
-            $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () use ($accessToken, $endpoint) {
-                    return $this->client
-                        ->withHeaders([
-                            'Authorization' => 'Bearer ' . $accessToken,
-                        ])
-                        ->withBody($this->getQuery(), 'plain/text')
-                        ->post($endpoint)
-                        ->json();
-                });
-
-            $this->init();
-
-            return $data;
-        }
-
-        throw new MissingEndpointException('Please provide an endpoint.');
     }
 
     /**
@@ -1593,6 +1568,61 @@ class Builder
         $message = sprintf('No %s found.', $model);
 
         throw new ModelNotFoundException($message);
+    }
+
+    /**
+     * Return the total "count" result of the query.
+     *
+     * @return mixed
+     * @throws MissingEndpointException|AuthenticationException
+     */
+    public function count()
+    {
+        if (!$this->endpoint) {
+            throw new MissingEndpointException('Please provide an endpoint.');
+        }
+
+        $accessToken = ApiHelper::retrieveAccessToken();
+
+        $endpoint = Str::finish($this->endpoint, '/count');
+
+        $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
+
+        if (!$this->cacheLifetime) {
+            Cache::forget($cacheKey);
+        }
+
+        $data = Cache::remember($cacheKey, $this->cacheLifetime,
+            function () use ($accessToken, $endpoint) {
+                $response = $this->client
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $accessToken,
+                    ])
+                    ->withBody($this->getQuery(), 'plain/text')
+                    ->post($endpoint);
+
+                if (!$response->ok()) {
+                    return null;
+                }
+
+                return $response->json()['count'];
+            });
+
+        $this->init();
+
+        return $data;
+    }
+
+    /**
+     * @return Collection
+     * @throws AuthenticationException
+     * @throws MissingEndpointException
+     */
+    public function all(): Collection
+    {
+        $data = $this->skip(0)->take(500)->get();
+
+        return collect($data);
     }
 
     /**

@@ -195,28 +195,10 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return mixed
      */
-    public function __call($method, $parameters)
-    {
-        return $this->forwardCallTo($this->newQuery(), $method, $parameters);
-    }
-
-    /**
-     * @param mixed $method
-     * @param mixed $parameters
-     *
-     * @return mixed
-     */
     public static function __callStatic($method, $parameters)
     {
-        return (new static)->$method(...$parameters);
-    }
-
-    /**
-     * @return mixed
-     */
-    public static function all()
-    {
-        return (new static)->limit(500)->get();
+        $that = new static;
+        return $that->forwardCallTo($that->newQuery(), $method, $parameters);
     }
 
     /**
