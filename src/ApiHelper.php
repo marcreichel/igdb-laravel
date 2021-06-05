@@ -3,9 +3,9 @@
 namespace MarcReichel\IGDBLaravel;
 
 use Exception;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 
 class ApiHelper
@@ -17,7 +17,6 @@ class ApiHelper
      *
      * @return string
      * @throws AuthenticationException
-     * @throws GuzzleException
      */
     public static function retrieveAccessToken(): string
     {
@@ -28,15 +27,13 @@ class ApiHelper
         }
 
         try {
-            $guzzleClient = new Client();
             $query = http_build_query([
                 'client_id' => config('igdb.credentials.client_id'),
                 'client_secret' => config('igdb.credentials.client_secret'),
                 'grant_type' => 'client_credentials',
             ]);
-            $response = json_decode($guzzleClient->post(
-                'https://id.twitch.tv/oauth2/token?' . $query
-            )->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $response = Http::post('https://id.twitch.tv/oauth2/token?' . $query)
+                ->json();
 
             if (isset($response['access_token']) && $response['expires_in']) {
                 Cache::put($accessTokenCacheKey, (string)$response['access_token'], (int)$response['expires_in']);

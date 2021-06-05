@@ -4,16 +4,14 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
-use Exception;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Config\Repository;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
@@ -30,7 +28,7 @@ class Builder
     /**
      * The HTTP Client to request data from the API.
      *
-     * @var Client
+     * @var Http
      */
     private $client;
 
@@ -154,12 +152,11 @@ class Builder
      */
     private function initClient(): void
     {
-        $this->client = new Client([
+        $this->client = Http::withOptions([
             'base_uri' => ApiHelper::IGDB_BASE_URI,
-            'headers' => [
-                'Accept' => 'application/json',
-                'Client-ID' => config('igdb.credentials.client_id'),
-            ],
+        ])->withHeaders([
+            'Accept' => 'application/json',
+            'Client-ID' => config('igdb.credentials.client_id'),
         ]);
     }
 
@@ -181,18 +178,6 @@ class Builder
     protected function resetCacheLifetime(): void
     {
         $this->cacheLifetime = config('igdb.cache_lifetime');
-    }
-
-    /**
-     * Retrieves an Access Token from Twitch.
-     *
-     * @return string
-     * @throws AuthenticationException
-     * @throws GuzzleException
-     */
-    protected function retrieveAccessToken(): string
-    {
-        return ApiHelper::retrieveAccessToken();
     }
 
     /**
@@ -1421,11 +1406,11 @@ class Builder
      * Execute the query.
      *
      * @return mixed|string
-     * @throws MissingEndpointException|AuthenticationException|GuzzleException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function get()
     {
-        $accessToken = $this->retrieveAccessToken();
+        $endpoint = ApiHelper::retrieveAccessToken();
 
         if ($this->endpoint) {
 
@@ -1436,20 +1421,13 @@ class Builder
             }
 
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () use ($accessToken) {
-                    try {
-                        return collect(json_decode($this->client->post($this->endpoint,
-                            [
-                                'headers' => [
-                                    'Authorization' => 'Bearer ' . $accessToken,
-                                ],
-                                'body' => $this->getQuery(),
-                            ])->getBody(), true, 512, JSON_THROW_ON_ERROR));
-                    } catch (Exception $exception) {
-                        $this->handleRequestException($exception);
-                    }
-
-                    return null;
+                function () use ($endpoint) {
+                    return $this->client->withHeaders([
+                            'Authorization' => 'Bearer ' . $endpoint
+                        ])
+                        ->withBody($this->getQuery(), 'plain/text')
+                        ->post($this->endpoint)
+                        ->json();
                 });
 
             if ($this->class) {
@@ -1542,7 +1520,7 @@ class Builder
      * Execute the query and get the first result.
      *
      * @return mixed
-     * @throws MissingEndpointException|AuthenticationException|GuzzleException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function first()
     {
@@ -1555,37 +1533,31 @@ class Builder
      * Return the total "count" result of the query.
      *
      * @return mixed
-     * @throws MissingEndpointException|AuthenticationException|GuzzleException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function count()
     {
-        $accessToken = $this->retrieveAccessToken();
+        $accessToken = ApiHelper::retrieveAccessToken();
 
         if ($this->endpoint) {
 
-            $this->endpoint = Str::finish($this->endpoint, '/') . 'count';
+            $endpoint = Str::finish($this->endpoint, '/count');
 
-            $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
+            $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
 
             if (!$this->cacheLifetime) {
                 Cache::forget($cacheKey);
             }
 
             $data = Cache::remember($cacheKey, $this->cacheLifetime,
-                function () use ($accessToken) {
-                    try {
-                        return (int)json_decode($this->client->post($this->endpoint,
-                            [
-                                'headers' => [
-                                    'Authorization' => 'Bearer ' . $accessToken,
-                                ],
-                                'body' => $this->getQuery(),
-                            ])->getBody(), true, 512, JSON_THROW_ON_ERROR)['count'];
-                    } catch (Exception $exception) {
-                        $this->handleRequestException($exception);
-                    }
-
-                    return null;
+                function () use ($accessToken, $endpoint) {
+                    return $this->client
+                        ->withHeaders([
+                            'Authorization' => 'Bearer ' . $accessToken,
+                        ])
+                        ->withBody($this->getQuery(), 'plain/text')
+                        ->post($endpoint)
+                        ->json();
                 });
 
             $this->initClient();
@@ -1599,7 +1571,7 @@ class Builder
     /**
      * @return mixed
      * @throws MissingEndpointException
-     * @throws ModelNotFoundException|AuthenticationException|GuzzleException
+     * @throws ModelNotFoundException|AuthenticationException
      */
     public function firstOrFail()
     {
@@ -1624,7 +1596,7 @@ class Builder
      * @param int $limit
      *
      * @return Paginator
-     * @throws MissingEndpointException|AuthenticationException|GuzzleException
+     * @throws MissingEndpointException|AuthenticationException
      */
     public function paginate(int $limit = 10): Paginator
     {
