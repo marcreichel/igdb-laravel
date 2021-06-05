@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use BadMethodCallException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Builder;
@@ -23,7 +24,59 @@ use ReflectionClass;
 /**
  * Class Model
  *
- * @method limit(int $limit)
+ * @method static Builder select(mixed $fields)
+ * @method static Builder limit(int $limit)
+ * @method static Builder take(int $limit)
+ * @method static Builder offset(int $limit)
+ * @method static Builder skip(int $limit)
+ * @method static Builder forPage(int $page, int $perPage = 10)
+ * @method static Builder search(string $query)
+ * @method static Builder where(mixed $key, mixed|null $operator = null, mixed|null $value = null, string $boolean = '&')
+ * @method static Builder orWhere(mixed $key, mixed|null $operator = null, mixed|null $value = null, string $boolean = '|')
+ * @method static Builder whereLike(string $key, string $value, bool $caseSensitive = true, string $boolean = '&')
+ * @method static Builder orWhereLike(string $key, string $value, bool $caseSensitive = true, string $boolean = '|')
+ * @method static Builder whereNotLike(string $key, string $value, bool $caseSensitive = true, string $boolean = '&')
+ * @method static Builder orWhereNotLike(string $key, string $value, bool $caseSensitive = true, string $boolean = '|')
+ * @method static Builder whereIn(string $key, array $values, string $boolean = '&', string $operator = '=', string $prefix = '(', string $suffix = ')')
+ * @method static Builder orWhereIn(string $key, array $values, string $boolean = '|', string $operator = '=', string $prefix = '(', string $suffix = ')')
+ * @method static Builder whereInAll(string $key, array $values, string $boolean = '&', string $operator = '=', string $prefix = '[', string $suffix = ']')
+ * @method static Builder orWhereInAll(string $key, array $values, string $boolean = '|', string $operator = '=', string $prefix = '[', string $suffix = ']')
+ * @method static Builder whereInExact(string $key, array $values, string $boolean = '&', string $operator = '=', string $prefix = '{', string $suffix = '}')
+ * @method static Builder orWhereInExact(string $key, array $values, string $boolean = '|', string $operator = '=', string $prefix = '{', string $suffix = '}')
+ * @method static Builder whereNotIn(string $key, array $values, string $boolean = '&', string $operator = '!=', string $prefix = '(', string $suffix = ')')
+ * @method static Builder orWhereNotIn(string $key, array $values, string $boolean = '|', string $operator = '!=', string $prefix = '(', string $suffix = ')')
+ * @method static Builder whereNotInAll(string $key, array $values, string $boolean = '&', string $operator = '!=', string $prefix = '[', string $suffix = ']')
+ * @method static Builder orWhereNotInAll(string $key, array $values, string $boolean = '|', string $operator = '!=', string $prefix = '[', string $suffix = ']')
+ * @method static Builder whereNotInExact(string $key, array $values, string $boolean = '&', string $operator = '!=', string $prefix = '{', string $suffix = '}')
+ * @method static Builder orWhereNotInExact(string $key, array $values, string $boolean = '|', string $operator = '!=', string $prefix = '{', string $suffix = '}')
+ * @method static Builder whereBetween(string $key, mixed $first, mixed $second, bool $withBoundaries = true, string $boolean = '&')
+ * @method static Builder orWhereBetween(string $key, mixed $first, mixed $second, bool $withBoundaries = true, string $boolean = '|')
+ * @method static Builder whereNotBetween(string $key, mixed $first, mixed $second, bool $withBoundaries = false, string $boolean = '&')
+ * @method static Builder orWhereNotBetween(string $key, mixed $first, mixed $second, bool $withBoundaries = false, string $boolean = '|')
+ * @method static Builder whereHas(string $key, string $boolean = '&')
+ * @method static Builder orWhereHas(string $key, string $boolean = '|')
+ * @method static Builder whereHasNot(string $key, string $boolean = '&')
+ * @method static Builder orWhereHasNot(string $key, string $boolean = '|')
+ * @method static Builder whereNull(string $key, string $boolean = '&')
+ * @method static Builder orWhereNull(string $key, string $boolean = '|')
+ * @method static Builder whereNotNull(string $key, string $boolean = '&')
+ * @method static Builder orWhereNotNull(string $key, string $boolean = '|')
+ * @method static Builder whereDate(string $key, mixed $operator, mixed|null $value, string $boolean = '&')
+ * @method static Builder orWhereDate(string $key, mixed $operator, mixed|null $value, string $boolean = '|')
+ * @method static Builder whereYear(string $key, mixed $operator, mixed|null $value, string $boolean = '&')
+ * @method static Builder orWhereYear(string $key, mixed $operator, mixed|null $value, string $boolean = '|')
+ * @method static Builder orderBy(string $key, string $direction = 'asc')
+ * @method static Builder orderByDesc(string $key)
+ * @method static Builder with(array $relationships)
+ * @method static Builder cache(int $seconds)
+ * @method static mixed|string get()
+ * @method static mixed find(int $id)
+ * @method static mixed findOrFail(int $id)
+ * @method static mixed first()
+ * @method static mixed firstOrFail()
+ * @method static int|null count()
+ * @method static \Illuminate\Support\Collection all()
+ * @method static Paginator paginate(int $limit = 10)
  *
  * @package MarcReichel\IGDBLaravel\Models
  */
