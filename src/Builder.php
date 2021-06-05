@@ -307,6 +307,9 @@ class Builder
                 $this->whereNotLike($key, $value, true, $boolean);
             } elseif ($operator === 'not ilike') {
                 $this->whereNotLike($key, $value, false, $boolean);
+            } else {
+                $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
+                $this->query->put('where', $where);
             }
         } else {
             $value = !is_int($value) ? json_encode($value) : $value;
@@ -1049,7 +1052,7 @@ class Builder
      *
      * @return self
      */
-    public function whereDate(string $key, $operator, $value, string $boolean = '&'): self
+    public function whereDate(string $key, $operator, $value = null, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
@@ -1113,7 +1116,7 @@ class Builder
      *
      * @return self
      */
-    public function whereYear(string $key, $operator, $value, string $boolean = '&'): self
+    public function whereYear(string $key, $operator, $value = null, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
@@ -1311,7 +1314,7 @@ class Builder
      *
      * @return string
      */
-    protected function getQuery(): string
+    public function getQuery(): string
     {
         return $this->query->map(function ($value, $key) {
             if ($key === 'where') {
@@ -1443,7 +1446,7 @@ class Builder
                 });
             }
 
-            $this->initClient();
+            $this->init();
 
             return $data;
         }
@@ -1560,7 +1563,7 @@ class Builder
                         ->json();
                 });
 
-            $this->initClient();
+            $this->init();
 
             return $data;
         }
