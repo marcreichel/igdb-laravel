@@ -437,6 +437,22 @@ Route::post('webhook/handle', function (Request $request) {
 })->name('handle-webhook');
 ```
 
+Add the route to the `VerifyCsrfToken` middleware (in `app/Http/Middleware/VerifyCsrfToken.php`):
+
+```diff
+class VerifyCsrfToken extends Middleware
+{
+    /**
+     * The URIs that should be excluded from CSRF verification.
+     *
+     * @var array
+     */
+    protected $except = [
++       'webhook/handle'
+    ];
+}
+```
+
 That's it!
 
 ### Creating a webhook
