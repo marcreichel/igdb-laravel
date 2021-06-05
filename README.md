@@ -497,6 +497,14 @@ public function boot()
 
 Further information on how to set up event listeners can be found on the [official docs](https://laravel.com/docs/events).
 
+## Testing
+
+Run the tests with:
+
+```bash
+composer test
+```
+
 ## TODO List
 
 - Write unit tests
