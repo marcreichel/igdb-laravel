@@ -7,6 +7,7 @@ use Closure;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Config\Repository;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -1431,7 +1432,7 @@ class Builder
         $endpoint = ApiHelper::retrieveAccessToken();
 
         if (!$this->endpoint) {
-            throw new MissingEndpointException('Please provide an endpoint.');
+            throw new MissingEndpointException();
         }
 
         $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
@@ -1447,6 +1448,7 @@ class Builder
                 ])
                     ->withBody($this->getQuery(), 'plain/text')
                     ->post($this->endpoint)
+                    ->throw()
                     ->json();
             });
 
@@ -1579,7 +1581,7 @@ class Builder
     public function count()
     {
         if (!$this->endpoint) {
-            throw new MissingEndpointException('Please provide an endpoint.');
+            throw new MissingEndpointException();
         }
 
         $accessToken = ApiHelper::retrieveAccessToken();
