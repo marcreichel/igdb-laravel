@@ -4,7 +4,6 @@ namespace MarcReichel\IGDBLaravel\Tests;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\Builder;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 
@@ -25,8 +24,7 @@ class BuilderTest extends TestCase
         $this->igdb->select(['name'])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('fields name;');
+            return $this->isApiCall($request, 'fields name;');
         });
     }
 
@@ -36,8 +34,7 @@ class BuilderTest extends TestCase
         $this->igdb->search('Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('search "Fortnite";');
+            return $this->isApiCall($request, 'search "Fortnite";');
         });
     }
 
@@ -47,15 +44,13 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', '=', 'Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where name = Fortnite;');
+            return $this->isApiCall($request, 'where name = Fortnite;');
         });
 
         $this->igdb->where('first_release_date', '>=', 1546297200)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where first_release_date >= 1546297200;');
+            return $this->isApiCall($request, 'where first_release_date >= 1546297200;');
         });
     }
 
@@ -65,8 +60,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', 'Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where name = Fortnite;');
+            return $this->isApiCall($request, 'where name = Fortnite;');
         });
     }
 
@@ -76,8 +70,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', 'Fortnite')->where('name', 'Borderlands 2')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where name = Fortnite & name = Borderlands 2;');
+            return $this->isApiCall($request, 'where name = Fortnite & name = Borderlands 2;');
         });
     }
 
@@ -87,8 +80,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', 'Fortnite')->orWhere('name', 'Borderlands 2')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where name = Fortnite | name = Borderlands 2;');
+            return $this->isApiCall($request, 'where name = Fortnite | name = Borderlands 2;');
         });
     }
 
@@ -98,8 +90,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereBetween('first_release_date', 1546297200, 1577833199)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where (first_release_date >= 1546297200 & first_release_date <= 1577833199);');
+            return $this->isApiCall($request, 'where (first_release_date >= 1546297200 & first_release_date <= 1577833199);');
         });
     }
 
@@ -109,8 +100,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereBetween('first_release_date', 1546297200, 1577833199, false)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where (first_release_date > 1546297200 & first_release_date < 1577833199);');
+            return $this->isApiCall($request, 'where (first_release_date > 1546297200 & first_release_date < 1577833199);');
         });
     }
 
@@ -120,8 +110,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereIn('category', [0,4])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where category = (0,4);');
+            return $this->isApiCall($request, 'where category = (0,4);');
         });
     }
 
@@ -131,8 +120,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereInExact('category', [0,4])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where category = {0,4};');
+            return $this->isApiCall($request, 'where category = {0,4};');
         });
     }
 
@@ -142,8 +130,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereInAll('category', [0,4])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where category = [0,4];');
+            return $this->isApiCall($request, 'where category = [0,4];');
         });
     }
 
@@ -153,8 +140,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereNotIn('category', [0,4])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where category != (0,4);');
+            return $this->isApiCall($request, 'where category != (0,4);');
         });
     }
 
@@ -164,8 +150,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereNotInExact('category', [0,4])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where category != {0,4};');
+            return $this->isApiCall($request, 'where category != {0,4};');
         });
     }
 
@@ -175,8 +160,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereNotInAll('category', [0,4])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where category != [0,4];');
+            return $this->isApiCall($request, 'where category != [0,4];');
         });
     }
 
@@ -186,8 +170,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereNull('first_release_date')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where first_release_date = null;');
+            return $this->isApiCall($request, 'where first_release_date = null;');
         });
     }
 
@@ -197,8 +180,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereNotNull('first_release_date')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where first_release_date != null;');
+            return $this->isApiCall($request, 'where first_release_date != null;');
         });
     }
 
@@ -212,8 +194,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereDate('first_release_date', $date->format('Y-m-d'))->get();
 
         Http::assertSent(function (Request $request) use ($start, $end) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where (first_release_date >= {$start} & first_release_date <= {$end});");
+            return $this->isApiCall($request, "where (first_release_date >= {$start} & first_release_date <= {$end});");
         });
     }
 
@@ -226,8 +207,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereDate('first_release_date', '>=', $date->format('Y-m-d'))->get();
 
         Http::assertSent(function (Request $request) use ($start) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date >= {$start};");
+            return $this->isApiCall($request, "where first_release_date >= {$start};");
         });
     }
 
@@ -240,8 +220,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereDate('first_release_date', '>', $date->format('Y-m-d'))->get();
 
         Http::assertSent(function (Request $request) use ($end) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date > {$end};");
+            return $this->isApiCall($request, "where first_release_date > {$end};");
         });
     }
 
@@ -254,8 +233,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereDate('first_release_date', '<=', $date->format('Y-m-d'))->get();
 
         Http::assertSent(function (Request $request) use ($end) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date <= {$end};");
+            return $this->isApiCall($request, "where first_release_date <= {$end};");
         });
     }
 
@@ -268,8 +246,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereDate('first_release_date', '<', $date->format('Y-m-d'))->get();
 
         Http::assertSent(function (Request $request) use ($start) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date < {$start};");
+            return $this->isApiCall($request, "where first_release_date < {$start};");
         });
     }
 
@@ -283,8 +260,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereYear('first_release_date', $date->year)->get();
 
         Http::assertSent(function (Request $request) use ($start, $end) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where (first_release_date >= {$start} & first_release_date <= {$end});");
+            return $this->isApiCall($request, "where (first_release_date >= {$start} & first_release_date <= {$end});");
         });
     }
 
@@ -297,8 +273,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereYear('first_release_date', '>=', $date->year)->get();
 
         Http::assertSent(function (Request $request) use ($start) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date >= {$start};");
+            return $this->isApiCall($request, "where first_release_date >= {$start};");
         });
     }
 
@@ -311,8 +286,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereYear('first_release_date', '>', $date->year)->get();
 
         Http::assertSent(function (Request $request) use ($end) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date > {$end};");
+            return $this->isApiCall($request, "where first_release_date > {$end};");
         });
     }
 
@@ -325,8 +299,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereYear('first_release_date', '<=', $date->year)->get();
 
         Http::assertSent(function (Request $request) use ($end) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date <= {$end};");
+            return $this->isApiCall($request, "where first_release_date <= {$end};");
         });
     }
 
@@ -339,8 +312,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereYear('first_release_date', '<', $date->year)->get();
 
         Http::assertSent(function (Request $request) use ($start) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("where first_release_date < {$start};");
+            return $this->isApiCall($request, "where first_release_date < {$start};");
         });
     }
 
@@ -350,8 +322,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereHas('first_release_date')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where first_release_date != null;');
+            return $this->isApiCall($request, 'where first_release_date != null;');
         });
     }
 
@@ -361,8 +332,7 @@ class BuilderTest extends TestCase
         $this->igdb->whereHasNot('first_release_date')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where first_release_date = null;');
+            return $this->isApiCall($request, 'where first_release_date = null;');
         });
     }
 
@@ -376,8 +346,7 @@ class BuilderTest extends TestCase
             })->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where name = Fortnite | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);');
+            return $this->isApiCall($request, 'where name = Fortnite | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);');
         });
     }
 
@@ -387,8 +356,7 @@ class BuilderTest extends TestCase
         $this->igdb->where([['name', 'Fortnite'], ['name', 'Borderlands 2']])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('where (name = Fortnite & name = Borderlands 2);');
+            return $this->isApiCall($request, 'where (name = Fortnite & name = Borderlands 2);');
         });
     }
 
@@ -398,22 +366,19 @@ class BuilderTest extends TestCase
         $this->igdb->orderBy('name')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('sort name asc;');
+            return $this->isApiCall($request, 'sort name asc;');
         });
 
         $this->igdb->orderBy('name', 'desc')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('sort name desc;');
+            return $this->isApiCall($request, 'sort name desc;');
         });
 
         $this->igdb->orderBy('name', 'asc')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('sort name asc;');
+            return $this->isApiCall($request, 'sort name asc;');
         });
     }
 
@@ -425,8 +390,7 @@ class BuilderTest extends TestCase
         $this->igdb->orderBy('name', 'foo')->get();
 
         Http::assertNotSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('sort name foo;');
+            return $this->isApiCall($request, 'sort name foo;');
         });
     }
 
@@ -436,8 +400,7 @@ class BuilderTest extends TestCase
         $this->igdb->orderByDesc('name')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('sort name desc;');
+            return $this->isApiCall($request, 'sort name desc;');
         });
     }
 
@@ -447,15 +410,13 @@ class BuilderTest extends TestCase
         $this->igdb->skip(10)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('offset 10;');
+            return $this->isApiCall($request, 'offset 10;');
         });
 
         $this->igdb->offset(10)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('offset 10;');
+            return $this->isApiCall($request, 'offset 10;');
         });
     }
 
@@ -465,15 +426,13 @@ class BuilderTest extends TestCase
         $this->igdb->take(10)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('limit 10;');
+            return $this->isApiCall($request, 'limit 10;');
         });
 
         $this->igdb->limit(10)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains('limit 10;');
+            return $this->isApiCall($request, 'limit 10;');
         });
     }
 
@@ -483,8 +442,7 @@ class BuilderTest extends TestCase
         $this->igdb->forPage(2, 20)->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("limit 20;\noffset 20;");
+            return $this->isApiCall($request, "limit 20;\noffset 20;");
         });
     }
 
@@ -494,8 +452,7 @@ class BuilderTest extends TestCase
         $this->igdb->all();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("limit 500;\noffset 0;");
+            return $this->isApiCall($request, "limit 500;\noffset 0;");
         });
     }
 
@@ -505,8 +462,7 @@ class BuilderTest extends TestCase
         $this->igdb->first();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("limit 1;\noffset 0;");
+            return $this->isApiCall($request, "limit 1;\noffset 0;");
         });
     }
 
@@ -518,8 +474,7 @@ class BuilderTest extends TestCase
         $this->igdb->find(1905);
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("limit 1;\noffset 0;\nwhere id = 1905;");
+            return $this->isApiCall($request, "limit 1;\noffset 0;\nwhere id = 1905;");
         });
     }
 
@@ -529,8 +484,7 @@ class BuilderTest extends TestCase
         $this->igdb->paginate(20);
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("limit 20;\noffset 0;");
+            return $this->isApiCall($request, "limit 20;\noffset 0;");
         });
 
         $this->get('/?page=2');
@@ -538,13 +492,7 @@ class BuilderTest extends TestCase
         $this->igdb->paginate(20);
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request) &&
-                Str::of($request->body())->contains("limit 20;\noffset 20;");
+            return $this->isApiCall($request, "limit 20;\noffset 20;");
         });
-    }
-
-    private function isApiCall(Request $request): bool
-    {
-        return Str::startsWith($request->url(), 'https://api.igdb.com/v4/');
     }
 }
