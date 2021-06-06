@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use JsonException;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
@@ -93,6 +94,8 @@ class Builder
      * Builder constructor.
      *
      * @param $model
+     *
+     * @throws ReflectionException
      */
     public function __construct($model = null)
     {
@@ -264,6 +267,8 @@ class Builder
      * @param string     $boolean
      *
      * @return self
+     * @throws ReflectionException
+     * @throws JsonException
      */
     public function where(
         $key,
@@ -307,7 +312,7 @@ class Builder
                 $this->query->put('where', $where);
             }
         } else {
-            $value = !is_int($value) ? json_encode($value) : $value;
+            $value = !is_int($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
             $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
             $this->query->put('where', $where);
         }
@@ -324,6 +329,7 @@ class Builder
      * @param string      $boolean
      *
      * @return self
+     * @throws ReflectionException|JsonException
      */
     public function orWhere(
         $key,
@@ -354,6 +360,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws JsonException
      */
     public function whereLike(
         string $key,
@@ -376,7 +383,7 @@ class Builder
         $operator = $caseSensitive ? '=' : '~';
         $prefix = $hasPrefix ? '*' : '';
         $suffix = $hasSuffix ? '*' : '';
-        $value = json_encode($value);
+        $value = json_encode($value, JSON_THROW_ON_ERROR);
 
         $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $value . $suffix);
 
@@ -394,6 +401,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws JsonException
      */
     public function orWhereLike(
         string $key,
@@ -413,6 +421,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws JsonException
      */
     public function whereNotLike(
         string $key,
@@ -435,7 +444,7 @@ class Builder
         $operator = $caseSensitive ? '!=' : '!~';
         $prefix = $hasPrefix ? '*' : '';
         $suffix = $hasSuffix ? '*' : '';
-        $value = json_encode($value);
+        $value = json_encode($value, JSON_THROW_ON_ERROR);
 
         $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $value . $suffix);
 
@@ -453,6 +462,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws JsonException
      */
     public function orWhereNotLike(
         string $key,
@@ -511,6 +521,7 @@ class Builder
      * @param string $method
      *
      * @return self
+     * @throws ReflectionException
      */
     protected function addArrayOfWheres(
         array $arrayOfWheres,
@@ -539,6 +550,7 @@ class Builder
      * @param string  $boolean
      *
      * @return self
+     * @throws ReflectionException
      */
     protected function whereNested(Closure $callback, string $boolean = '&'): self
     {
@@ -885,6 +897,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws ReflectionException
      */
     public function whereBetween(
         string $key,
@@ -922,6 +935,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws ReflectionException
      */
     public function orWhereBetween(
         string $key,
@@ -944,6 +958,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws ReflectionException
      */
     public function whereNotBetween(
         string $key,
@@ -981,6 +996,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws ReflectionException
      */
     public function orWhereNotBetween(
         string $key,
@@ -1116,12 +1132,13 @@ class Builder
     /**
      * Add a "where date" statement to the query.
      *
-     * @param string $key
-     * @param mixed $operator
+     * @param string     $key
+     * @param mixed      $operator
      * @param mixed|null $value
-     * @param string $boolean
+     * @param string     $boolean
      *
      * @return self
+     * @throws ReflectionException|JsonException
      */
     public function whereDate(string $key, $operator, $value = null, string $boolean = '&'): self
     {
@@ -1165,12 +1182,13 @@ class Builder
     /**
      * Add a "or where date" statement to the query.
      *
-     * @param string $key
-     * @param mixed $operator
+     * @param string     $key
+     * @param mixed      $operator
      * @param mixed|null $value
-     * @param string $boolean
+     * @param string     $boolean
      *
      * @return self
+     * @throws ReflectionException|JsonException
      */
     public function orWhereDate(string $key, $operator, $value = null, string $boolean = '|'): self
     {
@@ -1180,12 +1198,13 @@ class Builder
     /**
      * Add a "where year" statement to the query.
      *
-     * @param string $key
-     * @param mixed $operator
+     * @param string     $key
+     * @param mixed      $operator
      * @param mixed|null $value
-     * @param string $boolean
+     * @param string     $boolean
      *
      * @return self
+     * @throws ReflectionException|JsonException
      */
     public function whereYear(string $key, $operator, $value = null, string $boolean = '&'): self
     {
@@ -1227,6 +1246,7 @@ class Builder
      * @param string $boolean
      *
      * @return self
+     * @throws ReflectionException|JsonException
      */
     public function orWhereYear(string $key, $operator, $value, string $boolean = '|'): self
     {
@@ -1262,6 +1282,7 @@ class Builder
      * @param string $key
      *
      * @return self
+     * @throws InvalidParamsException
      */
     public function orderByDesc(string $key): self
     {
@@ -1467,7 +1488,7 @@ class Builder
      * @param int $id
      *
      * @return mixed|string
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException|AuthenticationException|ReflectionException|JsonException
      */
     public function find(int $id)
     {
@@ -1478,7 +1499,7 @@ class Builder
      * @param int $id
      *
      * @return mixed
-     * @throws MissingEndpointException|ModelNotFoundException|AuthenticationException
+     * @throws MissingEndpointException|ModelNotFoundException|AuthenticationException|ReflectionException|JsonException
      */
     public function findOrFail(int $id)
     {
