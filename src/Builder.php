@@ -4,7 +4,10 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Config\Repository;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -16,11 +19,14 @@ use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
+use MarcReichel\IGDBLaravel\Traits\{DateCasts, Operators};
 use ReflectionClass;
 use ReflectionException;
 
 class Builder
 {
+    use Operators, DateCasts;
+
     /**
      * The HTTP Client to request data from the API.
      *
@@ -55,40 +61,6 @@ class Builder
      * @var Repository|mixed
      */
     private $cacheLifetime;
-
-    /**
-     * These fields should be cast.
-     *
-     * @var array
-     */
-    public $dates = [
-        'created_at' => 'date',
-        'updated_at' => 'date',
-        'change_date' => 'date',
-        'start_date' => 'date',
-        'published_at' => 'date',
-        'first_release_date' => 'date',
-    ];
-
-    /**
-     * All of the available clause operators.
-     *
-     * @var array
-     */
-    public $operators = [
-        '=',
-        '<',
-        '>',
-        '<=',
-        '>=',
-        '!=',
-        '!=',
-        '~',
-        'like',
-        'ilike',
-        'not like',
-        'not ilike',
-    ];
 
     /**
      * Builder constructor.
@@ -370,22 +342,9 @@ class Builder
     ): self {
         $where = $this->query->get('where', new Collection());
 
-        $hasPrefix = Str::startsWith($value, '%');
-        $hasSuffix = Str::endsWith($value, '%');
+        $clause = $this->generateWhereLikeClause($key, $value, $caseSensitive, '=', '~');
 
-        if ($hasPrefix) {
-            $value = substr($value, 1);
-        }
-        if ($hasSuffix) {
-            $value = substr($value, 0, -1);
-        }
-
-        $operator = $caseSensitive ? '=' : '~';
-        $prefix = $hasPrefix ? '*' : '';
-        $suffix = $hasSuffix ? '*' : '';
-        $value = json_encode($value, JSON_THROW_ON_ERROR);
-
-        $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $value . $suffix);
+        $where->push(($where->count() ? $boolean . ' ' : '') . $clause);
 
         $this->query->put('where', $where);
 
@@ -431,22 +390,9 @@ class Builder
     ): self {
         $where = $this->query->get('where', new Collection());
 
-        $hasPrefix = Str::startsWith($value, '%');
-        $hasSuffix = Str::endsWith($value, '%');
+        $clause = $this->generateWhereLikeClause($key, $value, $caseSensitive, '!=', '!~');
 
-        if ($hasPrefix) {
-            $value = substr($value, 1);
-        }
-        if ($hasSuffix) {
-            $value = substr($value, 0, -1);
-        }
-
-        $operator = $caseSensitive ? '!=' : '!~';
-        $prefix = $hasPrefix ? '*' : '';
-        $suffix = $hasSuffix ? '*' : '';
-        $value = json_encode($value, JSON_THROW_ON_ERROR);
-
-        $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $value . $suffix);
+        $where->push(($where->count() ? $boolean . ' ' : '') . $clause);
 
         $this->query->put('where', $where);
 
@@ -471,6 +417,30 @@ class Builder
         string $boolean = '|'
     ): self {
         return $this->whereNotLike($key, $value, $caseSensitive, $boolean);
+    }
+
+    /**
+     * @throws JsonException
+     */
+    private function generateWhereLikeClause($key, $value, $caseSensitive, $operator, $insensitiveOperator): string
+    {
+        $hasPrefix = Str::startsWith($value, ['%', '*']);
+        $hasSuffix = Str::endsWith($value, ['%', '*']);
+
+        if ($hasPrefix) {
+            $value = substr($value, 1);
+        }
+        if ($hasSuffix) {
+            $value = substr($value, 0, -1);
+        }
+
+        $operator = $caseSensitive ? $operator : $insensitiveOperator;
+        $prefix = $hasPrefix ? '*' : '';
+        $suffix = $hasSuffix ? '*' : '';
+        $value = json_encode($value, JSON_THROW_ON_ERROR);
+        $value = Str::start(Str::finish($value, $suffix), $prefix);
+
+        return implode(' ', [$key, $operator, $value]);
     }
 
     /**
@@ -606,7 +576,7 @@ class Builder
         string $suffix = ')'
     ): self {
         if (($prefix === '(' && $suffix !== ')') || ($prefix === '[' && $suffix !== ']') || ($prefix === '{' && $suffix !== '}')) {
-            $message = 'Prefix and Suffix must be "()", "[]" or "{}".';
+            $message = 'Prefix and Suffix must be "(" and ")", "[" and "]" or "{" and "}".';
             throw new InvalidArgumentException($message);
         }
 
@@ -1145,38 +1115,91 @@ class Builder
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
 
-        if ($operator === '>') {
-            $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '>=') {
-            $value = Carbon::parse($value)->startOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '<') {
-            $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
-        if ($operator === '<=') {
-            $value = Carbon::parse($value)->endOfDay()->timestamp;
-
-            return $this->where($key, $operator, $value, $boolean);
-        }
-
         $start = Carbon::parse($value)->startOfDay()->timestamp;
         $end = Carbon::parse($value)->endOfDay()->timestamp;
 
-        if ($operator === '!=') {
-            return $this->whereNotBetween($key, $start, $end, false, $boolean);
+        switch ($operator) {
+            case '>':
+                return $this->whereDateGreaterThan($key, $operator, $value, $boolean);
+            case '>=':
+                return $this->whereDateGreaterThanOrEquals($key, $operator, $value, $boolean);
+            case '<':
+                return $this->whereDateLowerThan($key, $operator, $value, $boolean);
+            case '<=':
+                return $this->whereDateLowerThanOrEquals($key, $operator, $value, $boolean);
+            case '!=':
+                return $this->whereNotBetween($key, $start, $end, false, $boolean);
         }
 
         return $this->whereBetween($key, $start, $end, true, $boolean);
+    }
+
+    /**
+     * @param $key
+     * @param $operator
+     * @param $value
+     * @param $boolean
+     *
+     * @return Builder
+     * @throws JsonException
+     * @throws ReflectionException
+     */
+    private function whereDateGreaterThan($key, $operator, $value, $boolean): Builder
+    {
+        $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
+
+        return $this->where($key, $operator, $value, $boolean);
+    }
+
+    /**
+     * @param $key
+     * @param $operator
+     * @param $value
+     * @param $boolean
+     *
+     * @return $this
+     * @throws JsonException
+     * @throws ReflectionException
+     */
+    private function whereDateGreaterThanOrEquals($key, $operator, $value, $boolean): Builder
+    {
+        $value = Carbon::parse($value)->startOfDay()->timestamp;
+
+        return $this->where($key, $operator, $value, $boolean);
+    }
+
+    /**
+     * @param $key
+     * @param $operator
+     * @param $value
+     * @param $boolean
+     *
+     * @return $this
+     * @throws JsonException
+     * @throws ReflectionException
+     */
+    private function whereDateLowerThan($key, $operator, $value, $boolean): Builder
+    {
+        $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
+
+        return $this->where($key, $operator, $value, $boolean);
+    }
+
+    /**
+     * @param $key
+     * @param $operator
+     * @param $value
+     * @param $boolean
+     *
+     * @return $this
+     * @throws JsonException
+     * @throws ReflectionException
+     */
+    private function whereDateLowerThanOrEquals($key, $operator, $value, $boolean): Builder
+    {
+        $value = Carbon::parse($value)->endOfDay()->timestamp;
+
+        return $this->where($key, $operator, $value, $boolean);
     }
 
     /**
@@ -1398,14 +1421,11 @@ class Builder
             }
 
             $reflectionClass = new ReflectionClass($parents->last());
-
             $reflectionNamespace = $reflectionClass->getNamespaceName();
 
             if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
                 $this->class = get_class($model);
-
                 $class = class_basename($this->class);
-
                 $this->endpoint = Str::snake(Str::plural($class));
             }
         } elseif (is_string($model)) {
@@ -1437,49 +1457,38 @@ class Builder
      * Execute the query.
      *
      * @return mixed|string
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException
      */
     public function get()
     {
-        $endpoint = ApiHelper::retrieveAccessToken();
-
-        if (!$this->endpoint) {
-            throw new MissingEndpointException();
-        }
-
-        $cacheKey = 'igdb_cache.' . md5($this->endpoint . $this->getQuery());
-
-        if (is_int($this->cacheLifetime) && $this->cacheLifetime === 0) {
-            Cache::forget($cacheKey);
-        }
-
-        $data = Cache::remember($cacheKey, $this->cacheLifetime,
-            function () use ($endpoint) {
-                return $this->client->withHeaders([
-                    'Authorization' => 'Bearer ' . $endpoint
-                ])
-                    ->withBody($this->getQuery(), 'plain/text')
-                    ->post($this->endpoint)
-                    ->throw()
-                    ->json();
-            });
+        $data = $this->fetchApi();
 
         if ($this->class) {
-            $model = $this->class;
-
-            $data = collect($data)->map(function ($result) use ($model) {
-                $properties = collect($result)->toArray();
-                $model = new $model($properties);
-
-                unset($model->builder);
-
-                return $model;
+            $data = collect($data)->map(function ($result) {
+                return $this->mapToModel($result);
             });
         }
 
         $this->init();
 
         return $data;
+    }
+
+    /**
+     * @param $result
+     *
+     * @return mixed
+     */
+    private function mapToModel($result)
+    {
+        $model = $this->class;
+
+        $properties = collect($result)->toArray();
+        $model = new $model($properties);
+
+        unset($model->builder);
+
+        return $model;
     }
 
     /**
@@ -1561,40 +1570,11 @@ class Builder
      * Return the total "count" result of the query.
      *
      * @return mixed
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException
      */
     public function count()
     {
-        if (!$this->endpoint) {
-            throw new MissingEndpointException();
-        }
-
-        $accessToken = ApiHelper::retrieveAccessToken();
-
-        $endpoint = Str::finish($this->endpoint, '/count');
-
-        $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
-
-        if (!$this->cacheLifetime) {
-            Cache::forget($cacheKey);
-        }
-
-        $data = Cache::remember($cacheKey, $this->cacheLifetime,
-            function () use ($accessToken, $endpoint) {
-                $response = $this->client
-                    ->withHeaders([
-                        'Authorization' => 'Bearer ' . $accessToken,
-                    ])
-                    ->withBody($this->getQuery(), 'plain/text')
-                    ->post($endpoint)
-                    ->throw();
-
-                if (!$response->ok()) {
-                    return null;
-                }
-
-                return $response->json()['count'];
-            });
+        $data = $this->fetchApi(true);
 
         $this->init();
 
@@ -1626,5 +1606,60 @@ class Builder
         $data = $this->forPage($page, $limit)->get();
 
         return new Paginator($data, $limit);
+    }
+
+    /**
+     * @param bool $count
+     *
+     * @return mixed
+     * @throws MissingEndpointException
+     */
+    private function fetchApi(bool $count = false)
+    {
+        if (!$this->endpoint) {
+            throw new MissingEndpointException();
+        }
+
+        $endpoint = $this->getEndpoint($count);
+
+        $cacheKey = $this->handleCache($endpoint);
+
+        return Cache::remember($cacheKey, $this->cacheLifetime, function () use ($endpoint, $count) {
+            $response = $this->client->withHeaders([
+                'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
+            ])
+                ->withBody($this->getQuery(), 'plain/text')
+                ->post($endpoint)
+                ->throw()
+                ->json();
+
+            if ($count) {
+                return $response['count'];
+            }
+
+            return $response;
+        });
+    }
+
+    private function getEndpoint(bool $count = false): string
+    {
+        $endpoint = $this->endpoint;
+
+        if ($count) {
+            $endpoint = Str::finish($endpoint, '/count');
+        }
+
+        return $endpoint;
+    }
+
+    private function handleCache(string $endpoint)
+    {
+        $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
+
+        if (is_int($this->cacheLifetime) && $this->cacheLifetime === 0) {
+            Cache::forget($cacheKey);
+        }
+
+        return $cacheKey;
     }
 }
