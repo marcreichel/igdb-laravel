@@ -45,7 +45,7 @@ return [
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
 
     /*
-     * Default webhook secret.
+     * The webhook secret.
      *
      * This needs to be a string of your choice in order to use the webhook
      * functionality.
@@ -506,9 +506,9 @@ Run the tests with:
 composer test
 ```
 
-## TODO List
+## Roadmap
 
-- Write unit tests
+- Clean up and restructure/optimize Docs
 
 ## Contribution
 
