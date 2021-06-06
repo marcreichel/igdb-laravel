@@ -6,9 +6,9 @@ use Error;
 use ArrayAccess;
 use Carbon\Carbon;
 use BadMethodCallException;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Builder;
@@ -453,14 +453,14 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
 
         $endpoint = $self->endpoint . '/webhooks';
 
-        $client = new Client([
+        $client = Http::withOptions([
             'base_uri' => ApiHelper::IGDB_BASE_URI,
-            'headers' => [
-                'Accept' => 'application/json',
-                'Client-ID' => config('igdb.credentials.client_id'),
-                'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
-            ],
-        ]);
+        ])->withHeaders([
+            'Accept' => 'application/json',
+            'Client-ID' => config('igdb.credentials.client_id'),
+            'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
+        ])
+        ->asForm();
 
         parse_str($parsedUrl['query'] ?? '', $queryParams);
 
@@ -473,12 +473,10 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
         $newUrl = ($parsedUrl['scheme'] ?? 'http') . '://' . $parsedUrl['host'] . $parsedUrl['path']
             . ($modifiedQueryString ? '?' . $modifiedQueryString : '');
 
-        return new Webhook(...collect(json_decode($client->post($endpoint, [
-            'form_params' => [
-                'url' => $newUrl,
-                'method' => $method,
-                'secret' => config('igdb.webhook_secret'),
-            ],
-        ])->getBody(), true))->first());
+        return new Webhook(...$client->post($endpoint, [
+            'url' => $newUrl,
+            'method' => $method,
+            'secret' => config('igdb.webhook_secret'),
+        ])->json());
     }
 }
