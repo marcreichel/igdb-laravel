@@ -1,6 +1,6 @@
 # IGDB Laravel Wrapper
 
-[![Tests](https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml/badge.svg)](https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml)
+[![tests](https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml/badge.svg?event=push)](https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
 [![Packagist Version](https://img.shields.io/packagist/v/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
 [![GitHub](https://img.shields.io/github/license/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
