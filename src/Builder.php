@@ -1369,6 +1369,7 @@ class Builder
      * @param $model
      *
      * @return void
+     * @throws ReflectionException
      */
     protected function setEndpoint($model): void
     {
@@ -1382,19 +1383,16 @@ class Builder
                 $parents->push($class);
             }
 
-            try {
-                $reflectionClass = new ReflectionClass($parents->last());
+            $reflectionClass = new ReflectionClass($parents->last());
 
-                $reflectionNamespace = $reflectionClass->getNamespaceName();
+            $reflectionNamespace = $reflectionClass->getNamespaceName();
 
-                if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
-                    $this->class = get_class($model);
+            if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
+                $this->class = get_class($model);
 
-                    $class = class_basename($this->class);
+                $class = class_basename($this->class);
 
-                    $this->endpoint = Str::snake(Str::plural($class));
-                }
-            } catch (ReflectionException $e) {
+                $this->endpoint = Str::snake(Str::plural($class));
             }
         } elseif (is_string($model)) {
             $this->endpoint = $model;

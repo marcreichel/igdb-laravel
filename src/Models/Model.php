@@ -438,7 +438,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
             throw new WebhookSecretMissingException();
         }
 
-        if (!$parsedUrl = parse_url($url)) {
+        $parsedUrl = parse_url($url);
+
+        if (!$parsedUrl) {
             throw new InvalidWebhookUrlException($url);
         }
 

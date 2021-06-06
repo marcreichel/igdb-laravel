@@ -83,7 +83,9 @@ class Webhook
 
         $data = json_decode($request->getContent(), true);
 
-        if (!$endpoint = $request->get('x_igdb_endpoint')) {
+        $endpoint = $request->get('x_igdb_endpoint');
+
+        if (!$endpoint) {
             return $data;
         }
 
@@ -110,10 +112,7 @@ class Webhook
             return $entity;
         }
 
-        try {
-            $event::dispatch(new $fullClassName($data));
-        } catch (Exception $e) {
-        }
+        $event::dispatch(new $fullClassName($data));
 
         return $entity;
     }
