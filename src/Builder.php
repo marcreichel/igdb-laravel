@@ -4,10 +4,7 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
-use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Config\Repository;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -1583,7 +1580,6 @@ class Builder
 
     /**
      * @return Collection
-     * @throws AuthenticationException
      * @throws MissingEndpointException
      */
     public function all(): Collection
@@ -1597,7 +1593,7 @@ class Builder
      * @param int $limit
      *
      * @return Paginator
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException
      */
     public function paginate(int $limit = 10): Paginator
     {
@@ -1641,6 +1637,11 @@ class Builder
         });
     }
 
+    /**
+     * @param bool $count
+     *
+     * @return string
+     */
     private function getEndpoint(bool $count = false): string
     {
         $endpoint = $this->endpoint;
@@ -1652,7 +1653,12 @@ class Builder
         return $endpoint;
     }
 
-    private function handleCache(string $endpoint)
+    /**
+     * @param string $endpoint
+     *
+     * @return string
+     */
+    private function handleCache(string $endpoint): string
     {
         $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
 
