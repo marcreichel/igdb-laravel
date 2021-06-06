@@ -1574,7 +1574,8 @@ class Builder
                         'Authorization' => 'Bearer ' . $accessToken,
                     ])
                     ->withBody($this->getQuery(), 'plain/text')
-                    ->post($endpoint);
+                    ->post($endpoint)
+                    ->throw();
 
                 if (!$response->ok()) {
                     return null;
