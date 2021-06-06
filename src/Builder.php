@@ -4,11 +4,7 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
 use Illuminate\Config\Repository;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Response;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -19,9 +15,6 @@ use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
-use MarcReichel\IGDBLaravel\Exceptions\ServiceException;
-use MarcReichel\IGDBLaravel\Exceptions\ServiceUnavailableException;
-use MarcReichel\IGDBLaravel\Exceptions\UnauthorizedException;
 use ReflectionClass;
 use ReflectionException;
 
