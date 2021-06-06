@@ -1,44 +1,52 @@
 {
-    "name": "marcreichel/igdb-laravel",
-    "description": "A Laravel wrapper for version 4 of the IGDB API (Apicalypse) including webhook handling",
-    "keywords": ["laravel", "api-wrapper", "igdb", "igdb-api", "apicalypse", "wrapper"],
-    "require": {
-        "php": "^7.3 | ^7.4 | ^8.0",
-        "laravel/framework": "^8.40.0",
-        "guzzlehttp/guzzle": "~6.0|~7.0",
-        "ext-json": "*"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.5.4",
-        "orchestra/testbench": "^6.0",
-        "nunomaduro/collision": "^5.3",
-        "roave/security-advisories": "dev-latest"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Marc Reichel",
-            "email": "mail@marcreichel.de"
-        }
-    ],
-    "scripts": {
-        "test": "./vendor/bin/testbench package:test"
-    },
-    "autoload": {
-        "psr-4": {
-            "MarcReichel\\IGDBLaravel\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "MarcReichel\\IGDBLaravel\\Tests\\": "tests"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "MarcReichel\\IGDBLaravel\\IGDBLaravelServiceProvider"
-            ]
-        }
+  "name": "marcreichel/igdb-laravel",
+  "description": "A Laravel wrapper for version 4 of the IGDB API (Apicalypse) including webhook handling",
+  "keywords": [
+    "laravel",
+    "api-wrapper",
+    "igdb",
+    "igdb-api",
+    "apicalypse",
+    "wrapper"
+  ],
+  "type": "library",
+  "require": {
+    "php": "^7.3 | ^7.4 | ^8.0",
+    "laravel/framework": "^8.40.0",
+    "guzzlehttp/guzzle": "~6.0|~7.0",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5.4",
+    "orchestra/testbench": "^6.0",
+    "nunomaduro/collision": "^5.3",
+    "roave/security-advisories": "dev-latest"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marc Reichel",
+      "email": "mail@marcreichel.de"
     }
+  ],
+  "scripts": {
+    "test": "./vendor/bin/testbench package:test"
+  },
+  "autoload": {
+    "psr-4": {
+      "MarcReichel\\IGDBLaravel\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MarcReichel\\IGDBLaravel\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MarcReichel\\IGDBLaravel\\IGDBLaravelServiceProvider"
+      ]
+    }
+  }
 }
