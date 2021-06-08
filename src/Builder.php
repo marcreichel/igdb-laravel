@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use JsonException;
-use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
@@ -1494,7 +1493,7 @@ class Builder
      * @param int $id
      *
      * @return mixed|string
-     * @throws MissingEndpointException|AuthenticationException|ReflectionException|JsonException
+     * @throws MissingEndpointException|ReflectionException|JsonException
      */
     public function find(int $id)
     {
@@ -1505,7 +1504,7 @@ class Builder
      * @param int $id
      *
      * @return mixed
-     * @throws MissingEndpointException|ModelNotFoundException|AuthenticationException|ReflectionException|JsonException
+     * @throws MissingEndpointException|ModelNotFoundException|ReflectionException|JsonException
      */
     public function findOrFail(int $id)
     {
@@ -1530,7 +1529,7 @@ class Builder
      * Execute the query and get the first result.
      *
      * @return mixed
-     * @throws MissingEndpointException|AuthenticationException
+     * @throws MissingEndpointException
      */
     public function first()
     {
@@ -1542,7 +1541,7 @@ class Builder
     /**
      * @return mixed
      * @throws MissingEndpointException
-     * @throws ModelNotFoundException|AuthenticationException
+     * @throws ModelNotFoundException
      */
     public function firstOrFail()
     {

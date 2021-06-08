@@ -6,7 +6,6 @@ use Error;
 use ArrayAccess;
 use Carbon\Carbon;
 use BadMethodCallException;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -20,6 +19,7 @@ use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookUrlException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class Model
@@ -95,6 +95,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      * Model constructor.
      *
      * @param array $properties
+     *
+     * @throws ReflectionException
      */
     public function __construct(array $properties = [])
     {
@@ -129,44 +131,44 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param mixed $field
+     * @param mixed $offset
      *
      * @return bool
      */
-    public function offsetExists($field): bool
+    public function offsetExists($offset): bool
     {
-        return isset($this->attributes[$field]) || isset($this->relations[$field]);
+        return isset($this->attributes[$offset]) || isset($this->relations[$offset]);
     }
 
     /**
-     * @param mixed $field
+     * @param mixed $offset
      *
      * @return mixed
      */
-    public function offsetGet($field)
+    public function offsetGet($offset)
     {
-        return $this->getAttribute($field);
+        return $this->getAttribute($offset);
     }
 
     /**
-     * @param mixed $field
+     * @param mixed $offset
      * @param mixed $value
      *
      * @return void
      */
-    public function offsetSet($field, $value): void
+    public function offsetSet($offset, $value): void
     {
-        $this->attributes[$field] = $value;
+        $this->attributes[$offset] = $value;
     }
 
     /**
-     * @param mixed $field
+     * @param mixed $offset
      *
      * @return void
      */
-    public function offsetUnset($field): void
+    public function offsetUnset($offset): void
     {
-        unset($this->attributes[$field], $this->relations[$field]);
+        unset($this->attributes[$offset], $this->relations[$offset]);
     }
 
     /**
@@ -194,6 +196,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      * @param mixed $parameters
      *
      * @return mixed
+     * @throws ReflectionException
      */
     public static function __callStatic($method, $parameters)
     {
@@ -268,6 +271,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
 
     /**
      * @return Builder
+     * @throws ReflectionException
      */
     public function newQuery(): Builder
     {
@@ -278,6 +282,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      * @param mixed $fields
      *
      * @return Model
+     * @throws ReflectionException
      */
     public function getInstance($fields): Model
     {
@@ -430,7 +435,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return Webhook
      * @throws AuthenticationException
-     * @throws GuzzleException|WebhookSecretMissingException|InvalidWebhookMethodException|InvalidWebhookUrlException
+     * @throws WebhookSecretMissingException|InvalidWebhookMethodException|InvalidWebhookUrlException
      */
     public static function createWebhook(string $url, string $method): Webhook
     {
