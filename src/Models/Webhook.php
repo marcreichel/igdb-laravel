@@ -3,12 +3,11 @@
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Carbon\Carbon;
-use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\ApiHelper;
+use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
@@ -16,7 +15,7 @@ use ReflectionClass;
 
 class Webhook
 {
-    protected $client;
+    private $client;
 
     public $id;
     public $url;
@@ -33,45 +32,60 @@ class Webhook
      */
     public function __construct(...$parameters)
     {
-        $this->client = new Client([
+        $this->client = Http::withOptions([
             'base_uri' => ApiHelper::IGDB_BASE_URI,
-            'headers' => [
+        ])
+            ->withHeaders([
                 'Accept' => 'application/json',
                 'Client-ID' => config('igdb.credentials.client_id'),
                 'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
-            ],
-        ]);
+            ]);
 
         $this->fill(...$parameters);
     }
 
     /**
      * @return \Illuminate\Support\Collection
-     * @throws GuzzleException
      */
     public static function all(): \Illuminate\Support\Collection
     {
         $self = new static;
-        return $self->mapToModel(collect(json_decode($self->client->get('webhooks')->getBody(), true)));
+        $response = $self->client->get('webhooks');
+        if ($response->failed()) {
+            return new \Illuminate\Support\Collection();
+        }
+        return $self->mapToModel(collect($response->json()));
     }
 
     /**
-     * @throws GuzzleException
+     * @param int $id
+     *
+     * @return mixed
      */
-    public static function find(int $id): self
+    public static function find(int $id)
     {
         $self = new static;
-        return $self->mapToModel(collect(json_decode($self->client->get('webhooks/' . $id)->getBody(), true)))->first();
+        $response = $self->client->get('webhooks/' . $id);
+        if ($response->failed()) {
+            return null;
+        }
+        return $self->mapToModel(collect($response->json()))->first();
     }
 
     /**
-     * @throws GuzzleException
+     * @return mixed
      */
-    public function delete(): self
+    public function delete()
     {
         $self = new static;
-        return $self->mapToModel(collect(json_decode($self->client->delete('webhooks/' . $this->id)->getBody(),
-            true)))->first();
+        if (!$this->id) {
+            return false;
+        }
+        $response = $self->client->delete('webhooks/' . $this->id)->json();
+        if (!$response) {
+            return false;
+        }
+        return $self->mapToModel(collect([$response]))->first();
     }
 
     /**
@@ -129,6 +143,37 @@ class Webhook
         }
 
         throw new InvalidWebhookSecretException();
+    }
+
+    public function getModel()
+    {
+        $reflectionCategory = new ReflectionClass(Category::class);
+        $categories = collect($reflectionCategory->getConstants())->flip();
+
+        return $categories[$this->category] ?? null;
+    }
+
+    public function getMethod()
+    {
+        $reflectionMethod = new ReflectionClass(Method::class);
+        $methods = collect($reflectionMethod->getConstants())->values();
+
+        return $methods[$this->sub_category] ?? null;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'url' => $this->url,
+            'category' => $this->getModel() ?? $this->category,
+            'sub_category' => $this->getMethod() ?? $this->sub_category,
+            'active' => $this->active,
+            'number_of_retries' => $this->number_of_retries,
+            'secret' => $this->secret,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 
     private function fill(...$parameters): void
