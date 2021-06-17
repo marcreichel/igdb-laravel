@@ -44,7 +44,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', '=', 'Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite";');
         });
 
         $this->igdb->where('first_release_date', '>=', 1546297200)->get();
@@ -60,7 +60,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', 'Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite";');
         });
     }
 
@@ -70,7 +70,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', 'Fortnite')->where('name', 'Borderlands 2')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite & name = Borderlands 2;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite" & name = "Borderlands 2";');
         });
     }
 
@@ -80,7 +80,7 @@ class BuilderTest extends TestCase
         $this->igdb->where('name', 'Fortnite')->orWhere('name', 'Borderlands 2')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite | name = Borderlands 2;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite" | name = "Borderlands 2";');
         });
     }
 
@@ -346,7 +346,7 @@ class BuilderTest extends TestCase
             })->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite" | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);');
         });
     }
 
@@ -356,7 +356,7 @@ class BuilderTest extends TestCase
         $this->igdb->where([['name', 'Fortnite'], ['name', 'Borderlands 2']])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where (name = Fortnite & name = Borderlands 2);');
+            return $this->isApiCall($request, 'games', 'where (name = "Fortnite" & name = "Borderlands 2");');
         });
     }
 

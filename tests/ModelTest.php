@@ -35,7 +35,7 @@ class ModelTest extends TestCase
         Game::where('name', '=', 'Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite";');
         });
 
         Game::where('first_release_date', '>=', 1546297200)->get();
@@ -51,7 +51,7 @@ class ModelTest extends TestCase
         Game::where('name', 'Fortnite')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite";');
         });
     }
 
@@ -61,7 +61,7 @@ class ModelTest extends TestCase
         Game::where('name', 'Fortnite')->where('name', 'Borderlands 2')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite & name = Borderlands 2;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite" & name = "Borderlands 2";');
         });
     }
 
@@ -71,7 +71,7 @@ class ModelTest extends TestCase
         Game::where('name', 'Fortnite')->orWhere('name', 'Borderlands 2')->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite | name = Borderlands 2;');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite" | name = "Borderlands 2";');
         });
     }
 
@@ -337,7 +337,7 @@ class ModelTest extends TestCase
             })->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where name = Fortnite | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);');
+            return $this->isApiCall($request, 'games', 'where name = "Fortnite" | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);');
         });
     }
 
@@ -347,7 +347,7 @@ class ModelTest extends TestCase
         Game::where([['name', 'Fortnite'], ['name', 'Borderlands 2']])->get();
 
         Http::assertSent(function (Request $request) {
-            return $this->isApiCall($request, 'games', 'where (name = Fortnite & name = Borderlands 2);');
+            return $this->isApiCall($request, 'games', 'where (name = "Fortnite" & name = "Borderlands 2");');
         });
     }
 
