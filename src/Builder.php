@@ -276,7 +276,7 @@ class Builder
             } elseif ($operator === 'not ilike') {
                 $this->whereNotLike($key, $value, false, $boolean);
             } else {
-                $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $value);
+                $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' "' . $value . '"');
                 $this->query->put('where', $where);
             }
         } else {
