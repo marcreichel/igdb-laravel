@@ -84,7 +84,7 @@ class Builder
     public function select($fields): self
     {
         $fields = is_array($fields) ? $fields : func_get_args();
-        $collection = collect(is_array($fields) ? $fields : func_get_args());
+        $collection = collect($fields);
 
         if ($collection->isEmpty()) {
             $collection->push('*');
@@ -98,7 +98,7 @@ class Builder
             $collection->push('*');
         }
 
-        $this->query->put('fields', $fields);
+        $this->query->put('fields', $collection);
 
         return $this;
     }
