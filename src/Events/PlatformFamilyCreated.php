@@ -14,14 +14,15 @@ class PlatformFamilyCreated
     /**
      * @var PlatformFamily
      */
-    public $platformFamily;
+    public $data;
 
     /**
-     * @param PlatformFamily $platformFamily
+     * @param PlatformFamily $data
+     *
      * @return void
      */
-    public function __construct(PlatformFamily $platformFamily)
+    public function __construct(PlatformFamily $data)
     {
-        $this->platformFamily = $platformFamily;
+        $this->data = $data;
     }
 }

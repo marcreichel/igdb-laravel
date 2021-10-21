@@ -14,14 +14,15 @@ class CoverCreated
     /**
      * @var Cover
      */
-    public $cover;
+    public $data;
 
     /**
-     * @param Cover $cover
+     * @param Cover $data
+     *
      * @return void
      */
-    public function __construct(Cover $cover)
+    public function __construct(Cover $data)
     {
-        $this->cover = $cover;
+        $this->data = $data;
     }
 }

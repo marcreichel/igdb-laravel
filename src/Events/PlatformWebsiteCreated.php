@@ -14,14 +14,15 @@ class PlatformWebsiteCreated
     /**
      * @var PlatformWebsite
      */
-    public $platformWebsite;
+    public $data;
 
     /**
-     * @param PlatformWebsite $platformWebsite
+     * @param PlatformWebsite $data
+     *
      * @return void
      */
-    public function __construct(PlatformWebsite $platformWebsite)
+    public function __construct(PlatformWebsite $data)
     {
-        $this->platformWebsite = $platformWebsite;
+        $this->data = $data;
     }
 }

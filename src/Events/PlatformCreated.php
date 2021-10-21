@@ -14,14 +14,15 @@ class PlatformCreated
     /**
      * @var Platform
      */
-    public $platform;
+    public $data;
 
     /**
-     * @param Platform $platform
+     * @param Platform $data
+     *
      * @return void
      */
-    public function __construct(Platform $platform)
+    public function __construct(Platform $data)
     {
-        $this->platform = $platform;
+        $this->data = $data;
     }
 }

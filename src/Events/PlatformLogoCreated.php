@@ -14,14 +14,15 @@ class PlatformLogoCreated
     /**
      * @var PlatformLogo
      */
-    public $platformLogo;
+    public $data;
 
     /**
-     * @param PlatformLogo $platformLogo
+     * @param PlatformLogo $data
+     *
      * @return void
      */
-    public function __construct(PlatformLogo $platformLogo)
+    public function __construct(PlatformLogo $data)
     {
-        $this->platformLogo = $platformLogo;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class InvolvedCompanyCreated
     /**
      * @var InvolvedCompany
      */
-    public $involvedCompany;
+    public $data;
 
     /**
-     * @param InvolvedCompany $involvedCompany
+     * @param InvolvedCompany $data
+     *
      * @return void
      */
-    public function __construct(InvolvedCompany $involvedCompany)
+    public function __construct(InvolvedCompany $data)
     {
-        $this->involvedCompany = $involvedCompany;
+        $this->data = $data;
     }
 }

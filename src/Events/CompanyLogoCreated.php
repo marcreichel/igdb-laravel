@@ -14,14 +14,15 @@ class CompanyLogoCreated
     /**
      * @var CompanyLogo
      */
-    public $companyLogo;
+    public $data;
 
     /**
-     * @param CompanyLogo $companyLogo
+     * @param CompanyLogo $data
+     *
      * @return void
      */
-    public function __construct(CompanyLogo $companyLogo)
+    public function __construct(CompanyLogo $data)
     {
-        $this->companyLogo = $companyLogo;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class CharacterCreated
     /**
      * @var Character
      */
-    public $character;
+    public $data;
 
     /**
-     * @param Character $character
+     * @param Character $data
+     *
      * @return void
      */
-    public function __construct(Character $character)
+    public function __construct(Character $data)
     {
-        $this->character = $character;
+        $this->data = $data;
     }
 }

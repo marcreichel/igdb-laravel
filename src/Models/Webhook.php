@@ -3,9 +3,12 @@
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Carbon\Carbon;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use JetBrains\PhpStorm\ArrayShape;
+use JsonException;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
@@ -15,17 +18,17 @@ use ReflectionClass;
 
 class Webhook
 {
-    private $client;
+    private PendingRequest $client;
 
-    public $id;
-    public $url;
-    public $category;
-    public $sub_category;
-    public $active;
-    public $number_of_retries;
-    public $secret;
-    public $created_at;
-    public $updated_at;
+    public int $id;
+    public string $url;
+    public int $category;
+    public int $sub_category;
+    public bool $active;
+    public int $number_of_retries;
+    public string $secret;
+    public string $created_at;
+    public string $updated_at;
 
     /**
      * @throws AuthenticationException
@@ -62,7 +65,7 @@ class Webhook
      *
      * @return mixed
      */
-    public static function find(int $id)
+    public static function find(int $id): mixed
     {
         $self = new static;
         $response = $self->client->get('webhooks/' . $id);
@@ -75,7 +78,7 @@ class Webhook
     /**
      * @return mixed
      */
-    public function delete()
+    public function delete(): mixed
     {
         $self = new static;
         if (!$this->id) {
@@ -89,15 +92,15 @@ class Webhook
     }
 
     /**
-     * @throws InvalidWebhookSecretException
+     * @throws InvalidWebhookSecretException|JsonException
      */
     public static function handle(Request $request)
     {
         self::validate($request);
 
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        $endpoint = $request->get('x_igdb_endpoint');
+        $endpoint = $request->route('model');
 
         if (!$endpoint) {
             return $data;
@@ -110,7 +113,7 @@ class Webhook
             return $data;
         }
 
-        $method = $request->get('x_igdb_method');
+        $method = $request->route('method');
         $entity = new $fullClassName($data);
 
         $reflectionClass = new ReflectionClass(Method::class);
@@ -161,6 +164,14 @@ class Webhook
         return $methods[$this->sub_category] ?? null;
     }
 
+    #[ArrayShape([
+        'id' => "int",
+        'url' => "string",
+        'category' => "int|mixed",
+        'sub_category' => "int|mixed",
+        'number_of_retries' => "int",
+        'active' => "bool",
+    ])]
     public function toArray(): array
     {
         return [
@@ -168,11 +179,8 @@ class Webhook
             'url' => $this->url,
             'category' => $this->getModel() ?? $this->category,
             'sub_category' => $this->getMethod() ?? $this->sub_category,
-            'active' => $this->active,
             'number_of_retries' => $this->number_of_retries,
-            'secret' => $this->secret,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'active' => $this->active,
         ];
     }
 

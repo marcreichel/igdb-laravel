@@ -20,9 +20,9 @@ class TestCase extends Orchestra
 
         Event::fake();
 
-        Route::post('webhook/handle', function (\Illuminate\Http\Request $request) {
+        Route::post('igdb-webhook/handle/{model}/{method}', function (\Illuminate\Http\Request $request) {
             return Webhook::handle($request);
-        });
+        })->name('handle-igdb-webhook');
 
         Http::fake([
             '*/webhooks' => function (Request $request) {

@@ -14,14 +14,15 @@ class GameVersionCreated
     /**
      * @var GameVersion
      */
-    public $gameVersion;
+    public $data;
 
     /**
-     * @param GameVersion $gameVersion
+     * @param GameVersion $data
+     *
      * @return void
      */
-    public function __construct(GameVersion $gameVersion)
+    public function __construct(GameVersion $data)
     {
-        $this->gameVersion = $gameVersion;
+        $this->data = $data;
     }
 }

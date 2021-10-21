@@ -14,14 +14,15 @@ class CompanyWebsiteCreated
     /**
      * @var CompanyWebsite
      */
-    public $companyWebsite;
+    public $data;
 
     /**
-     * @param CompanyWebsite $companyWebsite
+     * @param CompanyWebsite $data
+     *
      * @return void
      */
-    public function __construct(CompanyWebsite $companyWebsite)
+    public function __construct(CompanyWebsite $data)
     {
-        $this->companyWebsite = $companyWebsite;
+        $this->data = $data;
     }
 }

@@ -5,8 +5,12 @@ namespace MarcReichel\IGDBLaravel\Tests;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Events\GameCreated;
+use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
+use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\Company;
 use MarcReichel\IGDBLaravel\Models\Game;
@@ -16,38 +20,47 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_generate_webhook(): void
     {
-        $webhook = Game::createWebhook('http://localhost/webhook/handle', 'create');
+        try {
+            $webhook = Game::createWebhook(Method::CREATE);
 
-        Http::assertSent(function (Request $request) {
-            return $this->isWebhookCall($request);
-        });
+            Http::assertSent(function (Request $request) {
+                return $this->isWebhookCall($request);
+            });
 
-        self::assertEquals(0, $webhook->sub_category);
-        self::assertEquals('http://localhost/webhook/handle?x_igdb_endpoint=games&x_igdb_method=create', $webhook->url);
+            self::assertEquals(0, $webhook->sub_category);
+            self::assertEquals('http://localhost/igdb-webhook/handle/games/create', $webhook->url);
+        } catch (AuthenticationException | InvalidWebhookMethodException | WebhookSecretMissingException $e) {
+        }
 
-        $webhook = Company::createWebhook('http://localhost/webhook/handle', 'update');
+        try {
+            $webhook = Company::createWebhook(Method::UPDATE);
 
-        Http::assertSent(function (Request $request) {
-            return $this->isWebhookCall($request);
-        });
+            Http::assertSent(function (Request $request) {
+                return $this->isWebhookCall($request);
+            });
 
-        self::assertEquals(2, $webhook->sub_category);
-        self::assertEquals('http://localhost/webhook/handle?x_igdb_endpoint=companies&x_igdb_method=update', $webhook->url);
+            self::assertEquals(2, $webhook->sub_category);
+            self::assertEquals('http://localhost/igdb-webhook/handle/companies/update', $webhook->url);
+        } catch (AuthenticationException | InvalidWebhookMethodException | WebhookSecretMissingException $e) {
+        }
 
-        $webhook = Artwork::createWebhook('http://localhost/webhook/handle', 'delete');
+        try {
+            $webhook = Artwork::createWebhook(Method::DELETE);
 
-        Http::assertSent(function (Request $request) {
-            return $this->isWebhookCall($request);
-        });
+            Http::assertSent(function (Request $request) {
+                return $this->isWebhookCall($request);
+            });
 
-        self::assertEquals(1, $webhook->sub_category);
-        self::assertEquals('http://localhost/webhook/handle?x_igdb_endpoint=artworks&x_igdb_method=delete', $webhook->url);
+            self::assertEquals(1, $webhook->sub_category);
+            self::assertEquals('http://localhost/igdb-webhook/handle/artworks/delete', $webhook->url);
+        } catch (AuthenticationException | InvalidWebhookMethodException | WebhookSecretMissingException $e) {
+        }
     }
 
     /** @test */
     public function it_should_receive_webhook_calls_and_trigger_event(): void
     {
-        $url = 'webhook/handle?x_igdb_endpoint=games&x_igdb_method=create';
+        $url = 'igdb-webhook/handle/games/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -65,7 +78,7 @@ class WebhookTest extends TestCase
         $this->withoutExceptionHandling();
         $this->expectException(InvalidWebhookSecretException::class);
 
-        $url = 'webhook/handle?x_igdb_endpoint=games&x_igdb_method=create';
+        $url = 'igdb-webhook/handle/games/create';
 
         $this->withHeaders([
             'X-Secret' => 'foobar',

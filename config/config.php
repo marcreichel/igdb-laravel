@@ -18,6 +18,11 @@ return [
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
 
     /*
+     * Path where the webhooks should be handled.
+     */
+    'webhook_path' => 'igdb-webhook/handle',
+
+    /*
      * The webhook secret.
      *
      * This needs to be a string of your choice in order to use the webhook

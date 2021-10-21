@@ -14,14 +14,15 @@ class GameEngineCreated
     /**
      * @var GameEngine
      */
-    public $gameEngine;
+    public $data;
 
     /**
-     * @param GameEngine $gameEngine
+     * @param GameEngine $data
+     *
      * @return void
      */
-    public function __construct(GameEngine $gameEngine)
+    public function __construct(GameEngine $data)
     {
-        $this->gameEngine = $gameEngine;
+        $this->data = $data;
     }
 }

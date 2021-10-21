@@ -14,14 +14,15 @@ class AgeRatingContentDescriptionCreated
     /**
      * @var AgeRatingContentDescription
      */
-    public $ageRatingContentDescription;
+    public $data;
 
     /**
-     * @param AgeRatingContentDescription $ageRatingContentDescription
+     * @param AgeRatingContentDescription $data
+     *
      * @return void
      */
-    public function __construct(AgeRatingContentDescription $ageRatingContentDescription)
+    public function __construct(AgeRatingContentDescription $data)
     {
-        $this->ageRatingContentDescription = $ageRatingContentDescription;
+        $this->data = $data;
     }
 }

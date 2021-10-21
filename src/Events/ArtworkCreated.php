@@ -14,14 +14,15 @@ class ArtworkCreated
     /**
      * @var Artwork
      */
-    public $artwork;
+    public $data;
 
     /**
-     * @param Artwork $artwork
+     * @param Artwork $data
+     *
      * @return void
      */
-    public function __construct(Artwork $artwork)
+    public function __construct(Artwork $data)
     {
-        $this->artwork = $artwork;
+        $this->data = $data;
     }
 }

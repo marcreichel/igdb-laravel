@@ -14,14 +14,15 @@ class GameEngineLogoCreated
     /**
      * @var GameEngineLogo
      */
-    public $gameEngineLogo;
+    public $data;
 
     /**
-     * @param GameEngineLogo $gameEngineLogo
+     * @param GameEngineLogo $data
+     *
      * @return void
      */
-    public function __construct(GameEngineLogo $gameEngineLogo)
+    public function __construct(GameEngineLogo $data)
     {
-        $this->gameEngineLogo = $gameEngineLogo;
+        $this->data = $data;
     }
 }

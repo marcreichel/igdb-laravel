@@ -16,7 +16,6 @@ use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
-use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookUrlException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use ReflectionClass;
 use ReflectionException;
@@ -84,12 +83,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
 {
     use HasAttributes, HasRelationships;
 
-    private static $instance;
+    private static Model $instance;
 
-    public $identifier;
-    public $builder;
+    public string|null $identifier;
+    public Builder $builder;
 
-    protected $endpoint;
+    protected string $endpoint;
 
     /**
      * Model constructor.
@@ -125,7 +124,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return void
      */
-    public function __set(string $field, $value): void
+    public function __set(string $field, mixed $value): void
     {
         $this->attributes[$field] = $value;
     }
@@ -145,7 +144,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->getAttribute($offset);
     }
@@ -176,7 +175,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return bool
      */
-    public function __isset($field): bool
+    public function __isset(mixed $field): bool
     {
         return $this->offsetExists($field);
     }
@@ -186,7 +185,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return void
      */
-    public function __unset($field): void
+    public function __unset(mixed $field): void
     {
         $this->offsetUnset($field);
     }
@@ -198,7 +197,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      * @return mixed
      * @throws ReflectionException
      */
-    public static function __callStatic($method, $parameters)
+    public static function __callStatic(mixed $method, mixed $parameters)
     {
         $that = new static;
         return $that->forwardCallTo($that->newQuery(), $method, $parameters);
@@ -260,7 +259,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return mixed
      */
-    public function forwardCallTo($object, $method, $parameters)
+    public function forwardCallTo(mixed $object, mixed $method, mixed $parameters): mixed
     {
         try {
             return $object->$method(...$parameters);
@@ -284,7 +283,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      * @return Model
      * @throws ReflectionException
      */
-    public function getInstance($fields): Model
+    public function getInstance(mixed $fields): Model
     {
         if (is_null(self::$instance)) {
             $model = new static($fields);
@@ -299,7 +298,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return mixed
      */
-    public function getAttribute($field)
+    public function getAttribute(mixed $field): mixed
     {
         return collect($this->attributes)->merge($this->relations)->get($field);
     }
@@ -310,7 +309,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return mixed
      */
-    private function mapToModel($property, $value)
+    private function mapToModel(mixed $property, mixed $value): mixed
     {
         $class = $this->getClassNameForProperty($property);
 
@@ -342,9 +341,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
     /**
      * @param mixed $property
      *
-     * @return bool|mixed|string
+     * @return bool|null|string
      */
-    protected function getClassNameForProperty($property)
+    protected function getClassNameForProperty(mixed $property): bool|null|string
     {
         if (collect($this->casts)->has($property)) {
             $class = collect($this->casts)->get($property);
@@ -374,7 +373,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      *
      * @return array
      */
-    protected function getProperties($value): array
+    protected function getProperties(mixed $value): array
     {
         return collect($value)->toArray();
     }
@@ -384,11 +383,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      */
     protected function setEndpoint(): void
     {
-        if (!$this->endpoint) {
-            $class = class_basename(get_class($this));
+        $class = class_basename(get_class($this));
 
-            $this->endpoint = Str::snake(Str::plural($class));
-        }
+        $this->endpoint = Str::snake(Str::plural($class));
     }
 
     /**
@@ -430,24 +427,28 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param string $url
      * @param string $method
+     * @param array  $parameters
      *
      * @return Webhook
      * @throws AuthenticationException
-     * @throws WebhookSecretMissingException|InvalidWebhookMethodException|InvalidWebhookUrlException
+     * @throws InvalidWebhookMethodException
+     * @throws WebhookSecretMissingException
      */
-    public static function createWebhook(string $url, string $method): Webhook
+    public static function createWebhook(string $method, array $parameters = []): Webhook
     {
         if (!config('igdb.webhook_secret')) {
             throw new WebhookSecretMissingException();
         }
 
-        $parsedUrl = parse_url($url);
+        $self = (new static);
 
-        if (!$parsedUrl) {
-            throw new InvalidWebhookUrlException($url);
-        }
+        $routeParameters = array_merge($parameters, [
+            'model' => $self->getEndpoint(),
+            'method' => $method,
+        ]);
+
+        $url = route('handle-igdb-webhook', $routeParameters);
 
         $reflectionClass = new ReflectionClass(Method::class);
         $allowedMethods = array_values($reflectionClass->getConstants());
@@ -455,8 +456,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
         if (!in_array($method, $allowedMethods, true)) {
             throw new InvalidWebhookMethodException();
         }
-
-        $self = (new static);
 
         $endpoint = $self->endpoint . '/webhooks';
 
@@ -469,19 +468,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
         ])
         ->asForm();
 
-        parse_str($parsedUrl['query'] ?? '', $queryParams);
-
-        $collection = collect($queryParams);
-
-        $collection->put('x_igdb_endpoint', $self->getEndpoint());
-        $collection->put('x_igdb_method', $method);
-
-        $modifiedQueryString = http_build_query($collection->toArray());
-        $newUrl = ($parsedUrl['scheme'] ?? 'http') . '://' . $parsedUrl['host'] . $parsedUrl['path']
-            . ($modifiedQueryString ? '?' . $modifiedQueryString : '');
-
         return new Webhook(...$client->post($endpoint, [
-            'url' => $newUrl,
+            'url' => $url,
             'method' => $method,
             'secret' => config('igdb.webhook_secret'),
         ])->json());

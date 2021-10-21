@@ -14,14 +14,15 @@ class PlatformVersionReleaseDateCreated
     /**
      * @var PlatformVersionReleaseDate
      */
-    public $platformVersionReleaseDate;
+    public $data;
 
     /**
-     * @param PlatformVersionReleaseDate $platformVersionReleaseDate
+     * @param PlatformVersionReleaseDate $data
+     *
      * @return void
      */
-    public function __construct(PlatformVersionReleaseDate $platformVersionReleaseDate)
+    public function __construct(PlatformVersionReleaseDate $data)
     {
-        $this->platformVersionReleaseDate = $platformVersionReleaseDate;
+        $this->data = $data;
     }
 }

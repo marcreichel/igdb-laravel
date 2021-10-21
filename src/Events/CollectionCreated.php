@@ -14,14 +14,15 @@ class CollectionCreated
     /**
      * @var Collection
      */
-    public $collection;
+    public $data;
 
     /**
-     * @param Collection $collection
+     * @param Collection $data
+     *
      * @return void
      */
-    public function __construct(Collection $collection)
+    public function __construct(Collection $data)
     {
-        $this->collection = $collection;
+        $this->data = $data;
     }
 }

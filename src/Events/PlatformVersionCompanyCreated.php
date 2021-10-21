@@ -14,14 +14,15 @@ class PlatformVersionCompanyCreated
     /**
      * @var PlatformVersionCompany
      */
-    public $platformVersionCompany;
+    public $data;
 
     /**
-     * @param PlatformVersionCompany $platformVersionCompany
+     * @param PlatformVersionCompany $data
+     *
      * @return void
      */
-    public function __construct(PlatformVersionCompany $platformVersionCompany)
+    public function __construct(PlatformVersionCompany $data)
     {
-        $this->platformVersionCompany = $platformVersionCompany;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class PlayerPerspectiveCreated
     /**
      * @var PlayerPerspective
      */
-    public $playerPerspective;
+    public $data;
 
     /**
-     * @param PlayerPerspective $playerPerspective
+     * @param PlayerPerspective $data
+     *
      * @return void
      */
-    public function __construct(PlayerPerspective $playerPerspective)
+    public function __construct(PlayerPerspective $data)
     {
-        $this->playerPerspective = $playerPerspective;
+        $this->data = $data;
     }
 }

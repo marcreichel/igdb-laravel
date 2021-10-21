@@ -14,14 +14,15 @@ class ReleaseDateCreated
     /**
      * @var ReleaseDate
      */
-    public $releaseDate;
+    public $data;
 
     /**
-     * @param ReleaseDate $releaseDate
+     * @param ReleaseDate $data
+     *
      * @return void
      */
-    public function __construct(ReleaseDate $releaseDate)
+    public function __construct(ReleaseDate $data)
     {
-        $this->releaseDate = $releaseDate;
+        $this->data = $data;
     }
 }

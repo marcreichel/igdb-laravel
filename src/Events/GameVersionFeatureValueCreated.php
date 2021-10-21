@@ -14,14 +14,15 @@ class GameVersionFeatureValueCreated
     /**
      * @var GameVersionFeatureValue
      */
-    public $gameVersionFeatureValue;
+    public $data;
 
     /**
-     * @param GameVersionFeatureValue $gameVersionFeatureValue
+     * @param GameVersionFeatureValue $data
+     *
      * @return void
      */
-    public function __construct(GameVersionFeatureValue $gameVersionFeatureValue)
+    public function __construct(GameVersionFeatureValue $data)
     {
-        $this->gameVersionFeatureValue = $gameVersionFeatureValue;
+        $this->data = $data;
     }
 }

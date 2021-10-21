@@ -14,14 +14,15 @@ class AlternativeNameCreated
     /**
      * @var AlternativeName
      */
-    public $alternativeName;
+    public $data;
 
     /**
-     * @param AlternativeName $alternativeName
+     * @param AlternativeName $data
+     *
      * @return void
      */
-    public function __construct(AlternativeName $alternativeName)
+    public function __construct(AlternativeName $data)
     {
-        $this->alternativeName = $alternativeName;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class GameCreated
     /**
      * @var Game
      */
-    public $game;
+    public $data;
 
     /**
-     * @param Game $game
+     * @param Game $data
+     *
      * @return void
      */
-    public function __construct(Game $game)
+    public function __construct(Game $data)
     {
-        $this->game = $game;
+        $this->data = $data;
     }
 }

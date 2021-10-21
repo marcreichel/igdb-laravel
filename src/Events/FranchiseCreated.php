@@ -14,14 +14,15 @@ class FranchiseCreated
     /**
      * @var Franchise
      */
-    public $franchise;
+    public $data;
 
     /**
-     * @param Franchise $franchise
+     * @param Franchise $data
+     *
      * @return void
      */
-    public function __construct(Franchise $franchise)
+    public function __construct(Franchise $data)
     {
-        $this->franchise = $franchise;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class GameVideoCreated
     /**
      * @var GameVideo
      */
-    public $gameVideo;
+    public $data;
 
     /**
-     * @param GameVideo $gameVideo
+     * @param GameVideo $data
+     *
      * @return void
      */
-    public function __construct(GameVideo $gameVideo)
+    public function __construct(GameVideo $data)
     {
-        $this->gameVideo = $gameVideo;
+        $this->data = $data;
     }
 }

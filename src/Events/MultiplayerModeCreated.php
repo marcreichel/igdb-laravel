@@ -14,14 +14,15 @@ class MultiplayerModeCreated
     /**
      * @var MultiplayerMode
      */
-    public $multiplayerMode;
+    public $data;
 
     /**
-     * @param MultiplayerMode $multiplayerMode
+     * @param MultiplayerMode $data
+     *
      * @return void
      */
-    public function __construct(MultiplayerMode $multiplayerMode)
+    public function __construct(MultiplayerMode $data)
     {
-        $this->multiplayerMode = $multiplayerMode;
+        $this->data = $data;
     }
 }

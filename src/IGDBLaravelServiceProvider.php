@@ -2,7 +2,12 @@
 
 namespace MarcReichel\IGDBLaravel;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use MarcReichel\IGDBLaravel\Console\CreateWebhook;
+use MarcReichel\IGDBLaravel\Console\DeleteWebhook;
+use MarcReichel\IGDBLaravel\Console\ListWebhooks;
+use MarcReichel\IGDBLaravel\Console\ReactivateWebhook;
 
 class IGDBLaravelServiceProvider extends ServiceProvider
 {
@@ -16,6 +21,19 @@ class IGDBLaravelServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/config.php' => config_path('igdb.php'),
         ]);
+
+        Route::group($this->routeConfiguration(), function () {
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CreateWebhook::class,
+                ListWebhooks::class,
+                DeleteWebhook::class,
+                ReactivateWebhook::class,
+            ]);
+        }
     }
 
     /**
@@ -28,5 +46,12 @@ class IGDBLaravelServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__ . '/../config/config.php', 'igdb'
         );
+    }
+
+    protected function routeConfiguration(): array
+    {
+        return [
+            'prefix' => config('igdb.webhook_path'),
+        ];
     }
 }

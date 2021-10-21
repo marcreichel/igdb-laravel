@@ -14,14 +14,15 @@ class GameModeCreated
     /**
      * @var GameMode
      */
-    public $gameMode;
+    public $data;
 
     /**
-     * @param GameMode $gameMode
+     * @param GameMode $data
+     *
      * @return void
      */
-    public function __construct(GameMode $gameMode)
+    public function __construct(GameMode $data)
     {
-        $this->gameMode = $gameMode;
+        $this->data = $data;
     }
 }

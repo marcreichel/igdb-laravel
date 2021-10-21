@@ -14,14 +14,15 @@ class ThemeCreated
     /**
      * @var Theme
      */
-    public $theme;
+    public $data;
 
     /**
-     * @param Theme $theme
+     * @param Theme $data
+     *
      * @return void
      */
-    public function __construct(Theme $theme)
+    public function __construct(Theme $data)
     {
-        $this->theme = $theme;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class CompanyCreated
     /**
      * @var Company
      */
-    public $company;
+    public $data;
 
     /**
-     * @param Company $company
+     * @param Company $data
+     *
      * @return void
      */
-    public function __construct(Company $company)
+    public function __construct(Company $data)
     {
-        $this->company = $company;
+        $this->data = $data;
     }
 }

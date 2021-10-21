@@ -14,14 +14,15 @@ class GenreCreated
     /**
      * @var Genre
      */
-    public $genre;
+    public $data;
 
     /**
-     * @param Genre $genre
+     * @param Genre $data
+     *
      * @return void
      */
-    public function __construct(Genre $genre)
+    public function __construct(Genre $data)
     {
-        $this->genre = $genre;
+        $this->data = $data;
     }
 }

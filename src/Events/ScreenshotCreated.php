@@ -14,14 +14,15 @@ class ScreenshotCreated
     /**
      * @var Screenshot
      */
-    public $screenshot;
+    public $data;
 
     /**
-     * @param Screenshot $screenshot
+     * @param Screenshot $data
+     *
      * @return void
      */
-    public function __construct(Screenshot $screenshot)
+    public function __construct(Screenshot $data)
     {
-        $this->screenshot = $screenshot;
+        $this->data = $data;
     }
 }

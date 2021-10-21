@@ -14,14 +14,15 @@ class KeywordCreated
     /**
      * @var Keyword
      */
-    public $keyword;
+    public $data;
 
     /**
-     * @param Keyword $keyword
+     * @param Keyword $data
+     *
      * @return void
      */
-    public function __construct(Keyword $keyword)
+    public function __construct(Keyword $data)
     {
-        $this->keyword = $keyword;
+        $this->data = $data;
     }
 }

@@ -14,14 +14,15 @@ class CharacterMugShotCreated
     /**
      * @var CharacterMugShot
      */
-    public $characterMugShot;
+    public $data;
 
     /**
-     * @param CharacterMugShot $characterMugShot
+     * @param CharacterMugShot $data
+     *
      * @return void
      */
-    public function __construct(CharacterMugShot $characterMugShot)
+    public function __construct(CharacterMugShot $data)
     {
-        $this->characterMugShot = $characterMugShot;
+        $this->data = $data;
     }
 }

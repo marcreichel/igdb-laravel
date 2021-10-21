@@ -14,14 +14,15 @@ class ExternalGameCreated
     /**
      * @var ExternalGame
      */
-    public $externalGame;
+    public $data;
 
     /**
-     * @param ExternalGame $externalGame
+     * @param ExternalGame $data
+     *
      * @return void
      */
-    public function __construct(ExternalGame $externalGame)
+    public function __construct(ExternalGame $data)
     {
-        $this->externalGame = $externalGame;
+        $this->data = $data;
     }
 }
