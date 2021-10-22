@@ -4,6 +4,7 @@ namespace MarcReichel\IGDBLaravel;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use JetBrains\PhpStorm\ArrayShape;
 use MarcReichel\IGDBLaravel\Console\CreateWebhook;
 use MarcReichel\IGDBLaravel\Console\DeleteWebhook;
 use MarcReichel\IGDBLaravel\Console\ListWebhooks;
@@ -48,6 +49,7 @@ class IGDBLaravelServiceProvider extends ServiceProvider
         );
     }
 
+    #[ArrayShape(['prefix' => "\Illuminate\Config\Repository|\Illuminate\Contracts\Foundation\Application|mixed"])]
     protected function routeConfiguration(): array
     {
         return [

@@ -14,7 +14,7 @@ class CompanyWebsiteCreated
     /**
      * @var CompanyWebsite
      */
-    public $data;
+    public CompanyWebsite $data;
 
     /**
      * @param CompanyWebsite $data

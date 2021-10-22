@@ -14,7 +14,7 @@ class PlatformWebsiteCreated
     /**
      * @var PlatformWebsite
      */
-    public $data;
+    public PlatformWebsite $data;
 
     /**
      * @param PlatformWebsite $data

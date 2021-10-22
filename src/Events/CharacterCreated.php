@@ -14,7 +14,7 @@ class CharacterCreated
     /**
      * @var Character
      */
-    public $data;
+    public Character $data;
 
     /**
      * @param Character $data

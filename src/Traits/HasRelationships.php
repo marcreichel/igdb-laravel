@@ -2,7 +2,9 @@
 
 namespace MarcReichel\IGDBLaravel\Traits;
 
+use Illuminate\Support\Collection;
+
 trait HasRelationships
 {
-    public $relations = [];
+    public Collection $relations;
 }

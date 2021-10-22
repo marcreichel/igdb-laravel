@@ -14,7 +14,7 @@ class GameEngineLogoCreated
     /**
      * @var GameEngineLogo
      */
-    public $data;
+    public GameEngineLogo $data;
 
     /**
      * @param GameEngineLogo $data

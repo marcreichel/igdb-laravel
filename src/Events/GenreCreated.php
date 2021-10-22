@@ -14,7 +14,7 @@ class GenreCreated
     /**
      * @var Genre
      */
-    public $data;
+    public Genre $data;
 
     /**
      * @param Genre $data

@@ -14,7 +14,7 @@ class KeywordCreated
     /**
      * @var Keyword
      */
-    public $data;
+    public Keyword $data;
 
     /**
      * @param Keyword $data

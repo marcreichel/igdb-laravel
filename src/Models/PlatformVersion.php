@@ -4,7 +4,7 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class PlatformVersion extends Model
 {
-    protected $casts = [
+    protected array $casts = [
         'companies' => PlatformVersionCompany::class,
         'main_manufacturer' => PlatformVersionCompany::class,
     ];

@@ -14,7 +14,7 @@ class CharacterMugShotCreated
     /**
      * @var CharacterMugShot
      */
-    public $data;
+    public CharacterMugShot $data;
 
     /**
      * @param CharacterMugShot $data

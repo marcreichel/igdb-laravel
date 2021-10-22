@@ -14,7 +14,7 @@ class MultiplayerModeCreated
     /**
      * @var MultiplayerMode
      */
-    public $data;
+    public MultiplayerMode $data;
 
     /**
      * @param MultiplayerMode $data

@@ -14,7 +14,7 @@ class GameEngineCreated
     /**
      * @var GameEngine
      */
-    public $data;
+    public GameEngine $data;
 
     /**
      * @param GameEngine $data

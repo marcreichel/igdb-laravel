@@ -14,7 +14,7 @@ class InvolvedCompanyCreated
     /**
      * @var InvolvedCompany
      */
-    public $data;
+    public InvolvedCompany $data;
 
     /**
      * @param InvolvedCompany $data

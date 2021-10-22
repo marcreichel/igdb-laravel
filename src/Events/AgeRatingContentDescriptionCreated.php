@@ -14,7 +14,7 @@ class AgeRatingContentDescriptionCreated
     /**
      * @var AgeRatingContentDescription
      */
-    public $data;
+    public AgeRatingContentDescription $data;
 
     /**
      * @param AgeRatingContentDescription $data

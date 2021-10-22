@@ -14,7 +14,7 @@ class CoverCreated
     /**
      * @var Cover
      */
-    public $data;
+    public Cover $data;
 
     /**
      * @param Cover $data

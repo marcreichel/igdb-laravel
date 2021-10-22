@@ -14,7 +14,7 @@ class PlatformLogoCreated
     /**
      * @var PlatformLogo
      */
-    public $data;
+    public PlatformLogo $data;
 
     /**
      * @param PlatformLogo $data

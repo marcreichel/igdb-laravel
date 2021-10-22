@@ -14,7 +14,7 @@ class CollectionCreated
     /**
      * @var Collection
      */
-    public $data;
+    public Collection $data;
 
     /**
      * @param Collection $data

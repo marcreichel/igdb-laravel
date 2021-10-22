@@ -14,7 +14,7 @@ class AlternativeNameCreated
     /**
      * @var AlternativeName
      */
-    public $data;
+    public AlternativeName $data;
 
     /**
      * @param AlternativeName $data

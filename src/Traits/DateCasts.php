@@ -9,7 +9,7 @@ trait DateCasts
      *
      * @var array
      */
-    public $dates = [
+    public array $dates = [
         'created_at' => 'date',
         'updated_at' => 'date',
         'change_date' => 'date',

@@ -14,7 +14,7 @@ class PlatformVersionCreated
     /**
      * @var PlatformVersion
      */
-    public $data;
+    public PlatformVersion $data;
 
     /**
      * @param PlatformVersion $data

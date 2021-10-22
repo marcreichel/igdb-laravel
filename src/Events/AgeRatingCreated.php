@@ -14,7 +14,7 @@ class AgeRatingCreated
     /**
      * @var AgeRating
      */
-    public $data;
+    public AgeRating $data;
 
     /**
      * @param AgeRating $data

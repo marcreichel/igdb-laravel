@@ -28,5 +28,5 @@ return [
      * This needs to be a string of your choice in order to use the webhook
      * functionality.
      */
-    'webhook_secret' => env('IGDB_WEBHOOK_SECRET', null),
+    'webhook_secret' => env('IGDB_WEBHOOK_SECRET'),
 ];

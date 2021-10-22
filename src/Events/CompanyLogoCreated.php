@@ -14,7 +14,7 @@ class CompanyLogoCreated
     /**
      * @var CompanyLogo
      */
-    public $data;
+    public CompanyLogo $data;
 
     /**
      * @param CompanyLogo $data

@@ -14,7 +14,7 @@ class ArtworkCreated
     /**
      * @var Artwork
      */
-    public $data;
+    public Artwork $data;
 
     /**
      * @param Artwork $data

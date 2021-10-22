@@ -14,7 +14,7 @@ class FranchiseCreated
     /**
      * @var Franchise
      */
-    public $data;
+    public Franchise $data;
 
     /**
      * @param Franchise $data

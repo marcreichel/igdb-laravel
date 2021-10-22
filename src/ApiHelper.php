@@ -41,7 +41,7 @@ class ApiHelper
 
                 $accessToken = (string)$response['access_token'];
             }
-        } catch (Exception $exception) {
+        } catch (Exception) {
             throw new AuthenticationException('Access Token could not be retrieved from Twitch.');
         }
 

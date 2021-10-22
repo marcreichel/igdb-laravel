@@ -14,7 +14,7 @@ class PlayerPerspectiveCreated
     /**
      * @var PlayerPerspective
      */
-    public $data;
+    public PlayerPerspective $data;
 
     /**
      * @param PlayerPerspective $data

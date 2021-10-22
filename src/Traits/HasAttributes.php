@@ -4,9 +4,9 @@ namespace MarcReichel\IGDBLaravel\Traits;
 
 trait HasAttributes
 {
-    public $attributes = [];
-    protected $casts = [];
-    protected $dates = [
+    public array $attributes = [];
+    protected array $casts = [];
+    protected array $dates = [
         'created_at',
         'updated_at',
         'change_date',

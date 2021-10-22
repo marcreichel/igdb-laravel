@@ -14,7 +14,7 @@ class ThemeCreated
     /**
      * @var Theme
      */
-    public $data;
+    public Theme $data;
 
     /**
      * @param Theme $data

@@ -4,7 +4,7 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class GameVersionFeature extends Model
 {
-    protected $casts = [
+    protected array $casts = [
         'values' => GameVersionFeatureValue::class,
     ];
 }

@@ -14,7 +14,7 @@ class GameCreated
     /**
      * @var Game
      */
-    public $data;
+    public Game $data;
 
     /**
      * @param Game $data

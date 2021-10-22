@@ -14,7 +14,7 @@ class PlatformVersionReleaseDateCreated
     /**
      * @var PlatformVersionReleaseDate
      */
-    public $data;
+    public PlatformVersionReleaseDate $data;
 
     /**
      * @param PlatformVersionReleaseDate $data

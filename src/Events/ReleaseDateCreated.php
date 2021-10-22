@@ -14,7 +14,7 @@ class ReleaseDateCreated
     /**
      * @var ReleaseDate
      */
-    public $data;
+    public ReleaseDate $data;
 
     /**
      * @param ReleaseDate $data

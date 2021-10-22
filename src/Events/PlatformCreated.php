@@ -14,7 +14,7 @@ class PlatformCreated
     /**
      * @var Platform
      */
-    public $data;
+    public Platform $data;
 
     /**
      * @param Platform $data

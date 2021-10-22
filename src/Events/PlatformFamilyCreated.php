@@ -14,7 +14,7 @@ class PlatformFamilyCreated
     /**
      * @var PlatformFamily
      */
-    public $data;
+    public PlatformFamily $data;
 
     /**
      * @param PlatformFamily $data

@@ -14,7 +14,7 @@ class ScreenshotCreated
     /**
      * @var Screenshot
      */
-    public $data;
+    public Screenshot $data;
 
     /**
      * @param Screenshot $data

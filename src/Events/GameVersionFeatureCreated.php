@@ -14,7 +14,7 @@ class GameVersionFeatureCreated
     /**
      * @var GameVersionFeature
      */
-    public $data;
+    public GameVersionFeature $data;
 
     /**
      * @param GameVersionFeature $data

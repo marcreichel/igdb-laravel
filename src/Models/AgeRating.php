@@ -4,7 +4,7 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class AgeRating extends Model
 {
-    protected $casts = [
+    protected array $casts = [
         'content_descriptions' => AgeRatingContentDescription::class,
     ];
 }

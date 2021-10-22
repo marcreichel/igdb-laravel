@@ -14,7 +14,7 @@ class CompanyCreated
     /**
      * @var Company
      */
-    public $data;
+    public Company $data;
 
     /**
      * @param Company $data

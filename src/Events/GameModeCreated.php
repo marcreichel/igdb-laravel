@@ -14,7 +14,7 @@ class GameModeCreated
     /**
      * @var GameMode
      */
-    public $data;
+    public GameMode $data;
 
     /**
      * @param GameMode $data

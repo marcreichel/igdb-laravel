@@ -14,7 +14,7 @@ class GameVideoCreated
     /**
      * @var GameVideo
      */
-    public $data;
+    public GameVideo $data;
 
     /**
      * @param GameVideo $data

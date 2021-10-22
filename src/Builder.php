@@ -4,7 +4,7 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
-use Illuminate\Config\Repository;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -26,37 +26,37 @@ class Builder
     /**
      * The HTTP Client to request data from the API.
      *
-     * @var Http
+     * @var PendingRequest
      */
-    private $client;
+    private PendingRequest $client;
 
     /**
      * The endpoint of the API that should be requested.
      *
      * @var string
      */
-    private $endpoint;
+    private string $endpoint;
 
     /**
      * The Class the request results should be mapped to.
      *
      * @var mixed
      */
-    private $class;
+    private mixed $class;
 
     /**
      * The query data that should be attached to the request.
      *
      * @var Collection
      */
-    private $query;
+    private Collection $query;
 
     /**
      * The cache lifetime.
      *
-     * @var Repository|mixed
+     * @var mixed
      */
-    private $cacheLifetime;
+    private mixed $cacheLifetime;
 
     /**
      * Builder constructor.
@@ -81,7 +81,7 @@ class Builder
      *
      * @return self
      */
-    public function select($fields): self
+    public function select(mixed $fields): self
     {
         $fields = is_array($fields) ? $fields : func_get_args();
         $collection = collect($fields);
@@ -286,9 +286,9 @@ class Builder
      * @throws JsonException
      */
     public function where(
-        $key,
-        $operator = null,
-        $value = null,
+        mixed $key,
+        mixed $operator = null,
+        mixed $value = null,
         string $boolean = '&'
     ): self {
         if ($key instanceof Closure) {
@@ -347,9 +347,9 @@ class Builder
      * @throws ReflectionException|JsonException
      */
     public function orWhere(
-        $key,
+        mixed $key,
         string $operator = null,
-        $value = null,
+        mixed $value = null,
         string $boolean = '|'
     ): self {
         if ($key instanceof Closure) {
@@ -395,7 +395,7 @@ class Builder
     }
 
     /**
-     * Add a "or where like" clause to the query.
+     * Add an "or where like" clause to the query.
      *
      * @param string $key
      * @param string $value
@@ -443,7 +443,7 @@ class Builder
     }
 
     /**
-     * Add a "or where not like" clause to the query.
+     * Add an "or where not like" clause to the query.
      *
      * @param string $key
      * @param string $value
@@ -496,8 +496,8 @@ class Builder
      * @return array
      */
     private function prepareValueAndOperator(
-        $value,
-        $operator,
+        mixed $value,
+        mixed $operator,
         bool $useDefault = false
     ): array {
         if ($useDefault) {
@@ -521,7 +521,7 @@ class Builder
      *
      * @return bool
      */
-    private function invalidOperatorAndValue(string $operator, $value): bool
+    private function invalidOperatorAndValue(string $operator, mixed $value): bool
     {
         return is_null($value) && in_array($operator, $this->operators, true) && !in_array($operator, ['=', '!=']);
     }
@@ -567,8 +567,8 @@ class Builder
      */
     protected function whereNested(Closure $callback, string $boolean = '&'): self
     {
-        $class = $this->class;
-        if ($class) {
+        if (isset($this->class) && $this->class) {
+            $class = $this->class;
             $callback($query = new Builder(new $class()));
         } else {
             $callback($query = new Builder($this->endpoint));
@@ -661,7 +661,7 @@ class Builder
     }
 
     /**
-     * Add an "where in all" clause to the query.
+     * Add a "where in all" clause to the query.
      *
      * @param string $key
      * @param array  $values
@@ -709,7 +709,7 @@ class Builder
     }
 
     /**
-     * Add an "where in exact" clause to the query.
+     * Add a "where in exact" clause to the query.
      *
      * @param string $key
      * @param array  $values
@@ -757,7 +757,7 @@ class Builder
     }
 
     /**
-     * Add an "where not in" clause to the query.
+     * Add a "where not in" clause to the query.
      *
      * @param string $key
      * @param array  $values
@@ -805,7 +805,7 @@ class Builder
     }
 
     /**
-     * Add an "where not in all" clause to the query.
+     * Add a "where not in all" clause to the query.
      *
      * @param string $key
      * @param array  $values
@@ -853,7 +853,7 @@ class Builder
     }
 
     /**
-     * Add an "where not in exact" clause to the query.
+     * Add a "where not in exact" clause to the query.
      *
      * @param string $key
      * @param array  $values
@@ -1044,7 +1044,7 @@ class Builder
     }
 
     /**
-     * Add a "or where has" statement to the query.
+     * Add an "or where has" statement to the query.
      *
      * @param string $relationship
      * @param string $boolean
@@ -1104,7 +1104,7 @@ class Builder
     }
 
     /**
-     * Add a "or where null" clause to the query.
+     * Add an "or where null" clause to the query.
      *
      * @param string $key
      * @param string $boolean
@@ -1130,7 +1130,7 @@ class Builder
     }
 
     /**
-     * Add a "or where not null" clause to the query.
+     * Add an "or where not null" clause to the query.
      *
      * @param string $key
      * @param string $boolean
@@ -1153,7 +1153,7 @@ class Builder
      * @return self
      * @throws ReflectionException|JsonException
      */
-    public function whereDate(string $key, $operator, $value = null, string $boolean = '&'): self
+    public function whereDate(string $key, mixed $operator, mixed $value = null, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
@@ -1161,20 +1161,14 @@ class Builder
         $start = Carbon::parse($value)->startOfDay()->timestamp;
         $end = Carbon::parse($value)->endOfDay()->timestamp;
 
-        switch ($operator) {
-            case '>':
-                return $this->whereDateGreaterThan($key, $operator, $value, $boolean);
-            case '>=':
-                return $this->whereDateGreaterThanOrEquals($key, $operator, $value, $boolean);
-            case '<':
-                return $this->whereDateLowerThan($key, $operator, $value, $boolean);
-            case '<=':
-                return $this->whereDateLowerThanOrEquals($key, $operator, $value, $boolean);
-            case '!=':
-                return $this->whereNotBetween($key, $start, $end, false, $boolean);
-        }
-
-        return $this->whereBetween($key, $start, $end, true, $boolean);
+        return match ($operator) {
+            '>' => $this->whereDateGreaterThan($key, $operator, $value, $boolean),
+            '>=' => $this->whereDateGreaterThanOrEquals($key, $operator, $value, $boolean),
+            '<' => $this->whereDateLowerThan($key, $operator, $value, $boolean),
+            '<=' => $this->whereDateLowerThanOrEquals($key, $operator, $value, $boolean),
+            '!=' => $this->whereNotBetween($key, $start, $end, false, $boolean),
+            default => $this->whereBetween($key, $start, $end, true, $boolean),
+        };
     }
 
     /**
@@ -1246,7 +1240,7 @@ class Builder
     }
 
     /**
-     * Add a "or where date" statement to the query.
+     * Add an "or where date" statement to the query.
      *
      * @param string     $key
      * @param mixed      $operator
@@ -1256,7 +1250,7 @@ class Builder
      * @return self
      * @throws ReflectionException|JsonException
      */
-    public function orWhereDate(string $key, $operator, $value = null, string $boolean = '|'): self
+    public function orWhereDate(string $key, mixed $operator, mixed $value = null, string $boolean = '|'): self
     {
         return $this->whereDate($key, $operator, $value, $boolean);
     }
@@ -1272,7 +1266,7 @@ class Builder
      * @return self
      * @throws ReflectionException|JsonException
      */
-    public function whereYear(string $key, $operator, $value = null, string $boolean = '&'): self
+    public function whereYear(string $key, mixed $operator, mixed $value = null, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
@@ -1304,23 +1298,23 @@ class Builder
     }
 
     /**
-     * Add a "or where year" statement to the query.
+     * Add an "or where year" statement to the query.
      *
      * @param string $key
-     * @param        $operator
-     * @param        $value
+     * @param mixed  $operator
+     * @param mixed  $value
      * @param string $boolean
      *
      * @return self
      * @throws ReflectionException|JsonException
      */
-    public function orWhereYear(string $key, $operator, $value, string $boolean = '|'): self
+    public function orWhereYear(string $key, mixed $operator, mixed $value, string $boolean = '|'): self
     {
         return $this->whereYear($key, $operator, $value, $boolean);
     }
 
     /**
-     * Add an "sort" clause to the query.
+     * Add a "sort" clause to the query.
      *
      * @param string $key
      * @param string $direction
@@ -1343,7 +1337,7 @@ class Builder
     }
 
     /**
-     * Add an "sort desc" clause to the query.
+     * Add a "sort desc" clause to the query.
      *
      * @param string $key
      *
@@ -1488,7 +1482,7 @@ class Builder
      *
      * @return int
      */
-    private function castDate($date)
+    private function castDate($date): int
     {
         if (!is_numeric($date)) {
             return Carbon::parse((string)$date)->timestamp;
@@ -1499,14 +1493,14 @@ class Builder
     /**
      * Execute the query.
      *
-     * @return mixed|string
+     * @return mixed
      * @throws MissingEndpointException
      */
-    public function get()
+    public function get(): mixed
     {
         $data = $this->fetchApi();
 
-        if ($this->class) {
+        if (isset($this->class) && $this->class) {
             $data = collect($data)->map(function ($result) {
                 return $this->mapToModel($result);
             });
@@ -1522,7 +1516,7 @@ class Builder
      *
      * @return mixed
      */
-    private function mapToModel($result)
+    private function mapToModel($result): mixed
     {
         $model = $this->class;
 
@@ -1539,10 +1533,10 @@ class Builder
      *
      * @param int $id
      *
-     * @return mixed|string
+     * @return mixed
      * @throws MissingEndpointException|ReflectionException|JsonException
      */
-    public function find(int $id)
+    public function find(int $id): mixed
     {
         return $this->where('id', $id)->first();
     }
@@ -1553,7 +1547,7 @@ class Builder
      * @return mixed
      * @throws MissingEndpointException|ModelNotFoundException|ReflectionException|JsonException
      */
-    public function findOrFail(int $id)
+    public function findOrFail(int $id): mixed
     {
         $data = $this->find($id);
 
@@ -1578,7 +1572,7 @@ class Builder
      * @return mixed
      * @throws MissingEndpointException
      */
-    public function first()
+    public function first(): mixed
     {
         $data = $this->skip(0)->take(1)->get();
 
@@ -1590,7 +1584,7 @@ class Builder
      * @throws MissingEndpointException
      * @throws ModelNotFoundException
      */
-    public function firstOrFail()
+    public function firstOrFail(): mixed
     {
         $data = $this->first();
 
@@ -1615,7 +1609,7 @@ class Builder
      * @return mixed
      * @throws MissingEndpointException
      */
-    public function count()
+    public function count(): mixed
     {
         $data = $this->fetchApi(true);
 
@@ -1656,7 +1650,7 @@ class Builder
      * @return mixed
      * @throws MissingEndpointException
      */
-    private function fetchApi(bool $count = false)
+    private function fetchApi(bool $count = false): mixed
     {
         if (!$this->endpoint) {
             throw new MissingEndpointException();
@@ -1708,7 +1702,7 @@ class Builder
     {
         $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());
 
-        if (is_int($this->cacheLifetime) && $this->cacheLifetime === 0) {
+        if ($this->cacheLifetime === 0) {
             Cache::forget($cacheKey);
         }
 

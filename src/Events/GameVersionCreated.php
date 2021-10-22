@@ -14,7 +14,7 @@ class GameVersionCreated
     /**
      * @var GameVersion
      */
-    public $data;
+    public GameVersion $data;
 
     /**
      * @param GameVersion $data

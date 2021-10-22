@@ -14,7 +14,7 @@ class ExternalGameCreated
     /**
      * @var ExternalGame
      */
-    public $data;
+    public ExternalGame $data;
 
     /**
      * @param ExternalGame $data

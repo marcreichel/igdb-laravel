@@ -4,7 +4,7 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class Character extends Model
 {
-    protected $casts = [
+    protected array $casts = [
         'mug_shot' => CharacterMugShot::class,
     ];
 }
