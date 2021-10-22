@@ -20,6 +20,12 @@ class CreateWebhook extends Command
 
         $model = $this->argument('model') ?? $this->choice($modelQuestionString, $this->getModels());
 
+        if (!is_string($model)) {
+            throw new \InvalidArgumentException(
+                'Argument <comment>model</comment> has to be of type string. ' . gettype($model) . ' given.',
+            );
+        }
+
         $namespace = 'MarcReichel\IGDBLaravel\Models\\';
         $fullQualifiedName = $namespace . $model;
 
