@@ -241,6 +241,29 @@ $games = Game::whereYear('first_release_date', 2019)->get();
 
 These methods have the same syntax as `whereNull` and `whereNotNull` and literally do the exact same thing.
 
+###### whereLike / whereNotLike
+
+```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
+// The third parameter activates/deactivates case sensitivity.
+
+$games = Game::whereLike('name', 'fort*', false)->get();
+
+// Will get all games where the name starts with "fort".
+
+$games = Game::whereLike('name', '*nite', false)->get();
+
+// Will get all games where the name ends with "nite".
+
+$games = Game::whereLike('name', '*rtni*', false)->get();
+
+// Will get all games where the name contains "rtni".
+
+// Since version 3.1.0 the leading AND trailing
+// asterisks can be omitted in this case.
+```
+
 ##### Parameter Grouping
 
 ```php
