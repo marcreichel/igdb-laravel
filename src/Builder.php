@@ -227,6 +227,53 @@ class Builder
     }
 
     /**
+     * Add a fuzzy search to the query.
+     *
+     * @param mixed       $key
+     * @param string      $query
+     * @param bool        $caseSensitive
+     * @param string      $boolean
+     *
+     * @return self
+     * @throws ReflectionException
+     */
+    public function fuzzySearch(
+        mixed $key,
+        string $query,
+        bool $caseSensitive = false,
+        string $boolean = '&',
+    ): self {
+        $tokenizedQuery = explode(' ', $query);
+        $keys = collect($key)->crossJoin($tokenizedQuery)->toArray();
+
+        return $this->whereNested(function ($query) use ($keys, $caseSensitive) {
+            foreach($keys as $v) {
+                $query->whereLike($v[0], $v[1], $caseSensitive, '|');
+            }
+        }, $boolean);
+    }
+
+    /**
+     * Add an "or fuzzy search" to the query.
+     *
+     * @param mixed       $key
+     * @param string      $query
+     * @param bool        $caseSensitive
+     * @param string      $boolean
+     *
+     * @return self
+     * @throws ReflectionException
+     */
+    public function orFuzzySearch(
+        mixed $key,
+        string $query,
+        bool $caseSensitive = false,
+        string $boolean = '|',
+    ): self {
+        return $this->fuzzySearch($key, $query, $caseSensitive, $boolean);
+    }
+
+    /**
      * Add a basic where clause to the query.
      *
      * @param mixed      $key
@@ -431,8 +478,8 @@ class Builder
         }
 
         $operator = $caseSensitive ? $operator : $insensitiveOperator;
-        $prefix = $hasPrefix ? '*' : '';
-        $suffix = $hasSuffix ? '*' : '';
+        $prefix = $hasPrefix || !$hasSuffix ? '*' : '';
+        $suffix = $hasSuffix || !$hasPrefix ? '*' : '';
         $value = json_encode($value, JSON_THROW_ON_ERROR);
         $value = Str::start(Str::finish($value, $suffix), $prefix);
 

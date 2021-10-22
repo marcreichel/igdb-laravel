@@ -30,6 +30,8 @@ use ReflectionException;
  * @method static Builder skip(int $limit)
  * @method static Builder forPage(int $page, int $perPage = 10)
  * @method static Builder search(string $query)
+ * @method static Builder fuzzySearch(mixed $key, string $query, bool $caseSensitive = false, string $boolean = '&')
+ * @method static Builder orFuzzySearch(mixed $key, string $query, bool $caseSensitive = false, string $boolean = '|')
  * @method static Builder where(mixed $key, mixed|null $operator = null, mixed|null $value = null, string $boolean = '&')
  * @method static Builder orWhere(mixed $key, mixed|null $operator = null, mixed|null $value = null, string $boolean = '|')
  * @method static Builder whereLike(string $key, string $value, bool $caseSensitive = true, string $boolean = '&')

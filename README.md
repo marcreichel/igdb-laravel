@@ -120,6 +120,27 @@ $games = Game::search('Fortnite')->get();
 
 **Attention:** Searchable models are `Character`, `Collection`, `Game`, `Platform` and `Theme`.
 
+#### Fuzzy Search ("where like" chain) (since v3.1.0)
+
+```php
+use MarcReichel\IGDBLaravel\Models\Game;
+
+$games = Game::fuzzySearch(
+    // fields to search in
+    [
+        'name',
+        'involved_companies.company.name', // you can search for nested values as well
+    ],
+    // the query to search for
+    'Call of Duty',
+    // enable/disable case sensitivity (disabled by default)
+    false,
+)->get();
+```
+
+**Attention**: Keep in mind you have to do the sorting of the results yourself. They are not ordered by relevance or
+something like this.
+
 #### Where-Clauses
 
 ##### Simple Where Clauses
