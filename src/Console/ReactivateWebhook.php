@@ -11,14 +11,23 @@ use MarcReichel\IGDBLaravel\Models\Webhook;
 
 class ReactivateWebhook extends Command
 {
+    /**
+     * @var string
+     */
     protected $signature = 'igdb:webhooks:reactivate {id}';
 
+    /**
+     * @var string
+     */
     protected $description = 'Reactivate an inactive webhook.';
 
+    /**
+     * @return int
+     */
     public function handle(): int
     {
         /** @var Webhook|null $webhook */
-        $webhook = Webhook::find($this->argument('id'));
+        $webhook = Webhook::find((int) $this->argument('id'));
 
         if (!$webhook) {
             $this->error('Webhook not found.');

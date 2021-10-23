@@ -7,13 +7,22 @@ use MarcReichel\IGDBLaravel\Models\Webhook;
 
 class DeleteWebhook extends Command
 {
+    /**
+     * @var string
+     */
     protected $signature = 'igdb:webhooks:delete {id?} {--A|all}';
 
+    /**
+     * @var string
+     */
     protected $description = 'Delete a webhook at IGDB.';
 
+    /**
+     * @return int
+     */
     public function handle(): int
     {
-        $id = $this->argument('id');
+        $id = (int)$this->argument('id');
 
         if ($id) {
             return $this->deleteOne($id);
@@ -27,13 +36,12 @@ class DeleteWebhook extends Command
     }
 
     /**
-     * @param $id
+     * @param  int  $id
      *
      * @return int
      */
-    private function deleteOne($id): int
+    private function deleteOne(int $id): int
     {
-        /** @var Webhook $webhook */
         $webhook = Webhook::find($id);
 
         if (!$webhook) {

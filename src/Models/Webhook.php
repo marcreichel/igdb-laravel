@@ -14,26 +14,67 @@ use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
+use MarcReichel\IGDBLaravel\Interfaces\WebhookInterface;
 use ReflectionClass;
 
-class Webhook
+class Webhook implements WebhookInterface
 {
+    /**
+     * @var PendingRequest
+     */
     private PendingRequest $client;
 
+    /**
+     * @var int
+     */
     public int $id;
+
+    /**
+     * @var string
+     */
     public string $url;
+
+    /**
+     * @var int
+     */
     public int $category;
+
+    /**
+     * @var int
+     */
     public int $sub_category;
+
+    /**
+     * @var bool
+     */
     public bool $active;
+
+    /**
+     * @var int
+     */
     public int $number_of_retries;
+
+    /**
+     * @var string
+     */
     public string $secret;
+
+    /**
+     * @var string
+     */
     public string $created_at;
+
+    /**
+     * @var string
+     */
     public string $updated_at;
 
     /**
+     * @param  mixed  ...$parameters
+     *
      * @throws AuthenticationException
      */
-    public function __construct(...$parameters)
+    public function __construct(mixed ...$parameters)
     {
         $this->client = Http::withOptions([
             'base_uri' => ApiHelper::IGDB_BASE_URI,
@@ -41,7 +82,7 @@ class Webhook
             ->withHeaders([
                 'Accept' => 'application/json',
                 'Client-ID' => config('igdb.credentials.client_id'),
-                'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
+                'Authorization' => 'Bearer '.ApiHelper::retrieveAccessToken(),
             ]);
 
         $this->fill(...$parameters);
@@ -54,6 +95,7 @@ class Webhook
     {
         $self = new static;
         $response = $self->client->get('webhooks');
+
         if ($response->failed()) {
             return new \Illuminate\Support\Collection();
         }
@@ -61,14 +103,14 @@ class Webhook
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      *
      * @return mixed
      */
     public static function find(int $id): mixed
     {
         $self = new static;
-        $response = $self->client->get('webhooks/' . $id);
+        $response = $self->client->get('webhooks/'.$id);
         if ($response->failed()) {
             return null;
         }
@@ -80,25 +122,29 @@ class Webhook
      */
     public function delete(): mixed
     {
-        $self = new static;
         if (!$this->id) {
             return false;
         }
-        $response = $self->client->delete('webhooks/' . $this->id)->json();
+
+        $self = new static;
+
+        $response = $self->client->delete('webhooks/'.$this->id)->json();
+
         if (!$response) {
             return false;
         }
+
         return $self->mapToModel(collect([$response]))->first();
     }
 
     /**
      * @throws InvalidWebhookSecretException|JsonException
      */
-    public static function handle(Request $request)
+    public static function handle(Request $request): mixed
     {
         self::validate($request);
 
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) $request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         $endpoint = $request->route('model');
 
@@ -107,7 +153,7 @@ class Webhook
         }
 
         $className = Str::singular(Str::studly($endpoint));
-        $fullClassName = '\\MarcReichel\\IGDBLaravel\\Models\\' . $className;
+        $fullClassName = '\\MarcReichel\\IGDBLaravel\\Models\\'.$className;
 
         if (!class_exists($fullClassName)) {
             return $data;
@@ -123,7 +169,7 @@ class Webhook
             return $entity;
         }
 
-        $event = '\\MarcReichel\\IGDBLaravel\\Events\\' . $className . ucfirst(strtolower($method)) . 'd';
+        $event = '\\MarcReichel\\IGDBLaravel\\Events\\'.$className.ucfirst(strtolower($method)).'d';
 
         if (!class_exists($event)) {
             return $entity;
@@ -148,20 +194,26 @@ class Webhook
         throw new InvalidWebhookSecretException();
     }
 
-    public function getModel()
+    /**
+     * @return mixed
+     */
+    public function getModel(): mixed
     {
         $reflectionCategory = new ReflectionClass(Category::class);
         $categories = collect($reflectionCategory->getConstants())->flip();
 
-        return $categories[$this->category] ?? null;
+        return $categories->get($this->category) ?? null;
     }
 
-    public function getMethod()
+    /**
+     * @return mixed
+     */
+    public function getMethod(): mixed
     {
         $reflectionMethod = new ReflectionClass(Method::class);
         $methods = collect($reflectionMethod->getConstants())->values();
 
-        return $methods[$this->sub_category] ?? null;
+        return $methods->get($this->sub_category) ?? null;
     }
 
     #[ArrayShape([
@@ -184,11 +236,14 @@ class Webhook
         ];
     }
 
-    private function fill(...$parameters): void
+    /**
+     * @param  mixed  ...$parameters
+     */
+    private function fill(mixed ...$parameters): void
     {
         if ($parameters) {
             foreach ($parameters as $parameter => $value) {
-                if (property_exists($this, $parameter)) {
+                if (property_exists($this, (string) $parameter)) {
                     if (in_array($parameter, ['created_at', 'updated_at'])) {
                         $this->{$parameter} = new Carbon($value);
                     } else {

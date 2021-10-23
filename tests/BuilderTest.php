@@ -9,7 +9,10 @@ use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 
 class BuilderTest extends TestCase
 {
-    private $igdb;
+    /**
+     * @var Builder $igdb
+     */
+    private Builder $igdb;
 
     public function setUp(): void
     {

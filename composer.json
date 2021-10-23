@@ -20,7 +20,8 @@
     "phpunit/phpunit": "^9.5.4",
     "orchestra/testbench": "^6.0",
     "nunomaduro/collision": "^5.3",
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "nunomaduro/larastan": "^0.7.13"
   },
   "license": "MIT",
   "authors": [
@@ -30,7 +31,9 @@
     }
   ],
   "scripts": {
-    "test": "./vendor/bin/testbench package:test"
+    "test": "./vendor/bin/testbench package:test",
+    "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
+    "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G"
   },
   "autoload": {
     "psr-4": {
