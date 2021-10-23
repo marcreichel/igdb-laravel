@@ -1,8 +1,6 @@
-name: Tests
+name: Code Quality (PHPStan)
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -14,4 +12,4 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --dev
       - name: Run test suite
-        run: composer test
+        run: composer stan
