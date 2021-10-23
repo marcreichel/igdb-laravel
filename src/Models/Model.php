@@ -17,6 +17,7 @@ use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
+use MarcReichel\IGDBLaravel\Interfaces\ModelInterface;
 use ReflectionClass;
 use ReflectionException;
 
@@ -81,7 +82,7 @@ use ReflectionException;
  *
  * @package MarcReichel\IGDBLaravel\Models
  */
-abstract class Model implements ArrayAccess, Arrayable, Jsonable
+abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
 {
     use HasAttributes, HasRelationships;
 
@@ -111,11 +112,11 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param $field
+     * @param mixed $field
      *
      * @return mixed
      */
-    public function __get($field)
+    public function __get(mixed $field): mixed
     {
         return $this->getAttribute($field);
     }
@@ -283,15 +284,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
      * @param mixed $fields
      *
      * @return Model
-     * @throws ReflectionException
      */
     public function getInstance(mixed $fields): Model
     {
-        if (is_null(self::$instance)) {
-            $model = new static($fields);
-            self::$instance = $model;
-        }
-
         return self::$instance;
     }
 
@@ -350,7 +345,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable
         if (collect($this->casts)->has($property)) {
             $class = collect($this->casts)->get($property);
 
-            if (class_exists($class)) {
+            if (!is_null($class) && class_exists($class)) {
                 return $class;
             }
         }

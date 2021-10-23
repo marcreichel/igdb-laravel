@@ -39,12 +39,12 @@ class ApiHelper
             if (isset($response['access_token']) && $response['expires_in']) {
                 Cache::put($accessTokenCacheKey, (string)$response['access_token'], (int)$response['expires_in']);
 
-                $accessToken = (string)$response['access_token'];
+                $accessToken = $response['access_token'];
             }
         } catch (Exception) {
             throw new AuthenticationException('Access Token could not be retrieved from Twitch.');
         }
 
-        return $accessToken;
+        return (string) $accessToken;
     }
 }

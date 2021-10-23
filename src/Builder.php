@@ -61,11 +61,11 @@ class Builder
     /**
      * Builder constructor.
      *
-     * @param $model
+     * @param mixed $model
      *
      * @throws ReflectionException
      */
-    public function __construct($model = null)
+    public function __construct(mixed $model = null)
     {
         if ($model) {
             $this->setEndpoint($model);
@@ -463,9 +463,16 @@ class Builder
     }
 
     /**
+     * @param  string  $key
+     * @param  string  $value
+     * @param  bool    $caseSensitive
+     * @param  string  $operator
+     * @param  string  $insensitiveOperator
+     *
+     * @return string
      * @throws JsonException
      */
-    private function generateWhereLikeClause($key, $value, $caseSensitive, $operator, $insensitiveOperator): string
+    private function generateWhereLikeClause(string $key, string $value, bool $caseSensitive, string $operator, string $insensitiveOperator): string
     {
         $hasPrefix = Str::startsWith($value, ['%', '*']);
         $hasSuffix = Str::endsWith($value, ['%', '*']);
@@ -580,12 +587,12 @@ class Builder
     /**
      * Add another query builder as a nested where to the query builder.
      *
-     * @param $query
-     * @param $boolean
+     * @param Builder $query
+     * @param string $boolean
      *
      * @return self
      */
-    protected function addNestedWhereQuery($query, $boolean): self
+    protected function addNestedWhereQuery(Builder $query, string $boolean): self
     {
         $where = $this->query->get('where', new Collection());
 
@@ -903,19 +910,19 @@ class Builder
     /**
      * Add a where between statement to the query.
      *
-     * @param string $key
-     * @param        $first
-     * @param        $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
+     * @param  string  $key
+     * @param  mixed   $first
+     * @param  mixed   $second
+     * @param  bool    $withBoundaries
+     * @param  string  $boolean
      *
      * @return self
      * @throws ReflectionException
      */
     public function whereBetween(
         string $key,
-        $first,
-        $second,
+        mixed $first,
+        mixed $second,
         bool $withBoundaries = true,
         string $boolean = '&'
     ): self {
@@ -941,19 +948,19 @@ class Builder
     /**
      * Add a or where between statement to the query.
      *
-     * @param string $key
-     * @param        $first
-     * @param        $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
+     * @param  string  $key
+     * @param  mixed   $first
+     * @param  mixed   $second
+     * @param  bool    $withBoundaries
+     * @param  string  $boolean
      *
      * @return self
      * @throws ReflectionException
      */
     public function orWhereBetween(
         string $key,
-        $first,
-        $second,
+        mixed $first,
+        mixed $second,
         bool $withBoundaries = true,
         string $boolean = '|'
     ): self {
@@ -964,19 +971,19 @@ class Builder
     /**
      * Add a where not between statement to the query.
      *
-     * @param string $key
-     * @param        $first
-     * @param        $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
+     * @param  string  $key
+     * @param  mixed   $first
+     * @param  mixed   $second
+     * @param  bool    $withBoundaries
+     * @param  string  $boolean
      *
      * @return self
      * @throws ReflectionException
      */
     public function whereNotBetween(
         string $key,
-        $first,
-        $second,
+        mixed $first,
+        mixed $second,
         bool $withBoundaries = false,
         string $boolean = '&'
     ): self {
@@ -1002,19 +1009,19 @@ class Builder
     /**
      * Add a or where not between statement to the query.
      *
-     * @param string $key
-     * @param        $first
-     * @param        $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
+     * @param  string  $key
+     * @param  mixed   $first
+     * @param  mixed   $second
+     * @param  bool    $withBoundaries
+     * @param  string  $boolean
      *
      * @return self
      * @throws ReflectionException
      */
     public function orWhereNotBetween(
         string $key,
-        $first,
-        $second,
+        mixed $first,
+        mixed $second,
         bool $withBoundaries = false,
         string $boolean = '|'
     ): self {
@@ -1172,16 +1179,16 @@ class Builder
     }
 
     /**
-     * @param $key
-     * @param $operator
-     * @param $value
-     * @param $boolean
+     * @param  string  $key
+     * @param  mixed   $operator
+     * @param  mixed   $value
+     * @param  string  $boolean
      *
-     * @return Builder
+     * @return self
      * @throws JsonException
      * @throws ReflectionException
      */
-    private function whereDateGreaterThan($key, $operator, $value, $boolean): Builder
+    private function whereDateGreaterThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
         $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
 
@@ -1189,16 +1196,16 @@ class Builder
     }
 
     /**
-     * @param $key
-     * @param $operator
-     * @param $value
-     * @param $boolean
+     * @param  string  $key
+     * @param  mixed   $operator
+     * @param  mixed   $value
+     * @param  string  $boolean
      *
-     * @return $this
+     * @return self
      * @throws JsonException
      * @throws ReflectionException
      */
-    private function whereDateGreaterThanOrEquals($key, $operator, $value, $boolean): Builder
+    private function whereDateGreaterThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
         $value = Carbon::parse($value)->startOfDay()->timestamp;
 
@@ -1206,16 +1213,16 @@ class Builder
     }
 
     /**
-     * @param $key
-     * @param $operator
-     * @param $value
-     * @param $boolean
+     * @param  string  $key
+     * @param  mixed   $operator
+     * @param  mixed   $value
+     * @param  string  $boolean
      *
-     * @return $this
+     * @return self
      * @throws JsonException
      * @throws ReflectionException
      */
-    private function whereDateLowerThan($key, $operator, $value, $boolean): Builder
+    private function whereDateLowerThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
         $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
 
@@ -1223,16 +1230,16 @@ class Builder
     }
 
     /**
-     * @param $key
-     * @param $operator
-     * @param $value
-     * @param $boolean
+     * @param  string  $key
+     * @param  mixed   $operator
+     * @param  mixed   $value
+     * @param  string  $boolean
      *
-     * @return $this
+     * @return self
      * @throws JsonException
      * @throws ReflectionException
      */
-    private function whereDateLowerThanOrEquals($key, $operator, $value, $boolean): Builder
+    private function whereDateLowerThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
         $value = Carbon::parse($value)->endOfDay()->timestamp;
 
@@ -1271,28 +1278,25 @@ class Builder
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
 
+        $value = Carbon::create($value);
+
+        if (is_bool($value)) {
+            throw new InvalidArgumentException('Could not convert value to Creator.');
+        }
+
         if ($operator === '=') {
-            $start = Carbon::create($value)->startOfYear()->timestamp;
-            $end = Carbon::create($value)->endOfYear()->timestamp;
+            $start = $value->startOfYear()->timestamp;
+            $end = $value->endOfYear()->timestamp;
 
             return $this->whereBetween($key, $start, $end, true, $boolean);
         }
 
-        if ($operator === '>') {
-            $value = Carbon::create($value)->endOfYear()->timestamp;
+        if ($operator === '>' || $operator === '<=') {
+            $value = $value->endOfYear()->timestamp;
+        } elseif ($operator === '>=' || $operator === '<') {
+            $value = $value->startOfYear()->timestamp;
         }
 
-        if ($operator === '>=') {
-            $value = Carbon::create($value)->startOfYear()->timestamp;
-        }
-
-        if ($operator === '<') {
-            $value = Carbon::create($value)->startOfYear()->timestamp;
-        }
-
-        if ($operator === '<=') {
-            $value = Carbon::create($value)->endOfYear()->timestamp;
-        }
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -1440,12 +1444,13 @@ class Builder
     /**
      * Set the endpoint from model or string
      *
-     * @param $model
+     * @param  mixed  $model
      *
      * @return void
      * @throws ReflectionException
+     * @throws InvalidParamsException
      */
-    protected function setEndpoint($model): void
+    protected function setEndpoint(mixed $model): void
     {
         $neededNamespace = __NAMESPACE__ . '\\Models';
 
@@ -1455,6 +1460,10 @@ class Builder
 
             if ($parents->isEmpty()) {
                 $parents->push($class);
+            }
+
+            if (is_null($parents->last()) || is_bool($parents->last())) {
+                throw new InvalidParamsException('Last parent element is either null or false. String or {} required.');
             }
 
             $reflectionClass = new ReflectionClass($parents->last());
@@ -1469,7 +1478,7 @@ class Builder
             $this->endpoint = $model;
         }
 
-        if ($this->endpoint === null) {
+        if (!isset($this->endpoint)) {
             $message = 'Construction-Parameter of Builder must be a string or a Class which extends ' . $neededNamespace . '\\Model. ' . ucfirst(gettype($model)) . ' given.';
             throw new InvalidArgumentException($message);
         }
@@ -1478,11 +1487,11 @@ class Builder
     /**
      * Cast a value as date.
      *
-     * @param $date
+     * @param  mixed  $date
      *
-     * @return int
+     * @return float|int|string
      */
-    private function castDate($date): int
+    private function castDate(mixed $date): float|int|string
     {
         if (!is_numeric($date)) {
             return Carbon::parse((string)$date)->timestamp;
@@ -1512,11 +1521,11 @@ class Builder
     }
 
     /**
-     * @param $result
+     * @param  mixed  $result
      *
      * @return mixed
      */
-    private function mapToModel($result): mixed
+    private function mapToModel(mixed $result): mixed
     {
         $model = $this->class;
 

@@ -1,0 +1,16 @@
+includes:
+  - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+  paths:
+    - src
+    - tests
+
+  # The level 8 is the highest level
+  level: 8
+  ignoreErrors:
+    - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist.#'
+    # - '#Unsafe usage of new static#'
+  excludePaths:
+    # - ./*/*/FileToBeExcluded.php
+  checkMissingIterableValueType: false

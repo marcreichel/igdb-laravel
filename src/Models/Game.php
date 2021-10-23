@@ -4,6 +4,9 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class Game extends Model
 {
+    /**
+     * @var array|string[]
+     */
     protected array $casts = [
         'bundles' => self::class,
         'dlcs' => self::class,

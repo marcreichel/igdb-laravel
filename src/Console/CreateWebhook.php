@@ -3,6 +3,7 @@
 namespace MarcReichel\IGDBLaravel\Console;
 
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
@@ -10,10 +11,19 @@ use MarcReichel\IGDBLaravel\Models\Model;
 
 class CreateWebhook extends Command
 {
+    /**
+     * @var string
+     */
     protected $signature = 'igdb:webhooks:create {model?} {--method=}';
 
+    /**
+     * @var string
+     */
     protected $description = 'Create a webhook at IGDB.';
 
+    /**
+     * @return int
+     */
     public function handle(): int
     {
         $modelQuestionString = 'For which model you want to create a webhook?';
@@ -21,7 +31,7 @@ class CreateWebhook extends Command
         $model = $this->argument('model') ?? $this->choice($modelQuestionString, $this->getModels());
 
         if (!is_string($model)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Argument <comment>model</comment> has to be of type string. ' . gettype($model) . ' given.',
             );
         }
@@ -73,6 +83,10 @@ class CreateWebhook extends Command
     {
         $pattern = '/\/(?:Model|Search|Webhook)\.php$/';
         $glob = glob(__DIR__ . '/../Models/*.php');
+
+        if (!$glob) {
+            return [];
+        }
 
         return collect(preg_grep($pattern, $glob, PREG_GREP_INVERT))
             ->map(function ($path) {
