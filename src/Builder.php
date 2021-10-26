@@ -1382,7 +1382,7 @@ class Builder
 
         $select = $this->query->get('fields', new Collection());
 
-        $fields = collect($relationships)->flatten()->toArray();
+        $fields = collect($relationships)->flatten()->filter()->toArray();
 
         $this->query->put('fields', $select->push($fields)->flatten());
 
