@@ -4,10 +4,11 @@ namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 use MarcReichel\IGDBLaravel\Models\Game;
 
-class GameCreated
+class GameCreated extends Event
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -17,12 +18,12 @@ class GameCreated
     public Game $data;
 
     /**
-     * @param Game $data
-     *
-     * @return void
+     * @param Game    $data
+     * @param Request $request
      */
-    public function __construct(Game $data)
+    public function __construct(Game $data, Request $request)
     {
         $this->data = $data;
+        parent::__construct($request);
     }
 }

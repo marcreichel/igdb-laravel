@@ -4,10 +4,11 @@ namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 use MarcReichel\IGDBLaravel\Models\CompanyWebsite;
 
-class CompanyWebsiteCreated
+class CompanyWebsiteCreated extends Event
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,11 +19,11 @@ class CompanyWebsiteCreated
 
     /**
      * @param CompanyWebsite $data
-     *
-     * @return void
+     * @param Request        $request
      */
-    public function __construct(CompanyWebsite $data)
+    public function __construct(CompanyWebsite $data, Request $request)
     {
         $this->data = $data;
+        parent::__construct($request);
     }
 }

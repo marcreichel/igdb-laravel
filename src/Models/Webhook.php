@@ -175,7 +175,7 @@ class Webhook implements WebhookInterface
             return $entity;
         }
 
-        $event::dispatch(new $fullClassName($data));
+        $event::dispatch(new $fullClassName($data), $request);
 
         return $entity;
     }

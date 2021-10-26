@@ -4,10 +4,11 @@ namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 use MarcReichel\IGDBLaravel\Models\GameVideo;
 
-class GameVideoCreated
+class GameVideoCreated extends Event
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,11 +19,11 @@ class GameVideoCreated
 
     /**
      * @param GameVideo $data
-     *
-     * @return void
+     * @param Request   $request
      */
-    public function __construct(GameVideo $data)
+    public function __construct(GameVideo $data, Request $request)
     {
         $this->data = $data;
+        parent::__construct($request);
     }
 }

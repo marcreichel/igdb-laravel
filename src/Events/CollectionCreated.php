@@ -4,10 +4,11 @@ namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 use MarcReichel\IGDBLaravel\Models\Collection;
 
-class CollectionCreated
+class CollectionCreated extends Event
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,11 +19,11 @@ class CollectionCreated
 
     /**
      * @param Collection $data
-     *
-     * @return void
+     * @param Request    $request
      */
-    public function __construct(Collection $data)
+    public function __construct(Collection $data, Request $request)
     {
         $this->data = $data;
+        parent::__construct($request);
     }
 }
