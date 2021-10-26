@@ -18,9 +18,9 @@ abstract class Event
     public string $url;
 
     /**
-     * @var string $method
+     * @var string|null $method
      */
-    public string $method;
+    public string|null $method;
 
     /**
      * @var Carbon $created_at
