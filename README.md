@@ -483,6 +483,11 @@ The secret can be any string you like. It is attached as a `X-Secret` HTTP heade
 verified by this package automatically. So make sure your defined secret matches the secret you created the webhooks
 with.
 
+**Important**: Make sure the `APP_URL` in your `.env` file is something different than `http://localhost` or
+`http://127.0.0.1` as webhooks would not work then. The `APP_URL` is used when creating webhooks via the
+[CLI](#manage-webhooks-via-cli). When [creating webhooks via code](#creating-a-webhook) the domain from the browser url
+bar is used. So please make sure you are accessing your app via a non-localhost url.
+
 And that wraps it up! You're all good to create your first webhook.
 
 ### Creating a webhook
