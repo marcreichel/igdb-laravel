@@ -479,7 +479,11 @@ And then set a secret inside your `.env` file:
 IGDB_WEBHOOK_SECRET=yoursecret
 ```
 
-That's it!
+The secret can be any string you like. It is attached as a `X-Secret` HTTP header to every webhook request and is
+verified by this package automatically. So make sure your defined secret matches the secret you created the webhooks
+with.
+
+And that wraps it up! You're all good to create your first webhook.
 
 ### Creating a webhook
 
