@@ -3,3 +3,5 @@ vendor/
 build/
 composer.lock
 .phpunit.result.cache
+cghooks.lock
+
