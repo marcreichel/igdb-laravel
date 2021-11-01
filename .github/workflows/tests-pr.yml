@@ -1,7 +1,7 @@
-name: Tests
+name: Tests (PR)
 
 on:
-  push:
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -38,8 +38,3 @@ jobs:
       - name: Execute tests
         run: |
           vendor/bin/phpunit
-          vendor/bin/phpunit --coverage-clover coverage.xml
-      - name: Upload
-        uses: codecov/codecov-action@v1
-        with:
-          files: ./coverage.xml
