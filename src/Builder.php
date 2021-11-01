@@ -1287,16 +1287,16 @@ class Builder
         }
 
         if ($operator === '=') {
-            $start = $value->clone()->startOfYear()->timestamp;
-            $end = $value->clone()->endOfYear()->timestamp;
+            $start = $value->startOfYear()->timestamp;
+            $end = $value->endOfYear()->timestamp;
 
             return $this->whereBetween($key, $start, $end, true, $boolean);
         }
 
         if ($operator === '>' || $operator === '<=') {
-            $value = $value->clone()->endOfYear()->timestamp;
+            $value = $value->endOfYear()->timestamp;
         } elseif ($operator === '>=' || $operator === '<') {
-            $value = $value->clone()->startOfYear()->timestamp;
+            $value = $value->startOfYear()->timestamp;
         }
 
 
