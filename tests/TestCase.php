@@ -25,9 +25,16 @@ class TestCase extends Orchestra
         })->name('handle-igdb-webhook');
 
         Http::fake([
-            '*/webhooks' => function (Request $request) {
+            '*/games/webhooks' => function (Request $request) {
                 return $this->createWebhookResponse($request);
             },
+            '*/companies/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/artworks/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/webhooks' => Http::response(),
             '*/count' => Http::response(['count' => 1337]),
             '*' => Http::response(),
         ]);
@@ -51,11 +58,9 @@ class TestCase extends Orchestra
             && Str::of($request->body())->contains($requestBody);
     }
 
-    protected function isWebhookCall(Request $request): bool
+    protected function isWebhookCall(Request $request, string $endpoint): bool
     {
-        return Str::startsWith($request->url(), 'https://api.igdb.com/v4/') &&
-            Str::endsWith($request->url(), '/webhooks') &&
-            $request->isForm();
+        return $request->url() === 'https://api.igdb.com/v4/' . $endpoint . '/webhooks' && $request->isForm();
     }
 
     /**

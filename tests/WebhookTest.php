@@ -20,7 +20,7 @@ class WebhookTest extends TestCase
         $webhook = Game::createWebhook(Method::CREATE);
 
         Http::assertSent(function (Request $request) {
-            return $this->isWebhookCall($request);
+            return $this->isWebhookCall($request, 'games');
         });
 
         self::assertEquals(0, $webhook->sub_category);
@@ -29,7 +29,7 @@ class WebhookTest extends TestCase
         $webhook = Company::createWebhook(Method::UPDATE);
 
         Http::assertSent(function (Request $request) {
-            return $this->isWebhookCall($request);
+            return $this->isWebhookCall($request, 'companies');
         });
 
         self::assertEquals(2, $webhook->sub_category);
@@ -38,7 +38,7 @@ class WebhookTest extends TestCase
         $webhook = Artwork::createWebhook(Method::DELETE);
 
         Http::assertSent(function (Request $request) {
-            return $this->isWebhookCall($request);
+            return $this->isWebhookCall($request, 'artworks');
         });
 
         self::assertEquals(1, $webhook->sub_category);

@@ -1,4 +1,4 @@
-name: PHPStan
+name: PHPStan (PR)
 
 on:
   pull_request:
