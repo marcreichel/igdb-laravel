@@ -1281,22 +1281,22 @@ class Builder
             func_num_args() === 2);
 
         try {
-            $value = Carbon::create($value);
+            $value = Carbon::now()->setYear($value)->startOfYear();
         } catch (Exception) {
             throw new InvalidArgumentException('Could not convert value to Carbon.');
         }
 
         if ($operator === '=') {
-            $start = $value->startOfYear()->timestamp;
-            $end = $value->endOfYear()->timestamp;
+            $start = $value->clone()->startOfYear()->timestamp;
+            $end = $value->clone()->endOfYear()->timestamp;
 
             return $this->whereBetween($key, $start, $end, true, $boolean);
         }
 
         if ($operator === '>' || $operator === '<=') {
-            $value = $value->endOfYear()->timestamp;
+            $value = $value->clone()->endOfYear()->timestamp;
         } elseif ($operator === '>=' || $operator === '<') {
-            $value = $value->startOfYear()->timestamp;
+            $value = $value->clone()->startOfYear()->timestamp;
         }
 
 
