@@ -38,7 +38,8 @@
     "post-update-cmd": "vendor/bin/cghooks update",
     "test": "./vendor/bin/testbench package:test",
     "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
-    "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G"
+    "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
+    "coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html report"
   },
   "autoload": {
     "psr-4": {

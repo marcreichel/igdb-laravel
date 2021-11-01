@@ -4,6 +4,7 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
+use Exception;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -63,7 +64,7 @@ class Builder
      *
      * @param mixed $model
      *
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function __construct(mixed $model = null)
     {
@@ -94,7 +95,7 @@ class Builder
             return !strpos($field, '.');
         })->flatten();
 
-        if ($collection->count() === 0) {
+        if ($collection->isEmpty()) {
             $collection->push('*');
         }
 
@@ -229,13 +230,13 @@ class Builder
     /**
      * Add a fuzzy search to the query.
      *
-     * @param mixed       $key
-     * @param string      $query
-     * @param bool        $caseSensitive
-     * @param string      $boolean
+     * @param mixed  $key
+     * @param string $query
+     * @param bool   $caseSensitive
+     * @param string $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function fuzzySearch(
         mixed $key,
@@ -247,7 +248,7 @@ class Builder
         $keys = collect($key)->crossJoin($tokenizedQuery)->toArray();
 
         return $this->whereNested(function ($query) use ($keys, $caseSensitive) {
-            foreach($keys as $v) {
+            foreach ($keys as $v) {
                 $query->whereLike($v[0], $v[1], $caseSensitive, '|');
             }
         }, $boolean);
@@ -256,13 +257,13 @@ class Builder
     /**
      * Add an "or fuzzy search" to the query.
      *
-     * @param mixed       $key
-     * @param string      $query
-     * @param bool        $caseSensitive
-     * @param string      $boolean
+     * @param mixed  $key
+     * @param string $query
+     * @param bool   $caseSensitive
+     * @param string $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function orFuzzySearch(
         mixed $key,
@@ -282,8 +283,7 @@ class Builder
      * @param string     $boolean
      *
      * @return self
-     * @throws ReflectionException
-     * @throws JsonException
+     * @throws ReflectionException|JsonException|InvalidParamsException
      */
     public function where(
         mixed $key,
@@ -344,7 +344,7 @@ class Builder
      * @param string      $boolean
      *
      * @return self
-     * @throws ReflectionException|JsonException
+     * @throws ReflectionException|JsonException|InvalidParamsException
      */
     public function orWhere(
         mixed $key,
@@ -463,17 +463,22 @@ class Builder
     }
 
     /**
-     * @param  string  $key
-     * @param  string  $value
-     * @param  bool    $caseSensitive
-     * @param  string  $operator
-     * @param  string  $insensitiveOperator
+     * @param string $key
+     * @param string $value
+     * @param bool   $caseSensitive
+     * @param string $operator
+     * @param string $insensitiveOperator
      *
      * @return string
      * @throws JsonException
      */
-    private function generateWhereLikeClause(string $key, string $value, bool $caseSensitive, string $operator, string $insensitiveOperator): string
-    {
+    private function generateWhereLikeClause(
+        string $key,
+        string $value,
+        bool $caseSensitive,
+        string $operator,
+        string $insensitiveOperator
+    ): string {
         $hasPrefix = Str::startsWith($value, ['%', '*']);
         $hasSuffix = Str::endsWith($value, ['%', '*']);
 
@@ -523,12 +528,12 @@ class Builder
      *
      * Prevents using Null values with invalid operators.
      *
-     * @param string $operator
-     * @param mixed  $value
+     * @param string|null $operator
+     * @param mixed       $value
      *
      * @return bool
      */
-    private function invalidOperatorAndValue(string $operator, mixed $value): bool
+    private function invalidOperatorAndValue(string|null $operator, mixed $value): bool
     {
         return is_null($value) && in_array($operator, $this->operators, true) && !in_array($operator, ['=', '!=']);
     }
@@ -541,7 +546,7 @@ class Builder
      * @param string $method
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     protected function addArrayOfWheres(
         array $arrayOfWheres,
@@ -570,7 +575,7 @@ class Builder
      * @param string  $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     protected function whereNested(Closure $callback, string $boolean = '&'): self
     {
@@ -588,7 +593,7 @@ class Builder
      * Add another query builder as a nested where to the query builder.
      *
      * @param Builder $query
-     * @param string $boolean
+     * @param string  $boolean
      *
      * @return self
      */
@@ -709,7 +714,7 @@ class Builder
         string $boolean = '|',
         string $operator = '=',
         string $prefix = '[',
-        string $suffix = ']'
+        string $suffix = ']',
     ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
@@ -733,7 +738,7 @@ class Builder
         string $boolean = '&',
         string $operator = '=',
         string $prefix = '{',
-        string $suffix = '}'
+        string $suffix = '}',
     ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
@@ -754,10 +759,10 @@ class Builder
     public function orWhereInExact(
         string $key,
         array $values,
-        string $boolean,
-        string $operator,
-        string $prefix,
-        string $suffix
+        string $boolean = '|',
+        string $operator = '=',
+        string $prefix = '{',
+        string $suffix = '}',
     ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
@@ -781,7 +786,7 @@ class Builder
         string $boolean = '&',
         string $operator = '!=',
         string $prefix = '(',
-        string $suffix = ')'
+        string $suffix = ')',
     ): self {
         return $this->whereIn($key, $values, $boolean, $operator, $prefix,
             $suffix);
@@ -910,14 +915,14 @@ class Builder
     /**
      * Add a where between statement to the query.
      *
-     * @param  string  $key
-     * @param  mixed   $first
-     * @param  mixed   $second
-     * @param  bool    $withBoundaries
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $first
+     * @param mixed  $second
+     * @param bool   $withBoundaries
+     * @param string $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function whereBetween(
         string $key,
@@ -948,14 +953,14 @@ class Builder
     /**
      * Add a or where between statement to the query.
      *
-     * @param  string  $key
-     * @param  mixed   $first
-     * @param  mixed   $second
-     * @param  bool    $withBoundaries
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $first
+     * @param mixed  $second
+     * @param bool   $withBoundaries
+     * @param string $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function orWhereBetween(
         string $key,
@@ -971,14 +976,14 @@ class Builder
     /**
      * Add a where not between statement to the query.
      *
-     * @param  string  $key
-     * @param  mixed   $first
-     * @param  mixed   $second
-     * @param  bool    $withBoundaries
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $first
+     * @param mixed  $second
+     * @param bool   $withBoundaries
+     * @param string $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function whereNotBetween(
         string $key,
@@ -1009,14 +1014,14 @@ class Builder
     /**
      * Add a or where not between statement to the query.
      *
-     * @param  string  $key
-     * @param  mixed   $first
-     * @param  mixed   $second
-     * @param  bool    $withBoundaries
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $first
+     * @param mixed  $second
+     * @param bool   $withBoundaries
+     * @param string $boolean
      *
      * @return self
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function orWhereNotBetween(
         string $key,
@@ -1158,7 +1163,7 @@ class Builder
      * @param string     $boolean
      *
      * @return self
-     * @throws ReflectionException|JsonException
+     * @throws ReflectionException|JsonException|InvalidParamsException
      */
     public function whereDate(string $key, mixed $operator, mixed $value = null, string $boolean = '&'): self
     {
@@ -1179,14 +1184,13 @@ class Builder
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed   $operator
-     * @param  mixed   $value
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $operator
+     * @param mixed  $value
+     * @param string $boolean
      *
      * @return self
-     * @throws JsonException
-     * @throws ReflectionException
+     * @throws JsonException|ReflectionException|InvalidParamsException
      */
     private function whereDateGreaterThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1196,14 +1200,13 @@ class Builder
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed   $operator
-     * @param  mixed   $value
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $operator
+     * @param mixed  $value
+     * @param string $boolean
      *
      * @return self
-     * @throws JsonException
-     * @throws ReflectionException
+     * @throws JsonException|ReflectionException|InvalidParamsException
      */
     private function whereDateGreaterThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1213,14 +1216,13 @@ class Builder
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed   $operator
-     * @param  mixed   $value
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $operator
+     * @param mixed  $value
+     * @param string $boolean
      *
      * @return self
-     * @throws JsonException
-     * @throws ReflectionException
+     * @throws JsonException|ReflectionException|InvalidParamsException
      */
     private function whereDateLowerThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1230,14 +1232,14 @@ class Builder
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed   $operator
-     * @param  mixed   $value
-     * @param  string  $boolean
+     * @param string $key
+     * @param mixed  $operator
+     * @param mixed  $value
+     * @param string $boolean
      *
      * @return self
      * @throws JsonException
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     private function whereDateLowerThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1255,7 +1257,7 @@ class Builder
      * @param string     $boolean
      *
      * @return self
-     * @throws ReflectionException|JsonException
+     * @throws ReflectionException|JsonException|InvalidParamsException
      */
     public function orWhereDate(string $key, mixed $operator, mixed $value = null, string $boolean = '|'): self
     {
@@ -1271,30 +1273,30 @@ class Builder
      * @param string     $boolean
      *
      * @return self
-     * @throws ReflectionException|JsonException
+     * @throws ReflectionException|JsonException|InvalidParamsException
      */
     public function whereYear(string $key, mixed $operator, mixed $value = null, string $boolean = '&'): self
     {
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
 
-        $value = Carbon::create($value);
-
-        if (is_bool($value)) {
-            throw new InvalidArgumentException('Could not convert value to Creator.');
+        try {
+            $value = Carbon::create($value);
+        } catch (Exception) {
+            throw new InvalidArgumentException('Could not convert value to Carbon.');
         }
 
         if ($operator === '=') {
-            $start = $value->startOfYear()->timestamp;
-            $end = $value->endOfYear()->timestamp;
+            $start = $value->clone()->startOfYear()->timestamp;
+            $end = $value->clone()->endOfYear()->timestamp;
 
             return $this->whereBetween($key, $start, $end, true, $boolean);
         }
 
         if ($operator === '>' || $operator === '<=') {
-            $value = $value->endOfYear()->timestamp;
+            $value = $value->clone()->endOfYear()->timestamp;
         } elseif ($operator === '>=' || $operator === '<') {
-            $value = $value->startOfYear()->timestamp;
+            $value = $value->clone()->startOfYear()->timestamp;
         }
 
 
@@ -1304,16 +1306,19 @@ class Builder
     /**
      * Add an "or where year" statement to the query.
      *
-     * @param string $key
-     * @param mixed  $operator
-     * @param mixed  $value
-     * @param string $boolean
+     * @param string     $key
+     * @param mixed      $operator
+     * @param mixed|null $value
+     * @param string     $boolean
      *
      * @return self
-     * @throws ReflectionException|JsonException
+     * @throws ReflectionException|JsonException|InvalidParamsException
      */
-    public function orWhereYear(string $key, mixed $operator, mixed $value, string $boolean = '|'): self
+    public function orWhereYear(string $key, mixed $operator, mixed $value = null, string $boolean = '|'): self
     {
+        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
+            func_num_args() === 2);
+
         return $this->whereYear($key, $operator, $value, $boolean);
     }
 
@@ -1434,7 +1439,7 @@ class Builder
      */
     public function endpoint(string $endpoint): self
     {
-        if ($this->class === null) {
+        if (!isset($this->class)) {
             $this->endpoint = $endpoint;
         }
 
@@ -1444,7 +1449,7 @@ class Builder
     /**
      * Set the endpoint from model or string
      *
-     * @param  mixed  $model
+     * @param mixed $model
      *
      * @return void
      * @throws ReflectionException
@@ -1462,7 +1467,7 @@ class Builder
                 $parents->push($class);
             }
 
-            if (is_null($parents->last()) || is_bool($parents->last())) {
+            if (is_bool($parents->last()) || is_null($parents->last())) {
                 throw new InvalidParamsException('Last parent element is either null or false. String or {} required.');
             }
 
@@ -1487,7 +1492,7 @@ class Builder
     /**
      * Cast a value as date.
      *
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return float|int|string
      */
@@ -1521,7 +1526,7 @@ class Builder
     }
 
     /**
-     * @param  mixed  $result
+     * @param mixed $result
      *
      * @return mixed
      */
@@ -1543,7 +1548,7 @@ class Builder
      * @param int $id
      *
      * @return mixed
-     * @throws MissingEndpointException|ReflectionException|JsonException
+     * @throws MissingEndpointException|ReflectionException|JsonException|InvalidParamsException
      */
     public function find(int $id): mixed
     {
@@ -1554,7 +1559,7 @@ class Builder
      * @param int $id
      *
      * @return mixed
-     * @throws MissingEndpointException|ModelNotFoundException|ReflectionException|JsonException
+     * @throws MissingEndpointException|ModelNotFoundException|ReflectionException|JsonException|InvalidParamsException
      */
     public function findOrFail(int $id): mixed
     {

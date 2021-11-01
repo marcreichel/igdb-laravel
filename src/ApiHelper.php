@@ -34,6 +34,7 @@ class ApiHelper
                 'grant_type' => 'client_credentials',
             ]);
             $response = Http::post('https://id.twitch.tv/oauth2/token?' . $query)
+                ->throw()
                 ->json();
 
             if (isset($response['access_token']) && $response['expires_in']) {

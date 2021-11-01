@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use MarcReichel\IGDBLaravel\IGDBLaravelServiceProvider;
 use MarcReichel\IGDBLaravel\Models\Webhook;
 use Orchestra\Testbench\TestCase as Orchestra;
-use MarcReichel\IGDBLaravel\IGDBLaravelServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -25,6 +25,10 @@ class TestCase extends Orchestra
         })->name('handle-igdb-webhook');
 
         Http::fake([
+            '*/oauth2/token*' => Http::response([
+                'access_token' => 'test-suite-token',
+                'expires_in' => 3600
+            ]),
             '*/games/webhooks' => function (Request $request) {
                 return $this->createWebhookResponse($request);
             },
