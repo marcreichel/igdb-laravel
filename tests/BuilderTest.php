@@ -669,17 +669,6 @@ class BuilderTest extends TestCase
      * @test
      * @throws JsonException|MissingEndpointException|ReflectionException|InvalidParamsException
      */
-    public function it_should_throw_exception_for_invalid_year(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->igdb->whereYear('first_release_date', 'abc')->get();
-    }
-
-    /**
-     * @test
-     * @throws JsonException|MissingEndpointException|ReflectionException|InvalidParamsException
-     */
     public function it_should_generate_where_year_larger_or_equals_query(): void
     {
         $date = now();

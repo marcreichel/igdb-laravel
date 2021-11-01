@@ -1280,11 +1280,7 @@ class Builder
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
             func_num_args() === 2);
 
-        try {
-            $value = Carbon::now()->setYear($value)->startOfYear();
-        } catch (Exception) {
-            throw new InvalidArgumentException('Could not convert value to Carbon.');
-        }
+        $value = Carbon::now()->setYear($value)->startOfYear();
 
         if ($operator === '=') {
             $start = $value->clone()->startOfYear()->timestamp;
