@@ -146,7 +146,7 @@ class Webhook implements WebhookInterface
 
         $data = json_decode((string) $request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        $endpoint = $request->route('model');
+        $endpoint = (string) $request->route('model');
 
         if (!$endpoint) {
             return $data;
@@ -159,7 +159,7 @@ class Webhook implements WebhookInterface
             return $data;
         }
 
-        $method = $request->route('method');
+        $method = (string) $request->route('method');
         $entity = new $fullClassName($data);
 
         $reflectionClass = new ReflectionClass(Method::class);

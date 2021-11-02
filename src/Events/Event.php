@@ -34,7 +34,7 @@ abstract class Event
     {
         $this->class = get_class($this);
         $this->url = $request->fullUrl();
-        $this->method = $request->route('method');
+        $this->method = (string) $request->route('method');
         $this->created_at = new Carbon();
     }
 }
