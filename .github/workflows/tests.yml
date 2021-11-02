@@ -30,7 +30,6 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
-          coverage: xdebug
       - name: Setup problem matchers
         run: |
           echo "::add-matcher::${{ runner.tool_cache }}/php.json"
@@ -40,10 +39,4 @@ jobs:
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
       - name: Execute tests
-        run: |
-          vendor/bin/phpunit
-          vendor/bin/phpunit --coverage-clover coverage.xml
-      - name: Upload
-        uses: codecov/codecov-action@v1
-        with:
-          files: ./coverage.xml
+        run: vendor/bin/phpunit
