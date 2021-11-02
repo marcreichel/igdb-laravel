@@ -5,17 +5,17 @@ namespace MarcReichel\IGDBLaravel\Traits;
 trait HasAttributes
 {
     /**
-     * @var array|string[]
+     * @var array
      */
     public array $attributes = [];
 
     /**
-     * @var array|string[]
+     * @var array
      */
     protected array $casts = [];
 
     /**
-     * @var array|string[]
+     * @var string[]
      */
     protected array $dates = [
         'created_at',

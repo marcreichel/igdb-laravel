@@ -23,7 +23,7 @@ class ApiHelper
 
         $accessToken = Cache::get($accessTokenCacheKey, false);
 
-        if ($accessToken) {
+        if ($accessToken && is_string($accessToken)) {
             return $accessToken;
         }
 
@@ -37,7 +37,7 @@ class ApiHelper
                 ->throw()
                 ->json();
 
-            if (isset($response['access_token']) && $response['expires_in']) {
+            if (is_array($response) && isset($response['access_token']) && $response['expires_in']) {
                 Cache::put($accessTokenCacheKey, (string)$response['access_token'], (int)$response['expires_in']);
 
                 $accessToken = $response['access_token'];

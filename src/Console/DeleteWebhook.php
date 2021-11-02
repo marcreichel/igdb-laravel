@@ -44,7 +44,7 @@ class DeleteWebhook extends Command
     {
         $webhook = Webhook::find($id);
 
-        if (!$webhook) {
+        if (!$webhook instanceof Webhook) {
             $this->error('Webhook not found.');
             return 1;
         }

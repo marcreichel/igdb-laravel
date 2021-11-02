@@ -4,8 +4,9 @@ namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
 use Closure;
-use Exception;
+use DateTimeInterface;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -55,9 +56,9 @@ class Builder
     /**
      * The cache lifetime.
      *
-     * @var mixed
+     * @var int
      */
-    private mixed $cacheLifetime;
+    private int $cacheLifetime;
 
     /**
      * Builder constructor.
@@ -144,7 +145,12 @@ class Builder
      */
     protected function resetCacheLifetime(): void
     {
-        $this->cacheLifetime = config('igdb.cache_lifetime');
+        $cache = config('igdb.cache_lifetime');
+        if (!is_int($cache)) {
+            throw new InvalidArgumentException('igdb.cache_lifetime needs to be int. ' . gettype($cache) . ' given.');
+        }
+
+        $this->cacheLifetime = $cache;
     }
 
     /**
@@ -249,7 +255,9 @@ class Builder
 
         return $this->whereNested(function ($query) use ($keys, $caseSensitive) {
             foreach ($keys as $v) {
-                $query->whereLike($v[0], $v[1], $caseSensitive, '|');
+                if (is_array($v)) {
+                    $query->whereLike($v[0], $v[1], $caseSensitive, '|');
+                }
             }
         }, $boolean);
     }
@@ -297,6 +305,10 @@ class Builder
 
         if (is_array($key)) {
             return $this->addArrayOfWheres($key, $boolean);
+        }
+
+        if (!is_string($key)) {
+            throw new InvalidArgumentException('Parameter #1 $key needs to be string. ' . gettype($key) . ' given.');
         }
 
         [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
@@ -514,6 +526,10 @@ class Builder
     ): array {
         if ($useDefault) {
             return [$operator, '='];
+        }
+
+        if (!is_string($operator) && !is_null($operator)) {
+            throw new InvalidArgumentException('Parameter #2 $operator needs to be string or null. ' . gettype($operator) . ' given.');
         }
 
         if ($this->invalidOperatorAndValue($operator, $value)) {
@@ -1194,7 +1210,9 @@ class Builder
      */
     private function whereDateGreaterThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
-        $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
+        if (is_string($value) || $value instanceof DateTimeInterface) {
+            $value = Carbon::parse($value)->addDay()->startOfDay()->timestamp;
+        }
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -1210,7 +1228,9 @@ class Builder
      */
     private function whereDateGreaterThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
-        $value = Carbon::parse($value)->startOfDay()->timestamp;
+        if (is_string($value) || $value instanceof DateTimeInterface) {
+            $value = Carbon::parse($value)->startOfDay()->timestamp;
+        }
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -1226,7 +1246,9 @@ class Builder
      */
     private function whereDateLowerThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
-        $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
+        if (is_string($value) || $value instanceof DateTimeInterface) {
+            $value = Carbon::parse($value)->subDay()->endOfDay()->timestamp;
+        }
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -1243,7 +1265,9 @@ class Builder
      */
     private function whereDateLowerThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
-        $value = Carbon::parse($value)->endOfDay()->timestamp;
+        if (is_string($value) || $value instanceof DateTimeInterface) {
+            $value = Carbon::parse($value)->endOfDay()->timestamp;
+        }
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -1490,12 +1514,12 @@ class Builder
      *
      * @param mixed $date
      *
-     * @return float|int|string
+     * @return mixed
      */
-    private function castDate(mixed $date): float|int|string
+    private function castDate(mixed $date): mixed
     {
-        if (!is_numeric($date)) {
-            return Carbon::parse((string)$date)->timestamp;
+        if (is_string($date)) {
+            return Carbon::parse($date)->timestamp;
         }
         return $date;
     }
@@ -1565,7 +1589,7 @@ class Builder
             return $data;
         }
 
-        if (isset($this->class)) {
+        if (isset($this->class) && is_string($this->class)) {
             $model = class_basename($this->class);
         } else {
             $model = Str::studly(Str::singular($this->endpoint));
@@ -1602,7 +1626,7 @@ class Builder
             return $data;
         }
 
-        if (isset($this->class)) {
+        if (isset($this->class) && is_string($this->class)) {
             $model = Str::plural(class_basename($this->class));
         } else {
             $model = Str::studly(Str::plural($this->endpoint));
@@ -1647,9 +1671,19 @@ class Builder
      */
     public function paginate(int $limit = 10): Paginator
     {
-        $page = optional(request())->get('page', 1);
+        $page = 1;
 
-        $data = $this->forPage($page, $limit)->get();
+        $request = request();
+
+        if ($request instanceof Request) {
+            $page = $request->get('page', 1);
+        }
+
+        if (!is_int($page) && !is_string($page)) {
+            $page = 1;
+        }
+
+        $data = $this->forPage((int) $page, $limit)->get();
 
         return new Paginator($data, $limit);
     }
@@ -1679,7 +1713,7 @@ class Builder
                 ->throw()
                 ->json();
 
-            if ($count) {
+            if ($count && is_array($response)) {
                 return $response['count'];
             }
 

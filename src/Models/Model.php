@@ -6,6 +6,8 @@ use Error;
 use ArrayAccess;
 use Carbon\Carbon;
 use BadMethodCallException;
+use Exception;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -301,12 +303,12 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param mixed $property
+     * @param string $property
      * @param mixed $value
      *
      * @return mixed
      */
-    private function mapToModel(mixed $property, mixed $value): mixed
+    private function mapToModel(string $property, mixed $value): mixed
     {
         $class = $this->getClassNameForProperty($property);
 
@@ -336,11 +338,11 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param mixed $property
+     * @param string $property
      *
      * @return bool|null|string
      */
-    protected function getClassNameForProperty(mixed $property): bool|null|string
+    protected function getClassNameForProperty(string $property): bool|null|string
     {
         if (collect($this->casts)->has($property)) {
             $class = collect($this->casts)->get($property);
@@ -431,6 +433,8 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
      * @throws AuthenticationException
      * @throws InvalidWebhookMethodException
      * @throws WebhookSecretMissingException
+     * @throws RequestException
+     * @throws Exception
      */
     public static function createWebhook(string $method, array $parameters = []): Webhook
     {
@@ -465,10 +469,16 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
         ])
         ->asForm();
 
-        return new Webhook(...$client->post($endpoint, [
+        $response = $client->post($endpoint, [
             'url' => $url,
             'method' => $method,
             'secret' => config('igdb.webhook_secret'),
-        ])->json());
+        ])->throw()->json();
+
+        if (!is_array($response)) {
+            throw new Exception('An error occured while trying to create the webhook.');
+        }
+
+        return new Webhook(...$response);
     }
 }

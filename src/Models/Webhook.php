@@ -3,6 +3,7 @@
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -195,25 +196,37 @@ class Webhook implements WebhookInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getModel(): mixed
+    public function getModel(): string
     {
         $reflectionCategory = new ReflectionClass(Category::class);
         $categories = collect($reflectionCategory->getConstants())->flip();
 
-        return $categories->get($this->category) ?? null;
+        $category = $categories->get($this->category);
+
+        if (!is_string($category)) {
+            return (string) $this->category;
+        }
+
+        return $category;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getMethod(): mixed
+    public function getMethod(): string
     {
         $reflectionMethod = new ReflectionClass(Method::class);
         $methods = collect($reflectionMethod->getConstants())->values();
 
-        return $methods->get($this->sub_category) ?? null;
+        $method = $methods->get($this->sub_category);
+
+        if (!is_string($method)) {
+            return (string) $this->sub_category;
+        }
+
+        return $method;
     }
 
     #[ArrayShape([
@@ -229,8 +242,8 @@ class Webhook implements WebhookInterface
         return [
             'id' => $this->id,
             'url' => $this->url,
-            'category' => $this->getModel() ?? $this->category,
-            'sub_category' => $this->getMethod() ?? $this->sub_category,
+            'category' => $this->getModel(),
+            'sub_category' => $this->getMethod(),
             'number_of_retries' => $this->number_of_retries,
             'active' => $this->active,
         ];
@@ -244,7 +257,7 @@ class Webhook implements WebhookInterface
         if ($parameters) {
             foreach ($parameters as $parameter => $value) {
                 if (property_exists($this, (string) $parameter)) {
-                    if (in_array($parameter, ['created_at', 'updated_at'])) {
+                    if (is_string($value) && in_array($parameter, ['created_at', 'updated_at'])) {
                         $this->{$parameter} = new Carbon($value);
                     } else {
                         $this->{$parameter} = $value;
