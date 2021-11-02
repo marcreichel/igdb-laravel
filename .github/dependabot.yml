@@ -11,3 +11,7 @@ updates:
       interval: "daily"
     assignees:
       - "marcreichel"
+    commit-message:
+      prefix: "⬆️"
+      prefix_development: "⬆️"
+      include_scope: false
