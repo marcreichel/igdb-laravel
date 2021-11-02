@@ -11,6 +11,7 @@ use JsonException;
 use MarcReichel\IGDBLaravel\Builder;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
+use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use ReflectionException;
 
 class BuilderTest extends TestCase
@@ -958,6 +959,32 @@ class BuilderTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @throws MissingEndpointException
+     */
+    public function it_should_throw_exception_for_first_or_fail_method(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->igdb->firstOrFail();
+    }
+
+    /**
+     * @test
+     * @throws InvalidParamsException
+     * @throws JsonException
+     * @throws MissingEndpointException
+     * @throws ModelNotFoundException
+     * @throws ReflectionException
+     */
+    public function it_should_throw_exception_for_find_or_fail_method(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->igdb->findOrFail(1337);
+    }
+
 
     /**
      * @test
@@ -1066,5 +1093,18 @@ class BuilderTest extends TestCase
         });
 
         self::assertEquals(1337, $count);
+    }
+
+    /**
+     * @test
+     * @throws MissingEndpointException
+     */
+    public function it_should_throw_exception_when_no_endpoint_is_set(): void
+    {
+        $this->expectException(MissingEndpointException::class);
+
+        $igdb = new Builder();
+
+        $igdb->get();
     }
 }

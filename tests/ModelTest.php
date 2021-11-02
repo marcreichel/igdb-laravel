@@ -2,9 +2,14 @@
 
 namespace MarcReichel\IGDBLaravel\Tests;
 
+use BadMethodCallException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
+use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
+use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
+use MarcReichel\IGDBLaravel\Models\Artwork;
+use MarcReichel\IGDBLaravel\Models\Company;
 use MarcReichel\IGDBLaravel\Models\Game;
 
 class ModelTest extends TestCase
@@ -513,5 +518,33 @@ class ModelTest extends TestCase
         });
 
         self::assertEquals(1337, $count);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_throw_exception_for_first_or_fail_method(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        Game::firstOrFail();
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_throw_exception_for_find_or_fail_method(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        Game::findOrFail(1337);
+    }
+
+    /** @test */
+    public function it_should_throw_exception_when_bad_method_is_called(): void
+    {
+        $this->expectException(BadMethodCallException::class);
+
+        Game::foo();
     }
 }

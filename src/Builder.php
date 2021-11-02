@@ -1565,7 +1565,7 @@ class Builder
             return $data;
         }
 
-        if ($this->class) {
+        if (isset($this->class)) {
             $model = class_basename($this->class);
         } else {
             $model = Str::studly(Str::singular($this->endpoint));
@@ -1602,7 +1602,7 @@ class Builder
             return $data;
         }
 
-        if ($this->class) {
+        if (isset($this->class)) {
             $model = Str::plural(class_basename($this->class));
         } else {
             $model = Str::studly(Str::plural($this->endpoint));
@@ -1662,7 +1662,7 @@ class Builder
      */
     private function fetchApi(bool $count = false): mixed
     {
-        if (!$this->endpoint) {
+        if (!isset($this->endpoint)) {
             throw new MissingEndpointException();
         }
 

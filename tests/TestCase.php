@@ -40,6 +40,7 @@ class TestCase extends Orchestra
             },
             '*/webhooks' => Http::response(),
             '*/count' => Http::response(['count' => 1337]),
+            '*/companies' => Http::response(['id' => 1337, 'name' => 'Fortnite']),
             '*' => Http::response(),
         ]);
     }
