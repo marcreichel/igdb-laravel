@@ -3,6 +3,10 @@ name: PHPStan (PR)
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '.github/**'
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   build:
