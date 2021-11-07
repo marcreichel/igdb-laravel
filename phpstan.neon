@@ -12,6 +12,7 @@ parameters:
     - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist.#'
     - '#Call to an undefined static method MarcReichel\\IGDBLaravel\\Models\\Game::foo\(\).#'
     - '#Parameter \#1 \$string of function md5 expects string, mixed given.#'
+    - '#Cannot call method getUrl\(\) on mixed.#'
     # - '#Unsafe usage of new static#'
   excludePaths:
     # - ./*/*/FileToBeExcluded.php

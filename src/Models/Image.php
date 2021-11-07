@@ -15,7 +15,7 @@ abstract class Image extends Model
     {
         $availableSizes = new ReflectionClass(Size::class);
         $constants = collect($availableSizes->getConstants());
-        $sizeFromEnum = $constants->first(function($value) use ($size) {
+        $sizeFromEnum = $constants->first(function ($value) use ($size) {
             return $value === $size;
         });
 
@@ -24,12 +24,12 @@ abstract class Image extends Model
         }
 
         $basePath = static::IMAGE_BASE_PATH;
-        $id = $this->getAttribute('image_id');
+        $id = '' . $this->getAttribute('image_id');
 
         if ($retina) {
-            $sizeFromEnum = Str::finish($sizeFromEnum, '_2x');
+            $size = Str::finish('' . $sizeFromEnum, '_2x');
         }
 
-        return "$basePath/t_$sizeFromEnum/$id.jpg";
+        return "$basePath/t_$size/$id.jpg";
     }
 }
