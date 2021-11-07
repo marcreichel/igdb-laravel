@@ -82,7 +82,7 @@ class CreateWebhook extends Command
      */
     private function getModels(): array
     {
-        $pattern = '/\/(?:Model|Search|Webhook)\.php$/';
+        $pattern = '/\/(?:Model|Search|Webhook|Image)\.php$/';
         $glob = glob(__DIR__ . '/../Models/*.php');
 
         if (!$glob) {
