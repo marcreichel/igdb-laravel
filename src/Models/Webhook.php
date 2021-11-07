@@ -3,7 +3,6 @@
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;

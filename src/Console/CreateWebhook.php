@@ -5,9 +5,7 @@ namespace MarcReichel\IGDBLaravel\Console;
 use Exception;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
-use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
-use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Models\Model;
 
 class CreateWebhook extends Command
