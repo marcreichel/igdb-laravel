@@ -1521,6 +1521,9 @@ class Builder
         if (is_string($date)) {
             return Carbon::parse($date)->timestamp;
         }
+        if ($date instanceof Carbon) {
+            return $date->timestamp;
+        }
         return $date;
     }
 
