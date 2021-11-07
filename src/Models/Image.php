@@ -5,12 +5,16 @@ namespace MarcReichel\IGDBLaravel\Models;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Enums\Image\Size;
+use MarcReichel\IGDBLaravel\Exceptions\PropertyDoesNotExist;
 use ReflectionClass;
 
 abstract class Image extends Model
 {
     protected const IMAGE_BASE_PATH = '//images.igdb.com/igdb/image/upload';
 
+    /**
+     * @throws PropertyDoesNotExist|InvalidArgumentException
+     */
     public function getUrl(string $size = 'thumb', bool $retina = false): string
     {
         $availableSizes = new ReflectionClass(Size::class);
@@ -24,7 +28,13 @@ abstract class Image extends Model
         }
 
         $basePath = static::IMAGE_BASE_PATH;
-        $id = '' . $this->getAttribute('image_id');
+        $id = $this->getAttribute('image_id');
+
+        if (is_null($id)) {
+            throw new PropertyDoesNotExist('Property [image_id] is missing from the response. Make sure you specify `image_id` inside the fields attribute.');
+        }
+
+        $id = '' . $id;
 
         if ($retina) {
             $size = Str::finish('' . $sizeFromEnum, '_2x');
