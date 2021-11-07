@@ -2,7 +2,7 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-class PlatformLogo extends Model
+class PlatformLogo extends Image
 {
     //
 }

@@ -2,7 +2,7 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-class Screenshot extends Model
+class Screenshot extends Image
 {
     //
 }

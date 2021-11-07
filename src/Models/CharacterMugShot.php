@@ -2,7 +2,7 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-class CharacterMugShot extends Model
+class CharacterMugShot extends Image
 {
     //
 }

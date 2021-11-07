@@ -2,7 +2,7 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-class Cover extends Model
+class Cover extends Image
 {
     //
 }

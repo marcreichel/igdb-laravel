@@ -2,7 +2,7 @@
 
 namespace MarcReichel\IGDBLaravel\Models;
 
-class GameEngineLogo extends Model
+class GameEngineLogo extends Image
 {
     //
 }
