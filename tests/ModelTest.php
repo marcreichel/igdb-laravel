@@ -4,16 +4,41 @@ namespace MarcReichel\IGDBLaravel\Tests;
 
 use BadMethodCallException;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
-use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
-use MarcReichel\IGDBLaravel\Models\Artwork;
-use MarcReichel\IGDBLaravel\Models\Company;
 use MarcReichel\IGDBLaravel\Models\Game;
 
 class ModelTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::put('igdb_cache.access_token', 'some-token');
+
+        Http::fake([
+            '*/oauth2/token*' => Http::response([
+                'access_token' => 'test-suite-token',
+                'expires_in' => 3600
+            ]),
+            '*/games/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/companies/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/artworks/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/webhooks' => Http::response(),
+            '*/count' => Http::response(['count' => 1337]),
+            '*/companies' => Http::response(['id' => 1337, 'name' => 'Fortnite']),
+            '*' => Http::response(),
+        ]);
+    }
+
     /** @test */
     public function it_should_generate_fields_query(): void
     {

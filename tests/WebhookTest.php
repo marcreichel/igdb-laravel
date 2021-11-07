@@ -2,7 +2,9 @@
 
 namespace MarcReichel\IGDBLaravel\Tests;
 
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
@@ -126,6 +128,39 @@ use MarcReichel\IGDBLaravel\Models\Game;
 
 class WebhookTest extends TestCase
 {
+    private string $hash;
+    private string $prefix;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->hash = substr(md5(config('igdb.credentials.client_id')), 0, 8);
+        $this->prefix = 'igdb-webhook/handle/' . $this->hash;
+
+        Cache::put('igdb_cache.access_token', 'some-token');
+
+        Http::fake([
+            '*/oauth2/token*' => Http::response([
+                'access_token' => 'test-suite-token',
+                'expires_in' => 3600
+            ]),
+            '*/games/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/companies/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/artworks/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/webhooks' => Http::response(),
+            '*/count' => Http::response(['count' => 1337]),
+            '*/companies' => Http::response(['id' => 1337, 'name' => 'Fortnite']),
+            '*' => Http::response(),
+        ]);
+    }
+
     /** @test */
     public function it_should_generate_webhook(): void
     {
@@ -136,7 +171,7 @@ class WebhookTest extends TestCase
         });
 
         self::assertEquals(0, $webhook->sub_category);
-        self::assertEquals('http://localhost/igdb-webhook/handle/games/create', $webhook->url);
+        self::assertEquals('http://localhost/' . $this->prefix . '/games/create', $webhook->url);
 
         $webhook = Company::createWebhook(Method::UPDATE);
 
@@ -145,7 +180,7 @@ class WebhookTest extends TestCase
         });
 
         self::assertEquals(2, $webhook->sub_category);
-        self::assertEquals('http://localhost/igdb-webhook/handle/companies/update', $webhook->url);
+        self::assertEquals('http://localhost/' . $this->prefix . '/companies/update', $webhook->url);
 
         $webhook = Artwork::createWebhook(Method::DELETE);
 
@@ -154,7 +189,7 @@ class WebhookTest extends TestCase
         });
 
         self::assertEquals(1, $webhook->sub_category);
-        self::assertEquals('http://localhost/igdb-webhook/handle/artworks/delete', $webhook->url);
+        self::assertEquals('http://localhost/' . $this->prefix . '/artworks/delete', $webhook->url);
     }
 
     /** @test */
@@ -178,7 +213,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_age_rating_content_destription_created_event(): void
     {
-        $url = 'igdb-webhook/handle/age_rating_content_description/create';
+        $url = $this->prefix . '/age_rating_content_description/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -193,7 +228,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_age_rating_content_destription_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/age_rating_content_description/delete';
+        $url = $this->prefix . '/age_rating_content_description/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -208,7 +243,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_age_rating_content_destription_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/age_rating_content_description/update';
+        $url = $this->prefix . '/age_rating_content_description/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -223,7 +258,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_age_rating_created_event(): void
     {
-        $url = 'igdb-webhook/handle/age_rating/create';
+        $url = $this->prefix . '/age_rating/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -238,7 +273,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_age_rating_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/age_rating/delete';
+        $url = $this->prefix . '/age_rating/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -253,7 +288,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_age_rating_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/age_rating/update';
+        $url = $this->prefix . '/age_rating/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -268,7 +303,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_alternative_name_created_event(): void
     {
-        $url = 'igdb-webhook/handle/alternative_name/create';
+        $url = $this->prefix . '/alternative_name/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -283,7 +318,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_alternative_name_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/alternative_name/delete';
+        $url = $this->prefix . '/alternative_name/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -298,7 +333,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_alternative_name_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/alternative_name/update';
+        $url = $this->prefix . '/alternative_name/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -313,7 +348,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_artwork_created_event(): void
     {
-        $url = 'igdb-webhook/handle/artwork/create';
+        $url = $this->prefix . '/artwork/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -328,7 +363,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_artwork_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/artwork/delete';
+        $url = $this->prefix . '/artwork/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -343,7 +378,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_artwork_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/artwork/update';
+        $url = $this->prefix . '/artwork/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -358,7 +393,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_character_created_event(): void
     {
-        $url = 'igdb-webhook/handle/character/create';
+        $url = $this->prefix . '/character/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -373,7 +408,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_character_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/character/delete';
+        $url = $this->prefix . '/character/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -388,7 +423,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_character_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/character/update';
+        $url = $this->prefix . '/character/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -403,7 +438,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_character_mug_shot_created_event(): void
     {
-        $url = 'igdb-webhook/handle/character_mug_shot/create';
+        $url = $this->prefix . '/character_mug_shot/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -418,7 +453,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_character_mug_shot_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/character_mug_shot/delete';
+        $url = $this->prefix . '/character_mug_shot/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -433,7 +468,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_character_mug_shot_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/character_mug_shot/update';
+        $url = $this->prefix . '/character_mug_shot/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -448,7 +483,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_collection_created_event(): void
     {
-        $url = 'igdb-webhook/handle/collection/create';
+        $url = $this->prefix . '/collection/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -463,7 +498,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_collection_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/collection/delete';
+        $url = $this->prefix . '/collection/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -478,7 +513,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_collection_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/collection/update';
+        $url = $this->prefix . '/collection/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -493,7 +528,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_created_event(): void
     {
-        $url = 'igdb-webhook/handle/company/create';
+        $url = $this->prefix . '/company/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -508,7 +543,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/company/delete';
+        $url = $this->prefix . '/company/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -523,7 +558,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/company/update';
+        $url = $this->prefix . '/company/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -538,7 +573,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_logo_created_event(): void
     {
-        $url = 'igdb-webhook/handle/company_logo/create';
+        $url = $this->prefix . '/company_logo/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -553,7 +588,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_logo_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/company_logo/delete';
+        $url = $this->prefix . '/company_logo/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -568,7 +603,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_logo_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/company_logo/update';
+        $url = $this->prefix . '/company_logo/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -583,7 +618,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_website_created_event(): void
     {
-        $url = 'igdb-webhook/handle/company_website/create';
+        $url = $this->prefix . '/company_website/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -598,7 +633,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_website_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/company_website/delete';
+        $url = $this->prefix . '/company_website/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -613,7 +648,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_company_website_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/company_website/update';
+        $url = $this->prefix . '/company_website/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -628,7 +663,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_cover_created_event(): void
     {
-        $url = 'igdb-webhook/handle/cover/create';
+        $url = $this->prefix . '/cover/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -643,7 +678,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_cover_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/cover/delete';
+        $url = $this->prefix . '/cover/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -658,7 +693,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_cover_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/cover/update';
+        $url = $this->prefix . '/cover/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -673,7 +708,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_external_game_created_event(): void
     {
-        $url = 'igdb-webhook/handle/external_game/create';
+        $url = $this->prefix . '/external_game/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -688,7 +723,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_external_game_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/external_game/delete';
+        $url = $this->prefix . '/external_game/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -703,7 +738,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_external_game_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/external_game/update';
+        $url = $this->prefix . '/external_game/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -718,7 +753,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_franchise_created_event(): void
     {
-        $url = 'igdb-webhook/handle/franchise/create';
+        $url = $this->prefix . '/franchise/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -733,7 +768,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_franchise_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/franchise/delete';
+        $url = $this->prefix . '/franchise/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -748,7 +783,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_franchise_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/franchise/update';
+        $url = $this->prefix . '/franchise/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -763,7 +798,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game/create';
+        $url = $this->prefix . '/game/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -778,7 +813,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game/delete';
+        $url = $this->prefix . '/game/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -793,7 +828,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game/update';
+        $url = $this->prefix . '/game/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -808,7 +843,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_engine_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_engine/create';
+        $url = $this->prefix . '/game_engine/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -823,7 +858,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_engine_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_engine/delete';
+        $url = $this->prefix . '/game_engine/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -838,7 +873,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_engine_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_engine/update';
+        $url = $this->prefix . '/game_engine/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -853,7 +888,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_engine_logo_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_engine_logo/create';
+        $url = $this->prefix . '/game_engine_logo/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -868,7 +903,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_engine_logo_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_engine_logo/delete';
+        $url = $this->prefix . '/game_engine_logo/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -883,7 +918,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_engine_logo_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_engine_logo/update';
+        $url = $this->prefix . '/game_engine_logo/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -898,7 +933,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_mode_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_mode/create';
+        $url = $this->prefix . '/game_mode/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -913,7 +948,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_mode_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_mode/delete';
+        $url = $this->prefix . '/game_mode/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -928,7 +963,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_mode_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_mode/update';
+        $url = $this->prefix . '/game_mode/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -943,7 +978,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version/create';
+        $url = $this->prefix . '/game_version/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -958,7 +993,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version/delete';
+        $url = $this->prefix . '/game_version/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -973,7 +1008,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version/update';
+        $url = $this->prefix . '/game_version/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -988,7 +1023,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_feature_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version_feature/create';
+        $url = $this->prefix . '/game_version_feature/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1003,7 +1038,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_feature_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version_feature/delete';
+        $url = $this->prefix . '/game_version_feature/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1018,7 +1053,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_feature_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version_feature/update';
+        $url = $this->prefix . '/game_version_feature/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1033,7 +1068,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_feature_value_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version_feature_value/create';
+        $url = $this->prefix . '/game_version_feature_value/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1048,7 +1083,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_feature_value_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version_feature_value/delete';
+        $url = $this->prefix . '/game_version_feature_value/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1063,7 +1098,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_version_feature_value_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_version_feature_value/update';
+        $url = $this->prefix . '/game_version_feature_value/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1078,7 +1113,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_video_created_event(): void
     {
-        $url = 'igdb-webhook/handle/game_video/create';
+        $url = $this->prefix . '/game_video/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1093,7 +1128,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_video_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/game_video/delete';
+        $url = $this->prefix . '/game_video/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1108,7 +1143,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_game_video_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/game_video/update';
+        $url = $this->prefix . '/game_video/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1123,7 +1158,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_genre_created_event(): void
     {
-        $url = 'igdb-webhook/handle/genre/create';
+        $url = $this->prefix . '/genre/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1138,7 +1173,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_genre_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/genre/delete';
+        $url = $this->prefix . '/genre/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1153,7 +1188,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_genre_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/genre/update';
+        $url = $this->prefix . '/genre/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1168,7 +1203,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_involved_company_created_event(): void
     {
-        $url = 'igdb-webhook/handle/involved_company/create';
+        $url = $this->prefix . '/involved_company/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1183,7 +1218,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_involved_company_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/involved_company/delete';
+        $url = $this->prefix . '/involved_company/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1198,7 +1233,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_involved_company_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/involved_company/update';
+        $url = $this->prefix . '/involved_company/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1213,7 +1248,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_keyword_created_event(): void
     {
-        $url = 'igdb-webhook/handle/keyword/create';
+        $url = $this->prefix . '/keyword/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1228,7 +1263,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_keyword_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/keyword/delete';
+        $url = $this->prefix . '/keyword/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1243,7 +1278,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_keyword_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/keyword/update';
+        $url = $this->prefix . '/keyword/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1258,7 +1293,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_multiplayer_mode_created_event(): void
     {
-        $url = 'igdb-webhook/handle/multiplayer_mode/create';
+        $url = $this->prefix . '/multiplayer_mode/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1273,7 +1308,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_multiplayer_mode_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/multiplayer_mode/delete';
+        $url = $this->prefix . '/multiplayer_mode/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1288,7 +1323,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_multiplayer_mode_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/multiplayer_mode/update';
+        $url = $this->prefix . '/multiplayer_mode/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1303,7 +1338,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform/create';
+        $url = $this->prefix . '/platform/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1318,7 +1353,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform/delete';
+        $url = $this->prefix . '/platform/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1333,7 +1368,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform/update';
+        $url = $this->prefix . '/platform/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1348,7 +1383,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_family_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_family/create';
+        $url = $this->prefix . '/platform_family/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1363,7 +1398,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_family_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_family/delete';
+        $url = $this->prefix . '/platform_family/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1378,7 +1413,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_family_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_family/update';
+        $url = $this->prefix . '/platform_family/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1393,7 +1428,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_logo_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_logo/create';
+        $url = $this->prefix . '/platform_logo/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1408,7 +1443,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_logo_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_logo/delete';
+        $url = $this->prefix . '/platform_logo/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1423,7 +1458,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_logo_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_logo/update';
+        $url = $this->prefix . '/platform_logo/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1438,7 +1473,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_company_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version_company/create';
+        $url = $this->prefix . '/platform_version_company/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1453,7 +1488,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_company_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version_company/delete';
+        $url = $this->prefix . '/platform_version_company/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1468,7 +1503,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_company_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version_company/update';
+        $url = $this->prefix . '/platform_version_company/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1483,7 +1518,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version/create';
+        $url = $this->prefix . '/platform_version/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1498,7 +1533,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version/delete';
+        $url = $this->prefix . '/platform_version/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1513,7 +1548,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version/update';
+        $url = $this->prefix . '/platform_version/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1528,7 +1563,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_release_date_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version_release_date/create';
+        $url = $this->prefix . '/platform_version_release_date/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1543,7 +1578,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_release_date_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version_release_date/delete';
+        $url = $this->prefix . '/platform_version_release_date/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1558,7 +1593,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_version_release_date_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_version_release_date/update';
+        $url = $this->prefix . '/platform_version_release_date/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1573,7 +1608,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_website_created_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_website/create';
+        $url = $this->prefix . '/platform_website/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1588,7 +1623,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_website_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_website/delete';
+        $url = $this->prefix . '/platform_website/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1603,7 +1638,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_platform_website_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/platform_website/update';
+        $url = $this->prefix . '/platform_website/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1618,7 +1653,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_player_perspective_created_event(): void
     {
-        $url = 'igdb-webhook/handle/player_perspective/create';
+        $url = $this->prefix . '/player_perspective/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1633,7 +1668,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_player_perspective_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/player_perspective/delete';
+        $url = $this->prefix . '/player_perspective/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1648,7 +1683,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_player_perspective_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/player_perspective/update';
+        $url = $this->prefix . '/player_perspective/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1663,7 +1698,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_release_date_created_event(): void
     {
-        $url = 'igdb-webhook/handle/release_date/create';
+        $url = $this->prefix . '/release_date/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1678,7 +1713,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_release_date_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/release_date/delete';
+        $url = $this->prefix . '/release_date/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1693,7 +1728,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_release_date_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/release_date/update';
+        $url = $this->prefix . '/release_date/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1708,7 +1743,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_screenshot_created_event(): void
     {
-        $url = 'igdb-webhook/handle/screenshot/create';
+        $url = $this->prefix . '/screenshot/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1723,7 +1758,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_screenshot_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/screenshot/delete';
+        $url = $this->prefix . '/screenshot/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1738,7 +1773,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_screenshot_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/screenshot/update';
+        $url = $this->prefix . '/screenshot/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1753,7 +1788,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_theme_created_event(): void
     {
-        $url = 'igdb-webhook/handle/theme/create';
+        $url = $this->prefix . '/theme/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1768,7 +1803,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_theme_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/theme/delete';
+        $url = $this->prefix . '/theme/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1783,7 +1818,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_theme_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/theme/update';
+        $url = $this->prefix . '/theme/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1798,7 +1833,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_website_created_event(): void
     {
-        $url = 'igdb-webhook/handle/website/create';
+        $url = $this->prefix . '/website/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1813,7 +1848,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_website_deleted_event(): void
     {
-        $url = 'igdb-webhook/handle/website/delete';
+        $url = $this->prefix . '/website/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1828,7 +1863,7 @@ class WebhookTest extends TestCase
     /** @test */
     public function it_should_dispatch_website_updated_event(): void
     {
-        $url = 'igdb-webhook/handle/website/update';
+        $url = $this->prefix . '/website/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -1846,7 +1881,7 @@ class WebhookTest extends TestCase
         $this->withoutExceptionHandling();
         $this->expectException(InvalidWebhookSecretException::class);
 
-        $url = 'igdb-webhook/handle/games/create';
+        $url = $this->prefix . '/games/create';
 
         $this->withHeaders([
             'X-Secret' => 'foobar',
@@ -1854,5 +1889,20 @@ class WebhookTest extends TestCase
             ->postJson($url, ['id' => 1337]);
 
         Event::assertNotDispatched(GameCreated::class);
+    }
+
+    /** @test */
+    public function it_should_keep_dispatching_event_for_deprecated_url(): void
+    {
+        $url = 'igdb-webhook/handle/website/update';
+
+        $response = $this->withHeaders([
+            'X-Secret' => 'secret',
+        ])
+            ->postJson($url, ['id' => 1337]);
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched(WebsiteUpdated::class);
     }
 }

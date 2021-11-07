@@ -25,6 +25,28 @@ class BuilderTest extends TestCase
     {
         parent::setUp();
 
+        Cache::put('igdb_cache.access_token', 'some-token');
+
+        Http::fake([
+            '*/oauth2/token*' => Http::response([
+                'access_token' => 'test-suite-token',
+                'expires_in' => 3600
+            ]),
+            '*/games/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/companies/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/artworks/webhooks' => function (Request $request) {
+                return $this->createWebhookResponse($request);
+            },
+            '*/webhooks' => Http::response(),
+            '*/count' => Http::response(['count' => 1337]),
+            '*/companies' => Http::response(['id' => 1337, 'name' => 'Fortnite']),
+            '*' => Http::response(),
+        ]);
+
         $this->igdb = new Builder('games');
     }
 
