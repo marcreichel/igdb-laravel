@@ -8,6 +8,7 @@ use JetBrains\PhpStorm\ArrayShape;
 use MarcReichel\IGDBLaravel\Console\CreateWebhook;
 use MarcReichel\IGDBLaravel\Console\DeleteWebhook;
 use MarcReichel\IGDBLaravel\Console\ListWebhooks;
+use MarcReichel\IGDBLaravel\Console\PublishCommand;
 use MarcReichel\IGDBLaravel\Console\ReactivateWebhook;
 
 class IGDBLaravelServiceProvider extends ServiceProvider
@@ -21,7 +22,7 @@ class IGDBLaravelServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__ . '/../config/config.php' => config_path('igdb.php'),
-        ]);
+        ], 'igdb:config');
 
         Route::group($this->routeConfiguration(), function () {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
@@ -29,6 +30,7 @@ class IGDBLaravelServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                PublishCommand::class,
                 CreateWebhook::class,
                 ListWebhooks::class,
                 DeleteWebhook::class,
