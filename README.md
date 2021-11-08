@@ -77,7 +77,6 @@ composer test
 
 ## Roadmap
 
-- Clean up and restructure/optimize Docs
 - Restructure/Optimize Builder class for better code quality
 
 ## Contribution
