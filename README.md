@@ -25,7 +25,7 @@ The package will automatically register its service provider.
 To publish the config file to `config/igdb.php` run:
 
 ```bash
-php artisan vendor:publish --provider="MarcReichel\IGDBLaravel\IGDBLaravelServiceProvider"
+php artisan igdb:publish
 ```
 
 This is the default content of the config file:
