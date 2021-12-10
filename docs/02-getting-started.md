@@ -11,6 +11,7 @@ Each endpoint of the API is mapped to its own model.
 To get a list of games you simply call something like this:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::where('name', 'Fortnite')->get();
@@ -27,6 +28,7 @@ _This method is used in the examples in the documentation._
 You can also use the Query Builder (which is used under the hood) directly if you want to:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Builder as IGDB;
 
 $igdb = new IGDB('games'); // 'games' is the endpoint

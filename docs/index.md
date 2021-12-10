@@ -12,3 +12,12 @@
 This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse) including [webhook handling](90-webhooks.md) since version 2.3.0.
 
 It handles authentication and caching of the IGDB API automatically.
+
+## Example
+
+```php
+// torchlight! {"lineNumbers": false}
+use MarcReichel\IGDBLaravel\Models\Game;
+
+$game = Game::where('name', 'Fortnite')->first();
+```

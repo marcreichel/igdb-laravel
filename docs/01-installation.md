@@ -19,6 +19,7 @@ php artisan igdb:publish
 This is the default content of the config file:
 
 ```php
+// torchlight! {"lineNumbers": false}
 <?php
 
 return [

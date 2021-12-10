@@ -3,6 +3,7 @@
 ## Simple where clause
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::where('first_release_date', '>=', now()->subMonth())
@@ -15,6 +16,7 @@ For convenience, if you want to verify that a column is equal to a given value, 
 second argument to the `where` method:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::where('name', 'Fortnite')->get();
@@ -30,6 +32,7 @@ You may chain where constraints together as well as add `or` clauses to the quer
 arguments as the where method:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::where('name', 'Fortnite')
@@ -44,6 +47,7 @@ $games = Game::where('name', 'Fortnite')
 The `whereBetween` method verifies that a fields's value is between two values:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereBetween('first_release_date', now()->subYear(), now())
@@ -58,6 +62,7 @@ The `whereNotBetween` method verifies that a field's value lies outside of two
 values:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereNotBetween('first_release_date', now()->subYear(), now())
@@ -72,6 +77,7 @@ The `whereIn` method verifies that a given field's value is contained within the
 given array:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereIn('category', [0,4])->get();
@@ -83,6 +89,7 @@ The `whereNotIn` method verifies that the given field's value is **not**
 contained in the given array:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereNotIn('category', [0,4])->get();
@@ -97,6 +104,7 @@ Alternatively you could use one of these methods to match against **all** or **e
 The `whereNull` method verifies that the value of the given field is `NULL`:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereNull('first_release_date')->get();
@@ -107,6 +115,7 @@ $games = Game::whereNull('first_release_date')->get();
 The `whereNotNull` method verifies that the field's value is **not** `NULL`:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereNotNull('first_release_date')->get();
@@ -117,6 +126,7 @@ $games = Game::whereNotNull('first_release_date')->get();
 The `whereDate` method may be used to compare a field's value against a date:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereDate('first_release_date', '2019-01-01')
@@ -129,6 +139,7 @@ The `whereYear` method may be used to compare a fields's value against a specifi
 year:
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::whereYear('first_release_date', 2019)
@@ -143,6 +154,7 @@ do the exact same thing.
 ## Parameter Grouping
 
 ```php
+// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::where('name', 'Fortnite')
