@@ -1,5 +1,12 @@
 # Installation
 
+## Create Twitch Developer App
+
+[Create](https://dev.twitch.tv/console/apps/create) a new Twitch Developer App and set the `Client ID` and
+`Client Secret` as described below.
+
+## Install the package
+
 You can install this package via composer using:
 
 ```bash
