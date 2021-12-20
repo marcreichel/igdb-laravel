@@ -7,12 +7,12 @@ parameters:
     - tests
 
   # The level 9 is the highest level
-  level: 9
+  level: 8
   ignoreErrors:
     - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist.#'
     - '#Call to an undefined static method MarcReichel\\IGDBLaravel\\Models\\Game::foo\(\).#'
-    - '#Parameter \#1 \$string of function md5 expects string, mixed given.#'
-    - '#Cannot call method getUrl\(\) on mixed.#'
+    # - '#Parameter \#1 \$string of function md5 expects string, mixed given.#'
+    # - '#Cannot call method getUrl\(\) on mixed.#'
     # - '#Unsafe usage of new static#'
   excludePaths:
     # - ./*/*/FileToBeExcluded.php

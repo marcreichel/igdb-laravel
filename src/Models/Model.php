@@ -17,6 +17,7 @@ use Illuminate\Contracts\Support\{Jsonable, Arrayable};
 use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Interfaces\ModelInterface;
@@ -114,11 +115,11 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param mixed $field
+     * @param string $field
      *
      * @return mixed
      */
-    public function __get(mixed $field): mixed
+    public function __get(string $field): mixed
     {
         return $this->getAttribute($field);
     }
@@ -151,7 +152,7 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
      */
     public function offsetGet($offset): mixed
     {
-        return $this->getAttribute($offset);
+        return $this->getAttribute((string) $offset);
     }
 
     /**
@@ -275,7 +276,7 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
 
     /**
      * @return Builder
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidParamsException
      */
     public function newQuery(): Builder
     {
@@ -293,11 +294,11 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param mixed $field
+     * @param string $field
      *
      * @return mixed
      */
-    public function getAttribute(mixed $field): mixed
+    public function getAttribute(string $field): mixed
     {
         return collect($this->attributes)->merge($this->relations)->get($field);
     }
