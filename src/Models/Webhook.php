@@ -202,7 +202,7 @@ class Webhook implements WebhookInterface
         $reflectionCategory = new ReflectionClass(Category::class);
         $categories = collect($reflectionCategory->getConstants())->flip();
 
-        $category = $categories->get($this->category);
+        $category = $categories->get((string) $this->category);
 
         if (!is_string($category)) {
             return (string) $this->category;
@@ -219,7 +219,7 @@ class Webhook implements WebhookInterface
         $reflectionMethod = new ReflectionClass(Method::class);
         $methods = collect($reflectionMethod->getConstants())->values();
 
-        $method = $methods->get($this->sub_category);
+        $method = $methods->get((string) $this->sub_category);
 
         if (!is_string($method)) {
             return (string) $this->sub_category;
