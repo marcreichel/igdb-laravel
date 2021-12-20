@@ -9,6 +9,8 @@
 [![GitHub](https://img.shields.io/github/license/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
 [![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev)
 
+![Cover](art/cover.png){style="width: 100%"}
+
 This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse) including [webhook handling](90-webhooks.md) since version 2.3.0.
 
 It handles authentication and caching of the IGDB API automatically.
