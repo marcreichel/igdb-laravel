@@ -9,7 +9,7 @@ on:
       - 'README.md'
 
 jobs:
-  test:
+  run-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
