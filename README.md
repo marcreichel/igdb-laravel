@@ -1,18 +1,38 @@
-# Laravel IGDB Wrapper
+<h1 align="center">Laravel IGDB Wrapper</h1>
 
-[![Packagist Version](https://img.shields.io/packagist/v/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
-[![tests](https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml/badge.svg?event=push)](https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml)
-[![PHPStan](https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml/badge.svg?event=push)](https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml)
-[![CodeFactor](https://www.codefactor.io/repository/github/marcreichel/igdb-laravel/badge)](https://www.codefactor.io/repository/github/marcreichel/igdb-laravel)
-[![codecov](https://codecov.io/gh/marcreichel/igdb-laravel/branch/main/graph/badge.svg?token=m6FOB0CyPE)](https://codecov.io/gh/marcreichel/igdb-laravel)
-[![GitHub](https://img.shields.io/github/license/marcreichel/igdb-laravel)](https://packagist.org/packages/marcreichel/igdb-laravel)
-[![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg)](https://gitmoji.dev)
+<p align="center">
+    <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
+        <img src="https://img.shields.io/packagist/v/marcreichel/igdb-laravel" alt="Packagist Version">
+    </a>
+    <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
+        <img src="https://img.shields.io/packagist/dt/marcreichel/igdb-laravel" alt="Packagist Downloads">
+    </a>
+    <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml">
+        <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml/badge.svg?event=push" alt="Tests">
+    </a>
+    <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml">
+        <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml/badge.svg?event=push" alt="PHPStan">
+    </a>
+    <a href="https://www.codefactor.io/repository/github/marcreichel/igdb-laravel">
+        <img src="https://www.codefactor.io/repository/github/marcreichel/igdb-laravel/badge" alt="CodeFactor">
+    </a>
+    <a href="https://codecov.io/gh/marcreichel/igdb-laravel">
+        <img src="https://codecov.io/gh/marcreichel/igdb-laravel/branch/main/graph/badge.svg?token=m6FOB0CyPE" alt="codecov">
+    </a>
+    <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
+        <img src="https://img.shields.io/github/license/marcreichel/igdb-laravel" alt="License">
+    </a>
+    <a href="https://gitmoji.dev">
+        <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji">
+    </a>
+</p>
+
+<p align="center">
+    This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse)
+    including [webhook handling](#-webhooks-since-v230) since version 2.3.0.
+</p>
 
 ![Cover](docs/art/cover.png)
-
-This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse)
-including [webhook handling](#-webhooks-since-v230) since version 2.3.0.
 
 ## Basic installation
 
