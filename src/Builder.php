@@ -1712,6 +1712,7 @@ class Builder
                 'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
             ])
                 ->withBody($this->getQuery(), 'plain/text')
+                ->retry(3, 100)
                 ->post($endpoint)
                 ->throw()
                 ->json();
