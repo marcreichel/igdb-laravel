@@ -19,10 +19,10 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5.4",
-    "orchestra/testbench": "^6.23",
-    "nunomaduro/collision": "^5.3",
+    "orchestra/testbench": "^6.23|^7.0",
+    "nunomaduro/collision": "^5.3|^6.1",
     "roave/security-advisories": "dev-latest",
-    "nunomaduro/larastan": "^1.0.0",
+    "nunomaduro/larastan": "^1.0.0|^2.0.0",
     "brainmaestro/composer-git-hooks": "^2.8"
   },
   "license": "MIT",
