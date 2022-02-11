@@ -11,7 +11,7 @@
   ],
   "type": "library",
   "require": {
-    "php": "^8.0",
+    "php": "^8.0.2",
     "laravel/framework": "^8.40.0|^9.0",
     "guzzlehttp/guzzle": "~6.0|~7.0",
     "nesbot/carbon": "^2.53.1",
@@ -22,8 +22,7 @@
     "orchestra/testbench": "^6.23|^7.0",
     "nunomaduro/collision": "^5.3|^6.1",
     "roave/security-advisories": "dev-latest",
-    "nunomaduro/larastan": "^1.0.0|^2.0.0",
-    "brainmaestro/composer-git-hooks": "^2.8"
+    "nunomaduro/larastan": "^1.0|^2.0"
   },
   "license": "MIT",
   "authors": [
@@ -33,9 +32,6 @@
     }
   ],
   "scripts": {
-    "cghooks": "vendor/bin/cghooks",
-    "post-install-cmd": "vendor/bin/cghooks add --ignore-lock",
-    "post-update-cmd": "vendor/bin/cghooks update",
     "test": "./vendor/bin/testbench package:test",
     "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
     "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
@@ -59,15 +55,6 @@
     }
   },
   "extra": {
-    "hooks": {
-      "config": {
-        "stop-on-failure": ["pre-push"]
-      },
-      "pre-push": [
-        "composer stan",
-        "composer test"
-      ]
-    },
     "laravel": {
       "providers": [
         "MarcReichel\\IGDBLaravel\\IGDBLaravelServiceProvider"
