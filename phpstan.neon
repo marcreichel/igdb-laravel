@@ -17,3 +17,4 @@ parameters:
   excludePaths:
     # - ./*/*/FileToBeExcluded.php
   checkMissingIterableValueType: false
+  checkGenericClassInNonGenericObjectType: false
