@@ -89,7 +89,9 @@ class CreateWebhook extends Command
             return [];
         }
 
-        return collect(preg_grep($pattern, $glob, PREG_GREP_INVERT))
+        $grep = preg_grep($pattern, $glob, PREG_GREP_INVERT);
+
+        return collect($grep ?: [])
             ->map(function ($path) {
                 return basename($path, '.php');
             })
