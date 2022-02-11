@@ -11,6 +11,8 @@ parameters:
   ignoreErrors:
     - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist.#'
     - '#Call to an undefined static method MarcReichel\\IGDBLaravel\\Models\\Game::foo\(\).#'
+    - '#Unable to resolve the template type TValue in call to function collect#'
+    - '#Unable to resolve the template type TKey in call to function collect#'
     # - '#Parameter \#1 \$string of function md5 expects string, mixed given.#'
     # - '#Cannot call method getUrl\(\) on mixed.#'
     # - '#Unsafe usage of new static#'

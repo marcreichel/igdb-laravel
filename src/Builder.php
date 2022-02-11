@@ -1481,7 +1481,7 @@ class Builder
 
         if (is_object($model)) {
             $class = get_class($model);
-            $parents = collect(class_parents($model));
+            $parents = class_parents($model) ? collect(class_parents($model)) : collect();
 
             if ($parents->isEmpty()) {
                 $parents->push($class);

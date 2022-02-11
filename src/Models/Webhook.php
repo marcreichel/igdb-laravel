@@ -219,7 +219,7 @@ class Webhook implements WebhookInterface
         $reflectionMethod = new ReflectionClass(Method::class);
         $methods = collect($reflectionMethod->getConstants())->values();
 
-        $method = $methods->get((string) $this->sub_category);
+        $method = $methods->get($this->sub_category);
 
         if (!is_string($method)) {
             return (string) $this->sub_category;
