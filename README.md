@@ -1,6 +1,11 @@
 <h1 align="center">Laravel IGDB Wrapper</h1>
 
 <p align="center">
+    This is a Laravel wrapper for version 4 of the <a href="https://api-docs.igdb.com/">IGDB API</a> (Apicalypse)
+    including <a href="https://marcreichel.dev/docs/igdb-laravel/webhooks">webhook handling</a> since version 2.3.0.
+</p>
+
+<p align="center">
     <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
         <img src="https://img.shields.io/packagist/v/marcreichel/igdb-laravel" alt="Packagist Version">
     </a>
@@ -25,11 +30,6 @@
     <a href="https://gitmoji.dev">
         <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji">
     </a>
-</p>
-
-<p align="center">
-    This is a Laravel wrapper for version 4 of the <a href="https://api-docs.igdb.com/">IGDB API</a> (Apicalypse)
-    including <a href="https://marcreichel.dev/docs/igdb-laravel/webhooks">webhook handling</a> since version 2.3.0.
 </p>
 
 ![Cover](docs/art/cover.png)
