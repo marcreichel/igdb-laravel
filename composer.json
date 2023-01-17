@@ -10,6 +10,7 @@
     "wrapper"
   ],
   "type": "library",
+  "minimum-stability": "dev",
   "require": {
     "php": "^8.0.2",
     "laravel/framework": "^8.40.0|^9.0|^10.0",
