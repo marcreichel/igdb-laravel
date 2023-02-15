@@ -1487,7 +1487,7 @@ class Builder
                 $parents->push($class);
             }
 
-            if (is_bool($parents->last()) || is_null($parents->last())) {
+            if (!$parents->last()) {
                 throw new InvalidParamsException('Last parent element is either null or false. String or {} required.');
             }
 

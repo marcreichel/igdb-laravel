@@ -21,9 +21,9 @@ class ApiHelper
     {
         $accessTokenCacheKey = 'igdb_cache.access_token';
 
-        $accessToken = Cache::get($accessTokenCacheKey, false);
+        $accessToken = Cache::get($accessTokenCacheKey, '');
 
-        if ($accessToken && is_string($accessToken)) {
+        if ($accessToken) {
             return $accessToken;
         }
 
