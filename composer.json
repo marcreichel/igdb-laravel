@@ -10,16 +10,17 @@
     "wrapper"
   ],
   "type": "library",
+  "minimum-stability": "dev",
   "require": {
     "php": "^8.0.2",
-    "laravel/framework": "^8.40.0|^9.0",
+    "laravel/framework": "^8.40.0|^9.0|^10.0",
     "guzzlehttp/guzzle": "~6.0|~7.0",
     "nesbot/carbon": "^2.53.1",
     "ext-json": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5.4",
-    "orchestra/testbench": "^6.23|^7.0",
+    "orchestra/testbench": "^6.23|^7.0|^8.0",
     "nunomaduro/collision": "^5.3|^6.1",
     "roave/security-advisories": "dev-latest",
     "nunomaduro/larastan": "^1.0|^2.0"
