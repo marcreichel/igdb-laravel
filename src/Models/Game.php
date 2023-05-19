@@ -9,6 +9,7 @@ class Game extends Model
      */
     protected array $casts = [
         'bundles' => self::class,
+        'cover' => Cover::class,
         'dlcs' => self::class,
         'expansions' => self::class,
         'parent_game' => self::class,
