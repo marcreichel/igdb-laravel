@@ -248,14 +248,16 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
     protected function setRelations(array $attributes): void
     {
         $this->relations = collect($attributes)
-            ->diffKeys($this->attributes)->map(function ($value, $key) {
-                if (is_array($value)) {
+            ->filter(fn ($value, $key) => array_key_exists($key, $this->casts))
+            ->map(function ($value, $key) {
+                if (is_array($value) && array_is_list($value)) {
                     return collect($value)->map(function ($value) use ($key) {
                         return $this->mapToModel($key, $value);
-                    });
+                    })->filter();
                 }
                 return $this->mapToModel($key, $value);
-            });
+            })
+            ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof \Illuminate\Support\Collection && !$value->isEmpty()));
     }
 
     /**
@@ -317,7 +319,7 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
             return $value;
         }
 
-        if (is_object($value)) {
+        if (is_array($value) && !array_is_list($value)) {
             $properties = $this->getProperties($value);
 
             return new $class($properties);
@@ -335,7 +337,7 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
             })->toArray();
         }
 
-        return [];
+        return null;
     }
 
     /**
