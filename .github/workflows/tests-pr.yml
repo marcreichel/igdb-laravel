@@ -18,9 +18,6 @@ jobs:
         laravel: [ 8.*, 9.*, 10.* ]
         stability: [ prefer-stable ]
         os: [ ubuntu-latest, windows-latest ]
-        exclude:
-          - php: 8.0
-            laravel: 10.*
         include:
           - laravel: 10.*
             testbench: 8.*
