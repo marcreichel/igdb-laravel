@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Game;
 
-class Category
+enum Category: int
 {
-    public const MAIN_GAME = 0;
-    public const DLC_ADDON = 1;
-    public const EXPANSION = 2;
-    public const BUNDLE = 3;
-    public const STANDALONE_EXPANSION = 4;
-    public const MOD = 5;
-    public const EPISODE = 6;
-    public const SEASON = 7;
-    public const REMAKE = 8;
-    public const REMASTER = 9;
-    public const EXPANDED_GAME = 10;
-    public const PORT = 11;
-    public const FORK = 12;
+    case MAIN_GAME = 0;
+    case DLC_ADDON = 1;
+    case EXPANSION = 2;
+    case BUNDLE = 3;
+    case STANDALONE_EXPANSION = 4;
+    case MOD = 5;
+    case EPISODE = 6;
+    case SEASON = 7;
+    case REMAKE = 8;
+    case REMASTER = 9;
+    case EXPANDED_GAME = 10;
+    case PORT = 11;
+    case FORK = 12;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel;
 
 use Carbon\Carbon;
@@ -23,48 +25,35 @@ use ReflectionException;
 
 class Builder
 {
-    use Operators, DateCasts;
+    use DateCasts;
+    use Operators;
 
     /**
      * The HTTP Client to request data from the API.
-     *
-     * @var PendingRequest
      */
     private PendingRequest $client;
 
     /**
      * The endpoint of the API that should be requested.
-     *
-     * @var string
      */
     private string $endpoint;
 
     /**
      * The Class the request results should be mapped to.
-     *
-     * @var mixed
      */
     private mixed $class;
 
     /**
      * The query data that should be attached to the request.
-     *
-     * @var Collection
      */
     private Collection $query;
 
     /**
      * The cache lifetime.
-     *
-     * @var int
      */
     private int $cacheLifetime;
 
     /**
-     * Builder constructor.
-     *
-     * @param mixed $model
-     *
      * @throws ReflectionException|InvalidParamsException
      */
     public function __construct(mixed $model = null)
@@ -78,10 +67,6 @@ class Builder
 
     /**
      * Set the fields to be selected.
-     *
-     * @param mixed $fields
-     *
-     * @return self
      */
     public function select(mixed $fields): self
     {
@@ -92,9 +77,7 @@ class Builder
             $collection->push('*');
         }
 
-        $collection = $collection->filter(function ($field) {
-            return !strpos($field, '.');
-        })->flatten();
+        $collection = $collection->filter(fn ($field) => !strpos($field, '.'))->flatten();
 
         if ($collection->isEmpty()) {
             $collection->push('*');
@@ -105,9 +88,6 @@ class Builder
         return $this;
     }
 
-    /**
-     * @return void
-     */
     protected function init(): void
     {
         $this->initClient();
@@ -115,9 +95,6 @@ class Builder
         $this->resetCacheLifetime();
     }
 
-    /**
-     * @return void
-     */
     private function initClient(): void
     {
         $this->client = Http::withOptions([
@@ -130,8 +107,6 @@ class Builder
 
     /**
      * Init the default query.
-     *
-     * @return void
      */
     protected function initQuery(): void
     {
@@ -140,8 +115,6 @@ class Builder
 
     /**
      * Reset the cache lifetime.
-     *
-     * @return void
      */
     protected function resetCacheLifetime(): void
     {
@@ -155,10 +128,6 @@ class Builder
 
     /**
      * Set the "limit" value of the query.
-     *
-     * @param int $limit
-     *
-     * @return self
      */
     public function limit(int $limit): self
     {
@@ -170,10 +139,6 @@ class Builder
 
     /**
      * Alias to set the "limit" value of the query.
-     *
-     * @param int $limit
-     *
-     * @return self
      */
     public function take(int $limit): self
     {
@@ -182,10 +147,6 @@ class Builder
 
     /**
      * Set the "offset" value of the query.
-     *
-     * @param int $offset
-     *
-     * @return self
      */
     public function offset(int $offset): self
     {
@@ -196,10 +157,6 @@ class Builder
 
     /**
      * Alias to set the "offset" value of the query.
-     *
-     * @param int $offset
-     *
-     * @return self
      */
     public function skip(int $offset): self
     {
@@ -208,11 +165,6 @@ class Builder
 
     /**
      * Set the limit and offset for a given page.
-     *
-     * @param int $page
-     * @param int $perPage
-     *
-     * @return self
      */
     public function forPage(int $page, int $perPage = 10): self
     {
@@ -221,10 +173,6 @@ class Builder
 
     /**
      * Search for the given string.
-     *
-     * @param string $query
-     *
-     * @return self
      */
     public function search(string $query): self
     {
@@ -236,13 +184,8 @@ class Builder
     /**
      * Add a fuzzy search to the query.
      *
-     * @param mixed  $key
-     * @param string $query
-     * @param bool   $caseSensitive
-     * @param string $boolean
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function fuzzySearch(
         mixed $key,
@@ -253,7 +196,7 @@ class Builder
         $tokenizedQuery = explode(' ', $query);
         $keys = collect($key)->crossJoin($tokenizedQuery)->toArray();
 
-        return $this->whereNested(function ($query) use ($keys, $caseSensitive) {
+        return $this->whereNested(function ($query) use ($keys, $caseSensitive): void {
             foreach ($keys as $v) {
                 if (is_array($v)) {
                     $query->whereLike($v[0], $v[1], $caseSensitive, '|');
@@ -265,12 +208,6 @@ class Builder
     /**
      * Add an "or fuzzy search" to the query.
      *
-     * @param mixed  $key
-     * @param string $query
-     * @param bool   $caseSensitive
-     * @param string $boolean
-     *
-     * @return self
      * @throws ReflectionException|InvalidParamsException
      */
     public function orFuzzySearch(
@@ -285,19 +222,15 @@ class Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param mixed      $key
-     * @param mixed|null $operator
-     * @param mixed|null $value
-     * @param string     $boolean
-     *
-     * @return self
-     * @throws ReflectionException|JsonException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function where(
         mixed $key,
         mixed $operator = null,
         mixed $value = null,
-        string $boolean = '&'
+        string $boolean = '&',
     ): self {
         if ($key instanceof Closure) {
             return $this->whereNested($key, $boolean);
@@ -311,8 +244,11 @@ class Builder
             throw new InvalidArgumentException('Parameter #1 $key needs to be string. ' . gettype($key) . ' given.');
         }
 
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value,
+            $operator,
+            func_num_args() === 2,
+        );
 
         $select = $this->query->get('fields', new Collection());
         if (!$select->contains($key) && !$select->contains('*')) {
@@ -350,19 +286,15 @@ class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param mixed       $key
-     * @param string|null $operator
-     * @param mixed|null  $value
-     * @param string      $boolean
-     *
-     * @return self
-     * @throws ReflectionException|JsonException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function orWhere(
         mixed $key,
         string $operator = null,
         mixed $value = null,
-        string $boolean = '|'
+        string $boolean = '|',
     ): self {
         if ($key instanceof Closure) {
             return $this->whereNested($key, $boolean);
@@ -372,8 +304,11 @@ class Builder
             return $this->addArrayOfWheres($key, $boolean);
         }
 
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value,
+            $operator,
+            func_num_args() === 2,
+        );
 
         return $this->where($key, $operator, $value, $boolean);
     }
@@ -381,19 +316,13 @@ class Builder
     /**
      * Add a "where like" clause to the query.
      *
-     * @param string $key
-     * @param string $value
-     * @param bool   $caseSensitive
-     * @param string $boolean
-     *
-     * @return self
      * @throws JsonException
      */
     public function whereLike(
         string $key,
         string $value,
         bool $caseSensitive = true,
-        string $boolean = '&'
+        string $boolean = '&',
     ): self {
         $where = $this->query->get('where', new Collection());
 
@@ -409,19 +338,13 @@ class Builder
     /**
      * Add an "or where like" clause to the query.
      *
-     * @param string $key
-     * @param string $value
-     * @param bool   $caseSensitive
-     * @param string $boolean
-     *
-     * @return self
      * @throws JsonException
      */
     public function orWhereLike(
         string $key,
         string $value,
         bool $caseSensitive = true,
-        string $boolean = '|'
+        string $boolean = '|',
     ): self {
         return $this->whereLike($key, $value, $caseSensitive, $boolean);
     }
@@ -429,19 +352,13 @@ class Builder
     /**
      * Add a "where not like" clause to the query.
      *
-     * @param string $key
-     * @param string $value
-     * @param bool   $caseSensitive
-     * @param string $boolean
-     *
-     * @return self
      * @throws JsonException
      */
     public function whereNotLike(
         string $key,
         string $value,
         bool $caseSensitive = true,
-        string $boolean = '&'
+        string $boolean = '&',
     ): self {
         $where = $this->query->get('where', new Collection());
 
@@ -457,31 +374,18 @@ class Builder
     /**
      * Add an "or where not like" clause to the query.
      *
-     * @param string $key
-     * @param string $value
-     * @param bool   $caseSensitive
-     * @param string $boolean
-     *
-     * @return self
      * @throws JsonException
      */
     public function orWhereNotLike(
         string $key,
         string $value,
         bool $caseSensitive = true,
-        string $boolean = '|'
+        string $boolean = '|',
     ): self {
         return $this->whereNotLike($key, $value, $caseSensitive, $boolean);
     }
 
     /**
-     * @param string $key
-     * @param string $value
-     * @param bool   $caseSensitive
-     * @param string $operator
-     * @param string $insensitiveOperator
-     *
-     * @return string
      * @throws JsonException
      */
     private function generateWhereLikeClause(
@@ -489,7 +393,7 @@ class Builder
         string $value,
         bool $caseSensitive,
         string $operator,
-        string $insensitiveOperator
+        string $insensitiveOperator,
     ): string {
         $hasPrefix = Str::startsWith($value, ['%', '*']);
         $hasSuffix = Str::endsWith($value, ['%', '*']);
@@ -512,23 +416,17 @@ class Builder
 
     /**
      * Prepare the value and operator for a where clause.
-     *
-     * @param mixed $value
-     * @param mixed $operator
-     * @param bool  $useDefault
-     *
-     * @return array
      */
     private function prepareValueAndOperator(
         mixed $value,
         mixed $operator,
-        bool $useDefault = false
+        bool $useDefault = false,
     ): array {
         if ($useDefault) {
             return [$operator, '='];
         }
 
-        if (!is_string($operator) && !is_null($operator)) {
+        if (!is_string($operator) && null !== $operator) {
             throw new InvalidArgumentException('Parameter #2 $operator needs to be string or null. ' . gettype($operator) . ' given.');
         }
 
@@ -543,37 +441,28 @@ class Builder
      * Determine if the given operator and value combination is legal.
      *
      * Prevents using Null values with invalid operators.
-     *
-     * @param string|null $operator
-     * @param mixed       $value
-     *
-     * @return bool
      */
-    private function invalidOperatorAndValue(string|null $operator, mixed $value): bool
+    private function invalidOperatorAndValue(?string $operator, mixed $value): bool
     {
-        return is_null($value) && in_array($operator, $this->operators, true) && !in_array($operator, ['=', '!=']);
+        return null === $value && in_array($operator, $this->operators, true) && !in_array($operator, ['=', '!=']);
     }
 
     /**
      * Add an array of where clauses to the query.
      *
-     * @param array  $arrayOfWheres
-     * @param string $boolean
-     * @param string $method
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     protected function addArrayOfWheres(
         array $arrayOfWheres,
         string $boolean,
-        string $method = 'where'
+        string $method = 'where',
     ): self {
         return $this->whereNested(function ($query) use (
             $arrayOfWheres,
             $method,
             $boolean
-        ) {
+        ): void {
             foreach ($arrayOfWheres as $key => $value) {
                 if (is_numeric($key) && is_array($value)) {
                     $query->$method(...array_values($value));
@@ -587,11 +476,8 @@ class Builder
     /**
      * Add a nested where statement to the query.
      *
-     * @param Closure $callback
-     * @param string  $boolean
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     protected function whereNested(Closure $callback, string $boolean = '&'): self
     {
@@ -607,11 +493,6 @@ class Builder
 
     /**
      * Add another query builder as a nested where to the query builder.
-     *
-     * @param Builder $query
-     * @param string  $boolean
-     *
-     * @return self
      */
     protected function addNestedWhereQuery(Builder $query, string $boolean): self
     {
@@ -628,15 +509,6 @@ class Builder
 
     /**
      * Add a "where in" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function whereIn(
         string $key,
@@ -644,18 +516,17 @@ class Builder
         string $boolean = '&',
         string $operator = '=',
         string $prefix = '(',
-        string $suffix = ')'
+        string $suffix = ')',
     ): self {
         if (($prefix === '(' && $suffix !== ')') || ($prefix === '[' && $suffix !== ']') || ($prefix === '{' && $suffix !== '}')) {
             $message = 'Prefix and Suffix must be "(" and ")", "[" and "]" or "{" and "}".';
+
             throw new InvalidArgumentException($message);
         }
 
         $where = $this->query->get('where', new Collection());
 
-        $valuesString = collect($values)->map(function ($value) {
-            return !is_numeric($value) ? '"' . $value . '"' : $value;
-        })->implode(',');
+        $valuesString = collect($values)->map(fn ($value) => !is_numeric($value) ? '"' . $value . '"' : $value)->implode(',');
 
         $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $valuesString . $suffix);
 
@@ -666,15 +537,6 @@ class Builder
 
     /**
      * Add an "or where in" clause to the query.
-     *
-     * @param string $key
-     * @param array  $value
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function orWhereIn(
         string $key,
@@ -682,23 +544,13 @@ class Builder
         string $boolean = '|',
         string $operator = '=',
         string $prefix = '(',
-        string $suffix = ')'
+        string $suffix = ')',
     ): self {
-        return $this->whereIn($key, $value, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $value, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add a "where in all" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function whereInAll(
         string $key,
@@ -706,23 +558,13 @@ class Builder
         string $boolean = '&',
         string $operator = '=',
         string $prefix = '[',
-        string $suffix = ']'
+        string $suffix = ']',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add an "or where in all" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function orWhereInAll(
         string $key,
@@ -732,21 +574,11 @@ class Builder
         string $prefix = '[',
         string $suffix = ']',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add a "where in exact" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function whereInExact(
         string $key,
@@ -756,21 +588,11 @@ class Builder
         string $prefix = '{',
         string $suffix = '}',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add an "or where in exact" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function orWhereInExact(
         string $key,
@@ -780,21 +602,11 @@ class Builder
         string $prefix = '{',
         string $suffix = '}',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add a "where not in" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function whereNotIn(
         string $key,
@@ -804,21 +616,11 @@ class Builder
         string $prefix = '(',
         string $suffix = ')',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add an "or where not in" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function orWhereNotIn(
         string $key,
@@ -826,23 +628,13 @@ class Builder
         string $boolean = '|',
         string $operator = '!=',
         string $prefix = '(',
-        string $suffix = ')'
+        string $suffix = ')',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add a "where not in all" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function whereNotInAll(
         string $key,
@@ -850,23 +642,13 @@ class Builder
         string $boolean = '&',
         string $operator = '!=',
         string $prefix = '[',
-        string $suffix = ']'
+        string $suffix = ']',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add an "or where not in all" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function orWhereNotInAll(
         string $key,
@@ -874,23 +656,13 @@ class Builder
         string $boolean = '|',
         string $operator = '!=',
         string $prefix = '[',
-        string $suffix = ']'
+        string $suffix = ']',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add a "where not in exact" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function whereNotInExact(
         string $key,
@@ -898,23 +670,13 @@ class Builder
         string $boolean = '&',
         string $operator = '!=',
         string $prefix = '{',
-        string $suffix = '}'
+        string $suffix = '}',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add an "or where not in exact" clause to the query.
-     *
-     * @param string $key
-     * @param array  $values
-     * @param string $boolean
-     * @param string $operator
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return self
      */
     public function orWhereNotInExact(
         string $key,
@@ -922,30 +684,23 @@ class Builder
         string $boolean = '|',
         string $operator = '!=',
         string $prefix = '{',
-        string $suffix = '}'
+        string $suffix = '}',
     ): self {
-        return $this->whereIn($key, $values, $boolean, $operator, $prefix,
-            $suffix);
+        return $this->whereIn($key, $values, $boolean, $operator, $prefix, $suffix);
     }
 
     /**
      * Add a where between statement to the query.
      *
-     * @param string $key
-     * @param mixed  $first
-     * @param mixed  $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function whereBetween(
         string $key,
         mixed $first,
         mixed $second,
         bool $withBoundaries = true,
-        string $boolean = '&'
+        string $boolean = '&',
     ): self {
         if (collect($this->dates)->has($key) && $this->dates[$key] === 'date') {
             $first = $this->castDate($first);
@@ -956,11 +711,10 @@ class Builder
             $key,
             $first,
             $second,
-            $withBoundaries
-        ) {
+            $withBoundaries,
+        ): void {
             $operator = ($withBoundaries ? '=' : '');
-            $query->where($key, '>' . $operator, $first)->where($key,
-                '<' . $operator, $second);
+            $query->where($key, '>' . $operator, $first)->where($key, '<' . $operator, $second);
         }, $boolean);
 
         return $this;
@@ -969,44 +723,31 @@ class Builder
     /**
      * Add a or where between statement to the query.
      *
-     * @param string $key
-     * @param mixed  $first
-     * @param mixed  $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function orWhereBetween(
         string $key,
         mixed $first,
         mixed $second,
         bool $withBoundaries = true,
-        string $boolean = '|'
+        string $boolean = '|',
     ): self {
-        return $this->whereBetween($key, $first, $second, $withBoundaries,
-            $boolean);
+        return $this->whereBetween($key, $first, $second, $withBoundaries, $boolean);
     }
 
     /**
      * Add a where not between statement to the query.
      *
-     * @param string $key
-     * @param mixed  $first
-     * @param mixed  $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function whereNotBetween(
         string $key,
         mixed $first,
         mixed $second,
         bool $withBoundaries = false,
-        string $boolean = '&'
+        string $boolean = '&',
     ): self {
         if (collect($this->dates)->has($key) && $this->dates[$key] === 'date') {
             $first = $this->castDate($first);
@@ -1017,11 +758,10 @@ class Builder
             $key,
             $first,
             $second,
-            $withBoundaries
-        ) {
+            $withBoundaries,
+        ): void {
             $operator = ($withBoundaries ? '=' : '');
-            $query->where($key, '<' . $operator, $first)->orWhere($key,
-                '>' . $operator, $second);
+            $query->where($key, '<' . $operator, $first)->orWhere($key, '>' . $operator, $second);
         }, $boolean);
 
         return $this;
@@ -1030,33 +770,21 @@ class Builder
     /**
      * Add a or where not between statement to the query.
      *
-     * @param string $key
-     * @param mixed  $first
-     * @param mixed  $second
-     * @param bool   $withBoundaries
-     * @param string $boolean
-     *
-     * @return self
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function orWhereNotBetween(
         string $key,
         mixed $first,
         mixed $second,
         bool $withBoundaries = false,
-        string $boolean = '|'
+        string $boolean = '|',
     ): self {
-        return $this->whereNotBetween($key, $first, $second, $withBoundaries,
-            $boolean);
+        return $this->whereNotBetween($key, $first, $second, $withBoundaries, $boolean);
     }
 
     /**
      * Add a "where has" statement to the query.
-     *
-     * @param string $relationship
-     * @param string $boolean
-     *
-     * @return self
      */
     public function whereHas(string $relationship, string $boolean = '&'): self
     {
@@ -1073,11 +801,6 @@ class Builder
 
     /**
      * Add an "or where has" statement to the query.
-     *
-     * @param string $relationship
-     * @param string $boolean
-     *
-     * @return self
      */
     public function orWhereHas(string $relationship, string $boolean = '|'): self
     {
@@ -1086,11 +809,6 @@ class Builder
 
     /**
      * Add a "where has not" statement to the query.
-     *
-     * @param string $relationship
-     * @param string $boolean
-     *
-     * @return self
      */
     public function whereHasNot(string $relationship, string $boolean = '&'): self
     {
@@ -1107,11 +825,6 @@ class Builder
 
     /**
      * Add a "where has not" statement to the query.
-     *
-     * @param string $relationship
-     * @param string $boolean
-     *
-     * @return self
      */
     public function orWhereHasNot(string $relationship, string $boolean = '|'): self
     {
@@ -1120,11 +833,6 @@ class Builder
 
     /**
      * Add a "where null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
      */
     public function whereNull(string $key, string $boolean = '&'): self
     {
@@ -1133,11 +841,6 @@ class Builder
 
     /**
      * Add an "or where null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
      */
     public function orWhereNull(string $key, string $boolean = '|'): self
     {
@@ -1146,11 +849,6 @@ class Builder
 
     /**
      * Add a "where not null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
      */
     public function whereNotNull(string $key, string $boolean = '&'): self
     {
@@ -1159,11 +857,6 @@ class Builder
 
     /**
      * Add an "or where not null" clause to the query.
-     *
-     * @param string $key
-     * @param string $boolean
-     *
-     * @return self
      */
     public function orWhereNotNull(string $key, string $boolean = '|'): self
     {
@@ -1173,18 +866,17 @@ class Builder
     /**
      * Add a "where date" statement to the query.
      *
-     * @param string     $key
-     * @param mixed      $operator
-     * @param mixed|null $value
-     * @param string     $boolean
-     *
-     * @return self
-     * @throws ReflectionException|JsonException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function whereDate(string $key, mixed $operator, mixed $value = null, string $boolean = '&'): self
     {
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value,
+            $operator,
+            func_num_args() === 2,
+        );
 
         $start = Carbon::parse($value)->startOfDay()->timestamp;
         $end = Carbon::parse($value)->endOfDay()->timestamp;
@@ -1200,13 +892,9 @@ class Builder
     }
 
     /**
-     * @param string $key
-     * @param mixed  $operator
-     * @param mixed  $value
-     * @param string $boolean
-     *
-     * @return self
-     * @throws JsonException|ReflectionException|InvalidParamsException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     private function whereDateGreaterThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1218,13 +906,9 @@ class Builder
     }
 
     /**
-     * @param string $key
-     * @param mixed  $operator
-     * @param mixed  $value
-     * @param string $boolean
-     *
-     * @return self
-     * @throws JsonException|ReflectionException|InvalidParamsException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     private function whereDateGreaterThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1236,13 +920,9 @@ class Builder
     }
 
     /**
-     * @param string $key
-     * @param mixed  $operator
-     * @param mixed  $value
-     * @param string $boolean
-     *
-     * @return self
-     * @throws JsonException|ReflectionException|InvalidParamsException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     private function whereDateLowerThan(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1254,14 +934,9 @@ class Builder
     }
 
     /**
-     * @param string $key
-     * @param mixed  $operator
-     * @param mixed  $value
-     * @param string $boolean
-     *
-     * @return self
      * @throws JsonException
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     private function whereDateLowerThanOrEquals(string $key, mixed $operator, mixed $value, string $boolean): self
     {
@@ -1275,13 +950,9 @@ class Builder
     /**
      * Add an "or where date" statement to the query.
      *
-     * @param string     $key
-     * @param mixed      $operator
-     * @param mixed|null $value
-     * @param string     $boolean
-     *
-     * @return self
-     * @throws ReflectionException|JsonException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function orWhereDate(string $key, mixed $operator, mixed $value = null, string $boolean = '|'): self
     {
@@ -1291,18 +962,17 @@ class Builder
     /**
      * Add a "where year" statement to the query.
      *
-     * @param string     $key
-     * @param mixed      $operator
-     * @param mixed|null $value
-     * @param string     $boolean
-     *
-     * @return self
-     * @throws ReflectionException|JsonException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function whereYear(string $key, mixed $operator, mixed $value = null, string $boolean = '&'): self
     {
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value,
+            $operator,
+            func_num_args() === 2,
+        );
 
         $value = Carbon::now()->setYear($value)->startOfYear();
 
@@ -1319,25 +989,23 @@ class Builder
             $value = $value->clone()->startOfYear()->timestamp;
         }
 
-
         return $this->where($key, $operator, $value, $boolean);
     }
 
     /**
      * Add an "or where year" statement to the query.
      *
-     * @param string     $key
-     * @param mixed      $operator
-     * @param mixed|null $value
-     * @param string     $boolean
-     *
-     * @return self
-     * @throws ReflectionException|JsonException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function orWhereYear(string $key, mixed $operator, mixed $value = null, string $boolean = '|'): self
     {
-        [$value, $operator] = $this->prepareValueAndOperator($value, $operator,
-            func_num_args() === 2);
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value,
+            $operator,
+            func_num_args() === 2,
+        );
 
         return $this->whereYear($key, $operator, $value, $boolean);
     }
@@ -1345,16 +1013,13 @@ class Builder
     /**
      * Add a "sort" clause to the query.
      *
-     * @param string $key
-     * @param string $direction
-     *
-     * @return self
      * @throws InvalidParamsException
      */
     public function orderBy(string $key, string $direction = 'asc'): self
     {
         if (!in_array($direction, ['asc', 'desc'])) {
             $message = 'Expected `asc` or `desc` as order direction. `' . $direction . '` given.';
+
             throw new InvalidParamsException($message);
         }
 
@@ -1368,9 +1033,6 @@ class Builder
     /**
      * Add a "sort desc" clause to the query.
      *
-     * @param string $key
-     *
-     * @return self
      * @throws InvalidParamsException
      */
     public function orderByDesc(string $key): self
@@ -1380,30 +1042,27 @@ class Builder
 
     /**
      * Add an "expand" clause to the query.
-     *
-     * @param array $relationships
-     *
-     * @return self
      */
     public function with(array $relationships): self
     {
-        $relationships = (array)collect($relationships)->mapWithKeys(function (
+        $relationships = collect($relationships)->mapWithKeys(function (
             $fields,
-            $relationship
+            $relationship,
         ) {
             if (is_numeric($relationship)) {
                 return [$fields => ['*']];
             }
+
             return [$relationship => $fields];
         })->map(function ($fields, $relationship) {
             if (collect($fields)->count() === 0) {
                 $fields = ['*'];
             }
 
-            return collect($fields)->map(function ($field) use ($relationship) {
-                return $relationship . '.' . $field;
-            })->implode(',');
-        })->values();
+            return collect($fields)->map(fn ($field) => $relationship . '.' . $field)->implode(',');
+        })
+            ->values()
+            ->toArray();
 
         $select = $this->query->get('fields', new Collection());
 
@@ -1416,10 +1075,6 @@ class Builder
 
     /**
      * Overwrite the cache lifetime for this query.
-     *
-     * @param int $seconds
-     *
-     * @return self
      */
     public function cache(int $seconds): self
     {
@@ -1430,8 +1085,6 @@ class Builder
 
     /**
      * Get the resulting query.
-     *
-     * @return string
      */
     public function getQuery(): string
     {
@@ -1440,22 +1093,15 @@ class Builder
                 return collect($value)->unique()->implode(' ');
             }
             if ($key === 'fields') {
-                return collect($value)->unique()->sortBy(function ($field) {
-                    return count(explode('.', $field));
-                })->implode(',');
+                return collect($value)->unique()->sortBy(fn ($field) => count(explode('.', $field)))->implode(',');
             }
+
             return $value;
-        })->map(function ($value, $key) {
-            return Str::finish($key . ' ' . $value, ';');
-        })->unique()->sort()->implode("\n");
+        })->map(fn ($value, $key) => Str::finish($key . ' ' . $value, ';'))->unique()->sort()->implode("\n");
     }
 
     /**
      * Set the endpoint as string.
-     *
-     * @param string $endpoint
-     *
-     * @return self
      */
     public function endpoint(string $endpoint): self
     {
@@ -1467,11 +1113,8 @@ class Builder
     }
 
     /**
-     * Set the endpoint from model or string
+     * Set the endpoint from model or string.
      *
-     * @param mixed $model
-     *
-     * @return void
      * @throws ReflectionException
      * @throws InvalidParamsException
      */
@@ -1480,7 +1123,7 @@ class Builder
         $neededNamespace = __NAMESPACE__ . '\\Models';
 
         if (is_object($model)) {
-            $class = get_class($model);
+            $class = $model::class;
             $parents = class_parents($model) ? collect(class_parents($model)) : collect();
 
             if ($parents->isEmpty()) {
@@ -1495,7 +1138,7 @@ class Builder
             $reflectionNamespace = $reflectionClass->getNamespaceName();
 
             if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
-                $this->class = get_class($model);
+                $this->class = $model::class;
                 $class = class_basename($this->class);
                 $this->endpoint = Str::snake(Str::plural($class));
             }
@@ -1505,32 +1148,30 @@ class Builder
 
         if (!isset($this->endpoint)) {
             $message = 'Construction-Parameter of Builder must be a string or a Class which extends ' . $neededNamespace . '\\Model. ' . ucfirst(gettype($model)) . ' given.';
+
             throw new InvalidArgumentException($message);
         }
     }
 
     /**
      * Cast a value as date.
-     *
-     * @param mixed $date
-     *
-     * @return mixed
      */
     private function castDate(mixed $date): mixed
     {
         if (is_string($date)) {
             return Carbon::parse($date)->timestamp;
         }
+
         if ($date instanceof Carbon) {
             return $date->timestamp;
         }
+
         return $date;
     }
 
     /**
      * Execute the query.
      *
-     * @return mixed
      * @throws MissingEndpointException
      */
     public function get(): mixed
@@ -1538,9 +1179,7 @@ class Builder
         $data = $this->fetchApi();
 
         if (isset($this->class) && $this->class) {
-            $data = collect($data)->map(function ($result) {
-                return $this->mapToModel($result);
-            });
+            $data = collect($data)->map(fn ($result) => $this->mapToModel($result));
         }
 
         $this->init();
@@ -1548,11 +1187,6 @@ class Builder
         return $data;
     }
 
-    /**
-     * @param mixed $result
-     *
-     * @return mixed
-     */
     private function mapToModel(mixed $result): mixed
     {
         $model = $this->class;
@@ -1568,10 +1202,10 @@ class Builder
     /**
      * Execute a query for a single record by ID.
      *
-     * @param int $id
-     *
-     * @return mixed
-     * @throws MissingEndpointException|ReflectionException|JsonException|InvalidParamsException
+     * @throws MissingEndpointException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function find(int $id): mixed
     {
@@ -1579,10 +1213,11 @@ class Builder
     }
 
     /**
-     * @param int $id
-     *
-     * @return mixed
-     * @throws MissingEndpointException|ModelNotFoundException|ReflectionException|JsonException|InvalidParamsException
+     * @throws MissingEndpointException
+     * @throws ModelNotFoundException
+     * @throws ReflectionException
+     * @throws JsonException
+     * @throws InvalidParamsException
      */
     public function findOrFail(int $id): mixed
     {
@@ -1606,7 +1241,6 @@ class Builder
     /**
      * Execute the query and get the first result.
      *
-     * @return mixed
      * @throws MissingEndpointException
      */
     public function first(): mixed
@@ -1617,7 +1251,6 @@ class Builder
     }
 
     /**
-     * @return mixed
      * @throws MissingEndpointException
      * @throws ModelNotFoundException
      */
@@ -1643,7 +1276,6 @@ class Builder
     /**
      * Return the total "count" result of the query.
      *
-     * @return mixed
      * @throws MissingEndpointException
      */
     public function count(): mixed
@@ -1656,7 +1288,6 @@ class Builder
     }
 
     /**
-     * @return Collection
      * @throws MissingEndpointException
      */
     public function all(): Collection
@@ -1667,9 +1298,6 @@ class Builder
     }
 
     /**
-     * @param int $limit
-     *
-     * @return Paginator
      * @throws MissingEndpointException
      */
     public function paginate(int $limit = 10): Paginator
@@ -1692,9 +1320,6 @@ class Builder
     }
 
     /**
-     * @param bool $count
-     *
-     * @return mixed
      * @throws MissingEndpointException
      */
     private function fetchApi(bool $count = false): mixed
@@ -1725,11 +1350,6 @@ class Builder
         });
     }
 
-    /**
-     * @param bool $count
-     *
-     * @return string
-     */
     private function getEndpoint(bool $count = false): string
     {
         $endpoint = $this->endpoint;
@@ -1741,11 +1361,6 @@ class Builder
         return $endpoint;
     }
 
-    /**
-     * @param string $endpoint
-     *
-     * @return string
-     */
     private function handleCache(string $endpoint): string
     {
         $cacheKey = 'igdb_cache.' . md5($endpoint . $this->getQuery());

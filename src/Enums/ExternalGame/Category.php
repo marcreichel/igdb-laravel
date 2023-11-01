@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\ExternalGame;
 
-class Category
+enum Category: int
 {
-    public const STEAM = 1;
-    public const GOG = 5;
-    public const YOUTUBE = 10;
-    public const MICROSOFT = 11;
-    public const APPLE = 13;
-    public const TWITCH = 14;
-    public const ANDROID = 15;
+    case STEAM = 1;
+    case GOG = 5;
+    case YOUTUBE = 10;
+    case MICROSOFT = 11;
+    case APPLE = 13;
+    case TWITCH = 14;
+    case ANDROID = 15;
 }

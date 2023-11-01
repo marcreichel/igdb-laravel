@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,17 +12,12 @@ use MarcReichel\IGDBLaravel\Models\Collection;
 
 class CollectionCreated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var Collection
-     */
     public Collection $data;
 
-    /**
-     * @param Collection $data
-     * @param Request    $request
-     */
     public function __construct(Collection $data, Request $request)
     {
         $this->data = $data;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,17 +12,12 @@ use MarcReichel\IGDBLaravel\Models\PlayerPerspective;
 
 class PlayerPerspectiveCreated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var PlayerPerspective
-     */
     public PlayerPerspective $data;
 
-    /**
-     * @param PlayerPerspective $data
-     * @param Request           $request
-     */
     public function __construct(PlayerPerspective $data, Request $request)
     {
         $this->data = $data;

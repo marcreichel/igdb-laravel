@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,17 +12,12 @@ use MarcReichel\IGDBLaravel\Models\Screenshot;
 
 class ScreenshotCreated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var Screenshot
-     */
     public Screenshot $data;
 
-    /**
-     * @param Screenshot $data
-     * @param Request    $request
-     */
     public function __construct(Screenshot $data, Request $request)
     {
         $this->data = $data;

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\ExternalGame;
 
-class Media
+enum Media: int
 {
-    public const DIGITAL = 1;
-    public const PHYSICAL = 2;
+    case DIGITAL = 1;
+    case PHYSICAL = 2;
 }

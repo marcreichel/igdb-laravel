@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,17 +12,12 @@ use MarcReichel\IGDBLaravel\Models\PlatformFamily;
 
 class PlatformFamilyCreated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var PlatformFamily
-     */
     public PlatformFamily $data;
 
-    /**
-     * @param PlatformFamily $data
-     * @param Request        $request
-     */
     public function __construct(PlatformFamily $data, Request $request)
     {
         $this->data = $data;

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Game;
 
-class Status
+enum Status: int
 {
-    public const RELEASED = 0;
-    public const ALPHA = 2;
-    public const BETA = 3;
-    public const EARLY_ACCESS = 4;
-    public const OFFLINE = 5;
-    public const CANCELLED = 6;
-    public const RUMORED = 7;
+    case RELEASED = 0;
+    case ALPHA = 2;
+    case BETA = 3;
+    case EARLY_ACCESS = 4;
+    case OFFLINE = 5;
+    case CANCELLED = 6;
+    case RUMORED = 7;
 }

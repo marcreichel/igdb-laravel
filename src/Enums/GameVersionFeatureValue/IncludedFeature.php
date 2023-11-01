@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\GameVersionFeatureValue;
 
-class IncludedFeature
+enum IncludedFeature: int
 {
-    public const NOT_INCLUDED = 0;
-    public const INCLUDED = 1;
-    public const PRE_ORDER_ONLY = 2;
+    case NOT_INCLUDED = 0;
+    case INCLUDED = 1;
+    case PRE_ORDER_ONLY = 2;
 }

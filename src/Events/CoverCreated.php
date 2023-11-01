@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,17 +12,12 @@ use MarcReichel\IGDBLaravel\Models\Cover;
 
 class CoverCreated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var Cover
-     */
     public Cover $data;
 
-    /**
-     * @param Cover   $data
-     * @param Request $request
-     */
     public function __construct(Cover $data, Request $request)
     {
         $this->data = $data;

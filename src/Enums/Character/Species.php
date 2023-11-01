@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Character;
 
-class Species
+enum Species: int
 {
-    public const HUMAN = 1;
-    public const ALIEN = 2;
-    public const ANIMAL = 3;
-    public const ANDROID = 4;
-    public const UNKNOWN = 5;
+    case HUMAN = 1;
+    case ALIEN = 2;
+    case ANIMAL = 3;
+    case ANDROID = 4;
+    case UNKNOWN = 5;
 }

@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Traits;
 
 trait Operators
 {
     /**
      * All the available clause operators.
-     *
-     * @var array
      */
     public array $operators = [
         '=',

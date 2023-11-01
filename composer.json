@@ -10,7 +10,7 @@
     "wrapper"
   ],
   "type": "library",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "require": {
     "php": "^8.1",
     "laravel/framework": "^8.40.0|^9.0|^10.0",
@@ -23,7 +23,8 @@
     "orchestra/testbench": "^6.23|^7.0|^8.0",
     "nunomaduro/collision": "^5.3|^6.1|^7.0",
     "roave/security-advisories": "dev-latest",
-    "nunomaduro/larastan": "^1.0|^2.0"
+    "nunomaduro/larastan": "^1.0|^2.0",
+    "laravel/pint": "dev-main"
   },
   "license": "MIT",
   "authors": [
@@ -33,6 +34,7 @@
     }
   ],
   "scripts": {
+    "pint": "./vendor/bin/pint --test -v",
     "test": "./vendor/bin/testbench package:test",
     "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
     "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",

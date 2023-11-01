@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\AgeRating;
 
-class Rating
+enum Rating: int
 {
-    public const THREE = 1;
-    public const SEVEN = 2;
-    public const TWELVE = 3;
-    public const SIXTEEN = 4;
-    public const EIGHTEEN = 5;
-    public const RP = 6;
-    public const EC = 7;
-    public const E = 8;
-    public const E10 = 9;
-    public const T = 10;
-    public const M = 11;
-    public const AO = 12;
+    case THREE = 1;
+    case SEVEN = 2;
+    case TWELVE = 3;
+    case SIXTEEN = 4;
+    case EIGHTEEN = 5;
+    case RP = 6;
+    case EC = 7;
+    case E = 8;
+    case E10 = 9;
+    case T = 10;
+    case M = 11;
+    case AO = 12;
 }

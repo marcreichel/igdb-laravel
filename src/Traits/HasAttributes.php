@@ -1,17 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Traits;
 
 trait HasAttributes
 {
-    /**
-     * @var array
-     */
     public array $attributes = [];
-
-    /**
-     * @var array
-     */
     protected array $casts = [];
 
     /**

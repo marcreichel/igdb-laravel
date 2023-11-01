@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\PlatformVersionReleaseDate;
 
-class Region
+enum Region: int
 {
-    public const EUROPE = 1;
-    public const NORTH_AMERICA = 2;
-    public const AUSTRALIA = 3;
-    public const NEW_ZEALAND = 4;
-    public const JAPAN = 5;
-    public const CHINA = 6;
-    public const ASIA = 7;
-    public const WORLDWIDE = 8;
+    case EUROPE = 1;
+    case NORTH_AMERICA = 2;
+    case AUSTRALIA = 3;
+    case NEW_ZEALAND = 4;
+    case JAPAN = 5;
+    case CHINA = 6;
+    case ASIA = 7;
+    case WORLDWIDE = 8;
 }

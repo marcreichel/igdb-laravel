@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,17 +12,12 @@ use MarcReichel\IGDBLaravel\Models\Keyword;
 
 class KeywordCreated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var Keyword
-     */
     public Keyword $data;
 
-    /**
-     * @param Keyword $data
-     * @param Request $request
-     */
     public function __construct(Keyword $data, Request $request)
     {
         $this->data = $data;
