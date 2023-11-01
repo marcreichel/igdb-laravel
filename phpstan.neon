@@ -9,7 +9,6 @@ parameters:
   # The level 9 is the highest level
   level: 8
   ignoreErrors:
-    - '#Attribute class JetBrains\\PhpStorm\\ArrayShape does not exist.#'
     - '#Call to an undefined static method MarcReichel\\IGDBLaravel\\Models\\Game::foo\(\).#'
     - '#Unable to resolve the template type TValue in call to function collect#'
     - '#Unable to resolve the template type TKey in call to function collect#'
