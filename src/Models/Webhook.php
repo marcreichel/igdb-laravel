@@ -16,7 +16,6 @@ use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
 use MarcReichel\IGDBLaravel\Interfaces\WebhookInterface;
-use ReflectionClass;
 
 class Webhook implements WebhookInterface
 {
