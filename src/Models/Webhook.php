@@ -151,10 +151,10 @@ class Webhook implements WebhookInterface
 
     public function getModel(): string
     {
-        $reflectionCategory = new ReflectionClass(Category::class);
-        $categories = collect($reflectionCategory->getConstants())->flip();
+        $categories = collect(Category::cases())
+            ->mapWithKeys(fn (Category $category) => [(string) $category->value => $category->name]);
 
-        $category = $categories->get((string) $this->category);
+        $category = $categories->get($this->category);
 
         if (!is_string($category)) {
             return (string) $this->category;
@@ -182,7 +182,7 @@ class Webhook implements WebhookInterface
         return [
             'id' => $this->id,
             'url' => $this->url,
-            'category' => $this->getModel(),
+            'category' => $this->category,
             'sub_category' => $this->sub_category,
             'number_of_retries' => $this->number_of_retries,
             'active' => $this->active,

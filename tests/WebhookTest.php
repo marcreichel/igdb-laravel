@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Models\Artwork;
@@ -47,8 +48,7 @@ class WebhookTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function itShouldGenerateWebhook(): void
+    public function testItShouldGenerateWebhook(): void
     {
         $webhook = Game::createWebhook(Method::CREATE);
 
@@ -72,8 +72,7 @@ class WebhookTest extends TestCase
         self::assertEquals('http://localhost/' . $this->prefix . '/artworks/delete', $webhook->url);
     }
 
-    /** @test */
-    public function itShouldThrowExceptionWhenNoSecretIsSet(): void
+    public function testItShouldThrowExceptionWhenNoSecretIsSet(): void
     {
         $this->expectException(WebhookSecretMissingException::class);
 
@@ -83,11 +82,9 @@ class WebhookTest extends TestCase
     }
 
     /**
-     * @test
-     *
      * @dataProvider modelsDataProvider
      */
-    public function itShouldDispatchCreatedEvent(string $className): void
+    public function testItShouldDispatchCreatedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Created';
         $url = $this->prefix . '/' . Str::snake($className) . '/create';
@@ -100,5 +97,54 @@ class WebhookTest extends TestCase
         $response->assertStatus(200);
 
         Event::assertDispatched($eventClassString);
+    }
+
+    /**
+     * @dataProvider modelsDataProvider
+     */
+    public function testItShouldDispatchUpdatedEvent(string $className): void
+    {
+        $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Updated';
+        $url = $this->prefix . '/' . Str::snake($className) . '/update';
+
+        $response = $this->withHeaders([
+            'X-Secret' => 'secret',
+        ])
+            ->postJson($url, ['id' => 1337]);
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched($eventClassString);
+    }
+
+    /**
+     * @dataProvider modelsDataProvider
+     */
+    public function testItShouldDispatchDeletedEvent(string $className): void
+    {
+        $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Deleted';
+        $url = $this->prefix . '/' . Str::snake($className) . '/delete';
+
+        $response = $this->withHeaders([
+            'X-Secret' => 'secret',
+        ])
+            ->postJson($url, ['id' => 1337]);
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched($eventClassString);
+    }
+
+    /**
+     * @dataProvider modelsDataProvider
+     */
+    public function testItShouldHaveACategoryCaseForEveryModel(string $className): void
+    {
+        $categories = collect(Category::cases())
+            ->map(fn (Category $category) => $category->name)
+            ->values()
+            ->toArray();
+
+        $this->assertContains($className, $categories);
     }
 }
