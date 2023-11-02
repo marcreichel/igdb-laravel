@@ -24,7 +24,7 @@
     "nunomaduro/collision": "^5.3|^6.1|^7.0",
     "roave/security-advisories": "dev-latest",
     "nunomaduro/larastan": "^1.0|^2.0",
-    "laravel/pint": "dev-main"
+    "laravel/pint": "^1.13"
   },
   "license": "MIT",
   "authors": [
