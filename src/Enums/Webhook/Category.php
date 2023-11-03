@@ -6,15 +6,14 @@ namespace MarcReichel\IGDBLaravel\Enums\Webhook;
 
 enum Category: int
 {
-    case PlatformWebsite = 195160949;
     case AgeRating = 285072627;
+    case AgeRatingContentDescription = 473256507;
     case CompanyLogo = 418544557;
     case GameVersionFeature = 465537972;
-    case AgeRatingContentDescription = 473256507;
+    case PlatformWebsite = 195160949;
     case GameMode = 477001771;
     case Game = 625691411;
     case PlatformVersion = 630691907;
-    case Website = 698516688;
     case Genre = 719936021;
     case CompanyWebsite = 810050019;
     case CharacterMugShot = 824164576;
@@ -43,4 +42,20 @@ enum Category: int
     case GameVideo = 1982000162;
     case PlatformVersionReleaseDate = 1994392367;
     case Keyword = 2139795778;
+    case LanguageSupport = 349003740;
+    case CollectionType = 156355986;
+    case CollectionMembershipType = 1180608740;
+    case Language = 207519550;
+    case ReleaseDateStatus = 1506091483;
+    case CollectionMembership = 2098492748;
+    case CollectionRelation = 635029137;
+    case Event = 1249614672;
+    case EventLogo = 1020437596;
+    case NetworkType = 1082018767;
+    case GameLocalization = 806896207;
+    case Region = 111529551;
+    case EventNetwork = 1460724974;
+    case CollectionRelationType = 1781504066;
+    case LanguageSupportType = 1157224631;
+    case Website = 698516688;
 }
