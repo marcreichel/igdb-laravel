@@ -19,6 +19,7 @@ use MarcReichel\IGDBLaravel\Builder;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Interfaces\ModelInterface;
 use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
@@ -320,7 +321,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
      * @throws RequestException
      * @throws Exception
      */
-    public static function createWebhook(Method $method, array $parameters = []): Webhook
+    public static function createWebhook(Method | string $method, array $parameters = []): Webhook
     {
         if (!config('igdb.webhook_secret')) {
             throw new WebhookSecretMissingException();
@@ -328,9 +329,19 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
 
         $self = new static();
 
+        if ($method instanceof Method) {
+            $parsedMethod = $method->value;
+        } else {
+            $parsedMethod = $method;
+        }
+
+        if (!in_array($parsedMethod, ['create', 'update', 'delete'])) {
+            throw new InvalidWebhookMethodException();
+        }
+
         $routeParameters = array_merge($parameters, [
             'model' => $self->getEndpoint(),
-            'method' => $method->value,
+            'method' => $parsedMethod,
         ]);
 
         $url = route('handle-igdb-webhook', $routeParameters);
@@ -348,7 +359,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
 
         $response = $client->post($endpoint, [
             'url' => $url,
-            'method' => $method->value,
+            'method' => $parsedMethod,
             'secret' => config('igdb.webhook_secret'),
         ])->throw()->json();
 

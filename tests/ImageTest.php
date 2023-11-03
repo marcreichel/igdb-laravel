@@ -6,6 +6,7 @@ namespace MarcReichel\IGDBLaravel\Tests;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Enums\Image\Size;
 use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\CharacterMugShot;
@@ -41,6 +42,18 @@ class ImageTest extends TestCase
                 ],
             ]),
         ]);
+    }
+
+    public static function imageSizeDataProvider(): array
+    {
+        $enumCases = collect(Size::cases())
+            ->map(static fn (Size $size) => [$size, $size->value])
+            ->toArray();
+        $stringCases = collect(Size::cases())
+            ->map(static fn (Size $size) => [$size->value, $size->value])
+            ->toArray();
+
+        return array_merge($enumCases, $stringCases);
     }
 
     public function testArtworkShouldBeMappedAsInstanceOfImage(): void
@@ -85,17 +98,30 @@ class ImageTest extends TestCase
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_thumb/abc.jpg', $url);
     }
 
-    public function testItShouldGenerateDesiredImageUrlWithParameter(): void
+    /**
+     * @dataProvider imageSizeDataProvider
+     */
+    public function testItShouldGenerateDesiredImageUrlWithParameter(Size | string $size, string $value): void
     {
-        $url = Artwork::first()->getUrl(Size::COVER_BIG);
+        $url = Artwork::first()->getUrl($size);
 
-        self::assertEquals('//images.igdb.com/igdb/image/upload/t_cover_big/abc.jpg', $url);
+        self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '/abc.jpg', $url);
     }
 
-    public function testItShouldGenerateRetinaImageUrl(): void
+    /**
+     * @dataProvider imageSizeDataProvider
+     */
+    public function testItShouldGenerateRetinaImageUrl(Size | string $size, string $value): void
     {
-        $url = Artwork::first()->getUrl(Size::COVER_BIG, true);
+        $url = Artwork::first()->getUrl($size, true);
 
-        self::assertEquals('//images.igdb.com/igdb/image/upload/t_cover_big_2x/abc.jpg', $url);
+        self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '_2x/abc.jpg', $url);
+    }
+
+    public function testItShouldThrowExceptionWithInvalidImageSize(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Artwork::first()->getUrl('foo');
     }
 }

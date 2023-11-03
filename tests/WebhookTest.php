@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
+use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\Company;
@@ -70,6 +71,37 @@ class WebhookTest extends TestCase
 
         self::assertEquals(1, $webhook->sub_category);
         self::assertEquals('http://localhost/' . $this->prefix . '/artworks/delete', $webhook->url);
+    }
+
+    public function testItShouldGenerateWebhookWithStringMethod(): void
+    {
+        $webhook = Game::createWebhook('create');
+
+        Http::assertSent(fn (Request $request) => $this->isWebhookCall($request, 'games'));
+
+        self::assertEquals(0, $webhook->sub_category);
+        self::assertEquals('http://localhost/' . $this->prefix . '/games/create', $webhook->url);
+
+        $webhook = Company::createWebhook('update');
+
+        Http::assertSent(fn (Request $request) => $this->isWebhookCall($request, 'companies'));
+
+        self::assertEquals(2, $webhook->sub_category);
+        self::assertEquals('http://localhost/' . $this->prefix . '/companies/update', $webhook->url);
+
+        $webhook = Artwork::createWebhook('delete');
+
+        Http::assertSent(fn (Request $request) => $this->isWebhookCall($request, 'artworks'));
+
+        self::assertEquals(1, $webhook->sub_category);
+        self::assertEquals('http://localhost/' . $this->prefix . '/artworks/delete', $webhook->url);
+    }
+
+    public function testItShouldThrowExceptionWithInvalidMethod(): void
+    {
+        $this->expectException(InvalidWebhookMethodException::class);
+
+        Game::createWebhook('foo');
     }
 
     public function testItShouldThrowExceptionWhenNoSecretIsSet(): void
