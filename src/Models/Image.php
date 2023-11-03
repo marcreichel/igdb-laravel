@@ -40,7 +40,7 @@ abstract class Image extends Model
             ->toArray();
 
         if (!in_array($parsedSize, $cases, true)) {
-            throw new InvalidArgumentException('Size must be one of '  . implode(', ', $cases));
+            throw new InvalidArgumentException('Size must be one of ' . implode(', ', $cases));
         }
 
         if ($retina) {
