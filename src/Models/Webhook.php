@@ -193,7 +193,7 @@ class Webhook implements WebhookInterface
         if ($parameters) {
             foreach ($parameters as $parameter => $value) {
                 if (property_exists($this, (string) $parameter)) {
-                    if (is_string($value) && in_array($parameter, ['created_at', 'updated_at'])) {
+                    if (in_array($parameter, ['created_at', 'updated_at'])) {
                         $this->{$parameter} = (string) new Carbon($value);
                     } else {
                         $this->{$parameter} = $value;
