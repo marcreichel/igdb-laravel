@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Console;
 
 use Illuminate\Console\Command;
@@ -17,12 +19,9 @@ class DeleteWebhook extends Command
      */
     protected $description = 'Delete a webhook at IGDB.';
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
-        $id = (int)$this->argument('id');
+        $id = (int) $this->argument('id');
 
         if ($id) {
             return $this->deleteOne($id);
@@ -35,22 +34,19 @@ class DeleteWebhook extends Command
         return 0;
     }
 
-    /**
-     * @param  int  $id
-     *
-     * @return int
-     */
     private function deleteOne(int $id): int
     {
         $webhook = Webhook::find($id);
 
         if (!$webhook instanceof Webhook) {
             $this->error('Webhook not found.');
+
             return 1;
         }
 
         if (!$webhook->delete()) {
             $this->error('Webhook could not be deleted.');
+
             return 1;
         }
 
@@ -59,9 +55,6 @@ class DeleteWebhook extends Command
         return 0;
     }
 
-    /**
-     * @return int
-     */
     private function deleteAll(): int
     {
         $webhooks = Webhook::all();
@@ -74,7 +67,7 @@ class DeleteWebhook extends Command
 
         $this->comment('Deleting all your registered webhooks ...');
 
-        $this->withProgressBar($webhooks, function (Webhook $webhook) {
+        $this->withProgressBar($webhooks, function (Webhook $webhook): void {
             $webhook->delete();
         });
 

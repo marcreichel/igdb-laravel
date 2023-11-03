@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\AgeRatingContentDescription;
 
-class Category
+enum Category: int
 {
-    public const PEGI = 1;
-    public const ESRB = 2;
+    case PEGI = 1;
+    case ESRB = 2;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Tests;
 
 use GuzzleHttp\Promise\PromiseInterface;
@@ -11,18 +13,23 @@ use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\IGDBLaravelServiceProvider;
 use MarcReichel\IGDBLaravel\Models\Webhook;
 use Orchestra\Testbench\TestCase as Orchestra;
+use ReflectionClass;
 
+/**
+ * @internal
+ */
 class TestCase extends Orchestra
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         Event::fake();
 
-        Route::post('igdb-webhook/handle/{model}/{method}', function (\Illuminate\Http\Request $request) {
-            return Webhook::handle($request);
-        })->name('handle-igdb-webhook');
+        Route::post(
+            'igdb-webhook/handle/{model}/{method}',
+            static fn (\Illuminate\Http\Request $request) => Webhook::handle($request),
+        )->name('handle-igdb-webhook');
     }
 
     protected function getPackageProviders($app): array
@@ -48,26 +55,25 @@ class TestCase extends Orchestra
         return $request->url() === 'https://api.igdb.com/v4/' . $endpoint . '/webhooks' && $request->isForm();
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return PromiseInterface
-     */
     protected function createWebhookResponse(Request $request): PromiseInterface
     {
         $data = $request->data();
-        $subCategory = 0;
+        $subCategory = null;
         switch ($data['method']) {
             case 'create':
                 $subCategory = 0;
+
                 break;
             case 'delete':
                 $subCategory = 1;
+
                 break;
             case 'update':
                 $subCategory = 2;
+
                 break;
         }
+
         return Http::response([
             'id' => 1337,
             'url' => $data['url'],
@@ -78,5 +84,34 @@ class TestCase extends Orchestra
             'created_at' => now()->toIso8601String(),
             'updated_at' => now()->toIso8601String(),
         ]);
+    }
+
+    public static function modelsDataProvider(): array
+    {
+        $files = glob(__DIR__ . '/../src/Models/*.php');
+        $classNames = [];
+        $blackList = ['Search', 'Webhook'];
+
+        if (!$files) {
+            return $classNames;
+        }
+
+        foreach ($files as $file) {
+            $classString = 'MarcReichel\IGDBLaravel\Models\\' . basename($file, '.php');
+            if (!class_exists($classString)) {
+                continue;
+            }
+            $reflection = new ReflectionClass($classString);
+            if ($reflection->isAbstract()) {
+                continue;
+            }
+            if (in_array(class_basename($classString), $blackList)) {
+                continue;
+            }
+
+            $classNames[] = [class_basename($classString)];
+        }
+
+        return $classNames;
     }
 }

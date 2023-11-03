@@ -6,5 +6,4 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class LanguageSupportType extends Model
 {
-    //
 }

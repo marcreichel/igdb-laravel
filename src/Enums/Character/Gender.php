@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Character;
 
-class Gender
+enum Gender: int
 {
-    public const MALE = 0;
-    public const FEMALE = 1;
-    public const OTHER = 2;
+    case MALE = 0;
+    case FEMALE = 1;
+    case OTHER = 2;
 }

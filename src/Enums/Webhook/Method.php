@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Webhook;
 
-class Method
+enum Method: string
 {
-    public const CREATE = 'create';
-    public const DELETE = 'delete';
-    public const UPDATE = 'update';
+    case CREATE = 'create';
+    case DELETE = 'delete';
+    case UPDATE = 'update';
 }

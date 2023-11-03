@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Traits;
 
 trait DateCasts
 {
     /**
      * These fields should be cast.
-     *
-     * @var array
      */
     public array $dates = [
         'created_at' => 'date',

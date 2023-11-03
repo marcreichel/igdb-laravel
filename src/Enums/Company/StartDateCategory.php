@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Company;
 
-class StartDateCategory
+enum StartDateCategory: int
 {
-    public const YYYYMMMMDD = 0;
-    public const YYYYMMMM = 1;
-    public const YYYY = 2;
-    public const YYYYQ1 = 3;
-    public const YYYYQ2 = 4;
-    public const YYYYQ3 = 5;
-    public const YYYYQ4 = 6;
-    public const TBD = 7;
+    case YYYYMMMMDD = 0;
+    case YYYYMMMM = 1;
+    case YYYY = 2;
+    case YYYYQ1 = 3;
+    case YYYYQ2 = 4;
+    case YYYYQ3 = 5;
+    case YYYYQ4 = 6;
+    case TBD = 7;
 }

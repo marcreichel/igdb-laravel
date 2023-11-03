@@ -9,6 +9,7 @@ This is supported for:
 - `CharacterMugShot`
 - `CompanyLogo`
 - `Cover`
+- `EventLogo`
 - `GameEngineLogo`
 - `PlatformLogo`
 - `Screenshot`
@@ -31,9 +32,8 @@ $game->cover->getUrl();
 
 ### Other sizes
 
-As the first parameter the method receives your desired image size. Check out the available
-sizes [in the official IGDB API documentation](https://api-docs.igdb.com/#images) or simply use the available constants
-of the `MarcReichel\IGDBLaravel\Enums\Image\Size` class.
+As the first parameter the method receives your desired image size. Simply use the available enum values
+of the `MarcReichel\IGDBLaravel\Enums\Image\Size` enum.
 
 ```php
 // torchlight! {"lineNumbers": false}
