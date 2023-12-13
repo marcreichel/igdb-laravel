@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
-      - '.github/**'
       - 'LICENSE'
       - 'README.md'
 
@@ -14,8 +13,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
-        php: [ 8.2, 8.1 ]
+        os: [ ubuntu-latest ]
+        php: [ 8.3, 8.2, 8.1 ]
         laravel: [ 10.*, 9.*, 8.* ]
         stability: [ prefer-stable ]
         include:
