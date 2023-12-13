@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Console;
 
 use Illuminate\Console\Command;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Tests;
 
 use Illuminate\Support\Facades\Cache;
@@ -15,6 +17,9 @@ use MarcReichel\IGDBLaravel\Models\Image;
 use MarcReichel\IGDBLaravel\Models\PlatformLogo;
 use MarcReichel\IGDBLaravel\Models\Screenshot;
 
+/**
+ * @internal
+ */
 class ImageTest extends TestCase
 {
     public function setUp(): void
@@ -39,74 +44,81 @@ class ImageTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function artwork_should_be_mapped_as_instance_of_image(): void
+    public static function imageSizeDataProvider(): array
+    {
+        $enumCases = collect(Size::cases())
+            ->map(static fn (Size $size) => [$size, $size->value])
+            ->toArray();
+        $stringCases = collect(Size::cases())
+            ->map(static fn (Size $size) => [$size->value, $size->value])
+            ->toArray();
+
+        return array_merge($enumCases, $stringCases);
+    }
+
+    public function testArtworkShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, Artwork::first());
     }
 
-    /** @test */
-    public function character_mug_shot_should_be_mapped_as_instance_of_image(): void
+    public function testCharacterMugShotShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, CharacterMugShot::first());
     }
 
-    /** @test */
-    public function company_logo_should_be_mapped_as_instance_of_image(): void
+    public function testCompanyLogoShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, CompanyLogo::first());
     }
 
-    /** @test */
-    public function cover_should_be_mapped_as_instance_of_image(): void
+    public function testCoverShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, Cover::first());
     }
 
-    /** @test */
-    public function game_engine_logo_should_be_mapped_as_instance_of_image(): void
+    public function testGameEngineLogoShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, GameEngineLogo::first());
     }
 
-    /** @test */
-    public function platform_logo_should_be_mapped_as_instance_of_image(): void
+    public function testPlatformLogoShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, PlatformLogo::first());
     }
 
-    /** @test */
-    public function screenshot_should_be_mapped_as_instance_of_image(): void
+    public function testScreenshotShouldBeMappedAsInstanceOfImage(): void
     {
         self::assertInstanceOf(Image::class, Screenshot::first());
     }
 
-    /** @test */
-    public function it_should_generate_default_image_url_without_attributes(): void
+    public function testItShouldGenerateDefaultImageUrlWithoutAttributes(): void
     {
         $url = Artwork::first()->getUrl();
 
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_thumb/abc.jpg', $url);
     }
 
-    /** @test */
-    public function it_should_generate_desired_image_url_with_parameter(): void
+    /**
+     * @dataProvider imageSizeDataProvider
+     */
+    public function testItShouldGenerateDesiredImageUrlWithParameter(Size | string $size, string $value): void
     {
-        $url = Artwork::first()->getUrl(Size::COVER_BIG);
+        $url = Artwork::first()->getUrl($size);
 
-        self::assertEquals('//images.igdb.com/igdb/image/upload/t_cover_big/abc.jpg', $url);
+        self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '/abc.jpg', $url);
     }
 
-    /** @test */
-    public function it_should_generate_retina_image_url(): void
+    /**
+     * @dataProvider imageSizeDataProvider
+     */
+    public function testItShouldGenerateRetinaImageUrl(Size | string $size, string $value): void
     {
-        $url = Artwork::first()->getUrl(Size::COVER_BIG, true);
+        $url = Artwork::first()->getUrl($size, true);
 
-        self::assertEquals('//images.igdb.com/igdb/image/upload/t_cover_big_2x/abc.jpg', $url);
+        self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '_2x/abc.jpg', $url);
     }
 
-    /** @test */
-    public function it_should_throw_exception_with_invalid_image_size(): void
+    public function testItShouldThrowExceptionWithInvalidImageSize(): void
     {
         $this->expectException(InvalidArgumentException::class);
 

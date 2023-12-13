@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\Platform;
 
-class Category
+enum Category: int
 {
-    public const CONSOLE = 1;
-    public const ARCADE = 2;
-    public const PLATFORM = 3;
-    public const OPERATING_SYSTEM = 4;
-    public const PORTABLE_CONSOLE = 5;
-    public const COMPUTER = 6;
+    case CONSOLE = 1;
+    case ARCADE = 2;
+    case PLATFORM = 3;
+    case OPERATING_SYSTEM = 4;
+    case PORTABLE_CONSOLE = 5;
+    case COMPUTER = 6;
 }

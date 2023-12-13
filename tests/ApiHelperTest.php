@@ -1,20 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Tests;
 
-use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 
+/**
+ * @internal
+ */
 class ApiHelperTest extends TestCase
 {
     /**
-     * @test
      * @throws AuthenticationException
      */
-    public function it_should_use_access_token_from_cache(): void
+    public function testItShouldUseAccessTokenFromCache(): void
     {
         Cache::put('igdb_cache.access_token', 'some-token');
 
@@ -24,17 +27,16 @@ class ApiHelperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws AuthenticationException
      */
-    public function it_should_retrieve_access_token_from_twitch(): void
+    public function testItShouldRetrieveAccessTokenFromTwitch(): void
     {
         Cache::forget('igdb_cache.access_token');
 
         Http::fake([
             '*/oauth2/token*' => Http::response([
                 'access_token' => 'test-suite-token',
-                'expires_in' => 3600
+                'expires_in' => 3600,
             ]),
         ]);
 

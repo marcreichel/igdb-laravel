@@ -1,45 +1,52 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MarcReichel\IGDBLaravel\Enums\Image\Size;
 use MarcReichel\IGDBLaravel\Exceptions\PropertyDoesNotExist;
-use ReflectionClass;
 
 abstract class Image extends Model
 {
     protected const IMAGE_BASE_PATH = '//images.igdb.com/igdb/image/upload';
 
     /**
-     * @throws PropertyDoesNotExist|InvalidArgumentException
+     * @throws PropertyDoesNotExist
+     * @throws InvalidArgumentException
      */
-    public function getUrl(string $size = 'thumb', bool $retina = false): string
+    public function getUrl(Size | string $size = Size::THUMBNAIL, bool $retina = false): string
     {
-        $availableSizes = new ReflectionClass(Size::class);
-        $constants = collect($availableSizes->getConstants());
-        $sizeFromEnum = $constants->first(function ($value) use ($size) {
-            return $value === $size;
-        });
-
-        if (is_null($sizeFromEnum)) {
-            throw new InvalidArgumentException("[$size] is not a valid image size.");
-        }
-
         $basePath = static::IMAGE_BASE_PATH;
         $id = $this->getAttribute('image_id');
 
-        if (is_null($id)) {
+        if ($id === null) {
             throw new PropertyDoesNotExist('Property [image_id] is missing from the response. Make sure you specify `image_id` inside the fields attribute.');
         }
 
         $id = '' . $id;
 
-        if ($retina) {
-            $size = Str::finish('' . $sizeFromEnum, '_2x');
+        if ($size instanceof Size) {
+            $parsedSize = $size->value;
+        } else {
+            $parsedSize = $size;
         }
 
-        return "$basePath/t_$size/$id.jpg";
+        $cases = collect(Size::cases())
+            ->map(static fn (Size $s) => $s->value)
+            ->values()
+            ->toArray();
+
+        if (!in_array($parsedSize, $cases, true)) {
+            throw new InvalidArgumentException('Size must be one of ' . implode(', ', $cases));
+        }
+
+        if ($retina) {
+            $parsedSize = Str::finish($parsedSize, '_2x');
+        }
+
+        return "$basePath/t_$parsedSize/$id.jpg";
     }
 }

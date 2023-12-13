@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel;
 
 use Exception;
@@ -14,7 +16,6 @@ class ApiHelper
     /**
      * Retrieves an Access Token from Twitch.
      *
-     * @return string
      * @throws AuthenticationException
      */
     public static function retrieveAccessToken(): string
@@ -38,7 +39,7 @@ class ApiHelper
                 ->json();
 
             if (is_array($response) && isset($response['access_token']) && $response['expires_in']) {
-                Cache::put($accessTokenCacheKey, (string)$response['access_token'], (int)$response['expires_in'] - 60);
+                Cache::put($accessTokenCacheKey, (string) $response['access_token'], (int) $response['expires_in'] - 60);
 
                 $accessToken = $response['access_token'];
             }

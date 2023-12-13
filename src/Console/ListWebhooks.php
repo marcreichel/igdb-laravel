@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Console;
 
 use Illuminate\Console\Command;
@@ -11,9 +13,6 @@ class ListWebhooks extends Command
 
     protected $description = 'List all your registered webhooks at IGDB.';
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         $webhooks = Webhook::all();

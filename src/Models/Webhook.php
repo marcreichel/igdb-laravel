@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Models;
 
 use Carbon\Carbon;
@@ -7,7 +9,6 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use JetBrains\PhpStorm\ArrayShape;
 use JsonException;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
@@ -15,63 +16,22 @@ use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
 use MarcReichel\IGDBLaravel\Interfaces\WebhookInterface;
-use ReflectionClass;
 
 class Webhook implements WebhookInterface
 {
-    /**
-     * @var PendingRequest
-     */
+    public int $id;
+    public string $url;
+    public int $category;
+    public int $sub_category;
+    public bool $active;
+    public int $number_of_retries;
+    public string $secret;
+    public string $created_at;
+    public string $updated_at;
+
     private PendingRequest $client;
 
     /**
-     * @var int
-     */
-    public int $id;
-
-    /**
-     * @var string
-     */
-    public string $url;
-
-    /**
-     * @var int
-     */
-    public int $category;
-
-    /**
-     * @var int
-     */
-    public int $sub_category;
-
-    /**
-     * @var bool
-     */
-    public bool $active;
-
-    /**
-     * @var int
-     */
-    public int $number_of_retries;
-
-    /**
-     * @var string
-     */
-    public string $secret;
-
-    /**
-     * @var string
-     */
-    public string $created_at;
-
-    /**
-     * @var string
-     */
-    public string $updated_at;
-
-    /**
-     * @param  mixed  ...$parameters
-     *
      * @throws AuthenticationException
      */
     public function __construct(mixed ...$parameters)
@@ -82,53 +42,44 @@ class Webhook implements WebhookInterface
             ->withHeaders([
                 'Accept' => 'application/json',
                 'Client-ID' => config('igdb.credentials.client_id'),
-                'Authorization' => 'Bearer '.ApiHelper::retrieveAccessToken(),
+                'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
             ]);
 
         $this->fill(...$parameters);
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
     public static function all(): \Illuminate\Support\Collection
     {
-        $self = new static;
+        $self = new static();
         $response = $self->client->get('webhooks');
 
         if ($response->failed()) {
             return new \Illuminate\Support\Collection();
         }
+
         return $self->mapToModel(collect($response->json()));
     }
 
-    /**
-     * @param  int  $id
-     *
-     * @return mixed
-     */
     public static function find(int $id): mixed
     {
-        $self = new static;
-        $response = $self->client->get('webhooks/'.$id);
+        $self = new static();
+        $response = $self->client->get('webhooks/' . $id);
         if ($response->failed()) {
             return null;
         }
+
         return $self->mapToModel(collect($response->json()))->first();
     }
 
-    /**
-     * @return mixed
-     */
     public function delete(): mixed
     {
         if (!$this->id) {
             return false;
         }
 
-        $self = new static;
+        $self = new static();
 
-        $response = $self->client->delete('webhooks/'.$this->id)->json();
+        $response = $self->client->delete('webhooks/' . $this->id)->json();
 
         if (!$response) {
             return false;
@@ -154,7 +105,7 @@ class Webhook implements WebhookInterface
         }
 
         $className = Str::singular(Str::studly($endpoint));
-        $fullClassName = '\\MarcReichel\\IGDBLaravel\\Models\\'.$className;
+        $fullClassName = 'MarcReichel\\IGDBLaravel\\Models\\' . $className;
 
         if (!class_exists($fullClassName)) {
             return $data;
@@ -164,14 +115,15 @@ class Webhook implements WebhookInterface
         $method = $request->route('method');
         $entity = new $fullClassName($data);
 
-        $reflectionClass = new ReflectionClass(Method::class);
-        $allowedMethods = array_values($reflectionClass->getConstants());
+        $allowedMethods = collect(Method::cases())
+            ->map(static fn (Method $method) => $method->value)
+            ->toArray();
 
         if (!$method || !in_array($method, $allowedMethods, true)) {
             return $entity;
         }
 
-        $event = '\\MarcReichel\\IGDBLaravel\\Events\\'.$className.ucfirst(strtolower($method)).'d';
+        $event = 'MarcReichel\\IGDBLaravel\\Events\\' . $className . ucfirst(strtolower($method)) . 'd';
 
         if (!class_exists($event)) {
             return $entity;
@@ -196,15 +148,12 @@ class Webhook implements WebhookInterface
         throw new InvalidWebhookSecretException();
     }
 
-    /**
-     * @return string
-     */
     public function getModel(): string
     {
-        $reflectionCategory = new ReflectionClass(Category::class);
-        $categories = collect($reflectionCategory->getConstants())->flip();
+        $categories = collect(Category::cases())
+            ->mapWithKeys(fn (Category $category) => [(string) $category->value => $category->name]);
 
-        $category = $categories->get((string) $this->category);
+        $category = $categories->get($this->category);
 
         if (!is_string($category)) {
             return (string) $this->category;
@@ -213,53 +162,39 @@ class Webhook implements WebhookInterface
         return $category;
     }
 
-    /**
-     * @return string
-     */
-    public function getMethod(): string
+    public function getMethod(): Method
     {
-        $reflectionMethod = new ReflectionClass(Method::class);
-        $methods = collect($reflectionMethod->getConstants())->values();
-
-        $method = $methods->get($this->sub_category);
-
-        if (!is_string($method)) {
-            return (string) $this->sub_category;
-        }
-
-        return $method;
+        return match ($this->sub_category) {
+            1 => Method::DELETE,
+            2 => Method::UPDATE,
+            default => Method::CREATE,
+        };
     }
 
-    #[ArrayShape([
-        'id' => "int",
-        'url' => "string",
-        'category' => "int|mixed",
-        'sub_category' => "int|mixed",
-        'number_of_retries' => "int",
-        'active' => "bool",
-    ])]
+    public function getSubCategory(): int
+    {
+        return $this->sub_category;
+    }
+
     public function toArray(): array
     {
         return [
             'id' => $this->id,
             'url' => $this->url,
-            'category' => $this->getModel(),
-            'sub_category' => $this->getMethod(),
+            'category' => $this->category,
+            'sub_category' => $this->sub_category,
             'number_of_retries' => $this->number_of_retries,
             'active' => $this->active,
         ];
     }
 
-    /**
-     * @param  mixed  ...$parameters
-     */
     private function fill(mixed ...$parameters): void
     {
         if ($parameters) {
             foreach ($parameters as $parameter => $value) {
                 if (property_exists($this, (string) $parameter)) {
-                    if (is_string($value) && in_array($parameter, ['created_at', 'updated_at'])) {
-                        $this->{$parameter} = new Carbon($value);
+                    if (in_array($parameter, ['created_at', 'updated_at'])) {
+                        $this->{$parameter} = (string) new Carbon($value);
                     } else {
                         $this->{$parameter} = $value;
                     }

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Enums\GameVersionFeature;
 
-class Category
+enum Category: int
 {
-    public const BOOLEAN = 0;
-    public const DESCRIPTION = 1;
+    case BOOLEAN = 0;
+    case DESCRIPTION = 1;
 }

@@ -1,38 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Events;
 
 use Carbon\Carbon;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Http\Request;
+use Illuminate\Queue\SerializesModels;
 
 abstract class Event
 {
-    /**
-     * @var string $class
-     */
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+
     public string $class;
-
-    /**
-     * @var string $url
-     */
     public string $url;
-
-    /**
-     * @var string|null $method
-     */
-    public string|null $method;
-
-    /**
-     * @var Carbon $created_at
-     */
+    public ?string $method;
     public Carbon $created_at;
 
-    /**
-     * @param Request $request
-     */
     public function __construct(Request $request)
     {
-        $this->class = get_class($this);
+        $this->class = static::class;
         $this->url = $request->fullUrl();
         /** @var string $method */
         $method = $request->route('method');

@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Console;
 
 use Illuminate\Console\Command;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
-use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Models\Model;
 use MarcReichel\IGDBLaravel\Models\Webhook;
@@ -21,9 +22,6 @@ class ReactivateWebhook extends Command
      */
     protected $description = 'Reactivate an inactive webhook.';
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         /** @var Webhook|null $webhook */
@@ -31,11 +29,13 @@ class ReactivateWebhook extends Command
 
         if (!$webhook) {
             $this->error('Webhook not found.');
+
             return 1;
         }
 
         if ($webhook->active) {
             $this->info('Webhook does not need to be reactivated.');
+
             return 0;
         }
 
@@ -55,7 +55,7 @@ class ReactivateWebhook extends Command
 
         try {
             $class::createWebhook($method);
-        } catch (AuthenticationException | InvalidWebhookMethodException | WebhookSecretMissingException $e) {
+        } catch (AuthenticationException | WebhookSecretMissingException $e) {
             $this->error($e->getMessage());
 
             return 1;

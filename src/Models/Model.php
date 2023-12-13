@@ -1,32 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Models;
 
-use Error;
 use ArrayAccess;
-use Carbon\Carbon;
 use BadMethodCallException;
+use Carbon\Carbon;
+use Error;
 use Exception;
+use Illuminate\Contracts\Support\{Arrayable, Jsonable};
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Builder;
-use Illuminate\Contracts\Support\{Jsonable, Arrayable};
-use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Interfaces\ModelInterface;
-use ReflectionClass;
+use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
 use ReflectionException;
 
 /**
- * Class Model
- *
  * @method static Builder select(mixed $fields)
  * @method static Builder limit(int $limit)
  * @method static Builder take(int $limit)
@@ -82,31 +81,24 @@ use ReflectionException;
  * @method static int|null count()
  * @method static \Illuminate\Support\Collection all()
  * @method static Paginator paginate(int $limit = 10)
- *
- * @package MarcReichel\IGDBLaravel\Models
  */
-abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
+abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
 {
-    use HasAttributes, HasRelationships;
+    use HasAttributes;
+    use HasRelationships;
 
-    private static Model $instance;
-
-    public string|null $identifier;
+    public ?string $identifier;
     public Builder $builder;
 
     protected string $endpoint;
 
     /**
-     * Model constructor.
-     *
-     * @param array $properties
-     *
      * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function __construct(array $properties = [])
     {
         $this->builder = new Builder($this);
-        self::$instance = $this;
 
         $this->setAttributes($properties);
         $this->setRelations($properties);
@@ -114,203 +106,117 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
         $this->setEndpoint();
     }
 
-    /**
-     * @param string $field
-     *
-     * @return mixed
-     */
     public function __get(string $field): mixed
     {
         return $this->getAttribute($field);
     }
 
-    /**
-     * @param string $field
-     * @param mixed  $value
-     *
-     * @return void
-     */
     public function __set(string $field, mixed $value): void
     {
         $this->attributes[$field] = $value;
     }
 
-    /**
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->attributes[$offset]) || isset($this->relations[$offset]);
     }
 
-    /**
-     * @param mixed $offset
-     *
-     * @return mixed
-     */
-    public function offsetGet($offset): mixed
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->getAttribute((string) $offset);
     }
 
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     *
-     * @return void
-     */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->attributes[$offset] = $value;
     }
 
-    /**
-     * @param mixed $offset
-     *
-     * @return void
-     */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->attributes[$offset], $this->relations[$offset]);
     }
 
-    /**
-     * @param mixed $field
-     *
-     * @return bool
-     */
     public function __isset(mixed $field): bool
     {
         return $this->offsetExists($field);
     }
 
-    /**
-     * @param mixed $field
-     *
-     * @return void
-     */
     public function __unset(mixed $field): void
     {
         $this->offsetUnset($field);
     }
 
     /**
-     * @param mixed $method
-     * @param mixed $parameters
-     *
-     * @return mixed
      * @throws ReflectionException
+     * @throws InvalidParamsException
      */
-    public static function __callStatic(mixed $method, mixed $parameters)
+    public static function __callStatic(mixed $method, mixed $parameters): mixed
     {
-        $that = new static;
+        $that = new static();
+
         return $that->forwardCallTo($that->newQuery(), $method, $parameters);
     }
 
-    /**
-     * @return void
-     */
     protected function setIdentifier(): void
     {
-        $this->identifier = collect($this->attributes)->get('id');
+        $this->identifier = (string) collect($this->attributes)->get('id');
     }
 
-    /**
-     * @param array $attributes
-     *
-     * @return void
-     */
     protected function setAttributes(array $attributes): void
     {
         $this->attributes = collect($attributes)->filter(function ($value) {
             if (is_array($value)) {
-                return collect($value)->filter(function ($value) {
-                    return is_object($value);
-                })->isEmpty();
+                return collect($value)->filter(fn ($value) => is_object($value))->isEmpty();
             }
+
             return !is_object($value);
         })->map(function ($value, $key) {
             $dates = collect($this->dates);
             if ($dates->contains($key)) {
                 return Carbon::createFromTimestamp($value);
             }
+
             return $value;
         })->toArray();
     }
 
-    /**
-     * @param array $attributes
-     *
-     * @return void
-     */
     protected function setRelations(array $attributes): void
     {
         $this->relations = collect($attributes)
             ->filter(fn ($value, $key) => array_key_exists($key, $this->casts))
             ->map(function ($value, $key) {
                 if (is_array($value) && array_is_list($value)) {
-                    return collect($value)->map(function ($value) use ($key) {
-                        return $this->mapToModel($key, $value);
-                    })->filter();
+                    return collect($value)->map(fn ($value) => $this->mapToModel($key, $value))->filter();
                 }
+
                 return $this->mapToModel($key, $value);
             })
             ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof \Illuminate\Support\Collection && !$value->isEmpty()));
     }
 
-    /**
-     * @param mixed $object
-     * @param mixed $method
-     * @param mixed $parameters
-     *
-     * @return mixed
-     */
     public function forwardCallTo(mixed $object, mixed $method, mixed $parameters): mixed
     {
         try {
             return $object->$method(...$parameters);
-        } catch (Error | BadMethodCallException $e) {
+        } catch (BadMethodCallException | Error $e) {
             throw new BadMethodCallException($e->getMessage());
         }
     }
 
     /**
-     * @return Builder
-     * @throws ReflectionException|InvalidParamsException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
      */
     public function newQuery(): Builder
     {
         return new Builder($this);
     }
 
-    /**
-     * @param mixed $fields
-     *
-     * @return Model
-     */
-    public function getInstance(mixed $fields): Model
-    {
-        return self::$instance;
-    }
-
-    /**
-     * @param string $field
-     *
-     * @return mixed
-     */
     public function getAttribute(string $field): mixed
     {
         return collect($this->attributes)->merge($this->relations)->get($field);
     }
 
-    /**
-     * @param string $property
-     * @param mixed $value
-     *
-     * @return mixed
-     */
     private function mapToModel(string $property, mixed $value): mixed
     {
         $class = $this->getClassNameForProperty($property);
@@ -340,17 +246,12 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
         return null;
     }
 
-    /**
-     * @param string $property
-     *
-     * @return bool|null|string
-     */
-    protected function getClassNameForProperty(string $property): bool|null|string
+    protected function getClassNameForProperty(string $property): bool | string | null
     {
         if (collect($this->casts)->has($property)) {
             $class = collect($this->casts)->get($property);
 
-            if (!is_null($class) && class_exists($class)) {
+            if (null !== $class && class_exists($class)) {
                 return $class;
             }
         }
@@ -361,7 +262,7 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
             return $class;
         }
 
-        $class = __NAMESPACE__ . '\\' . class_basename(get_class($this)) . Str::singular(Str::studly($property));
+        $class = __NAMESPACE__ . '\\' . class_basename(static::class) . Str::singular(Str::studly($property));
 
         if (class_exists($class)) {
             return $class;
@@ -370,29 +271,18 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
         return false;
     }
 
-    /**
-     * @param mixed $value
-     *
-     * @return array
-     */
     protected function getProperties(mixed $value): array
     {
         return collect($value)->toArray();
     }
 
-    /**
-     * @return void
-     */
     protected function setEndpoint(): void
     {
-        $class = class_basename(get_class($this));
+        $class = class_basename(static::class);
 
         $this->endpoint = Str::snake(Str::plural($class));
     }
 
-    /**
-     * @return string
-     */
     public function getEndpoint(): string
     {
         return $this->endpoint;
@@ -400,8 +290,6 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
 
     /**
      * Get the instance as an array.
-     *
-     * @return array
      */
     public function toArray(): array
     {
@@ -413,6 +301,7 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
 
             return $relation->toArray();
         });
+
         return $attributes->merge($relations)->sortKeys()->toArray();
     }
 
@@ -420,8 +309,6 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
      * Convert the object to its JSON representation.
      *
      * @param int $options
-     *
-     * @return string
      */
     public function toJson($options = 0): string
     {
@@ -429,37 +316,35 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
     }
 
     /**
-     * @param string $method
-     * @param array  $parameters
-     *
-     * @return Webhook
      * @throws AuthenticationException
-     * @throws InvalidWebhookMethodException
      * @throws WebhookSecretMissingException
      * @throws RequestException
      * @throws Exception
      */
-    public static function createWebhook(string $method, array $parameters = []): Webhook
+    public static function createWebhook(Method | string $method, array $parameters = []): Webhook
     {
         if (!config('igdb.webhook_secret')) {
             throw new WebhookSecretMissingException();
         }
 
-        $self = (new static);
+        $self = new static();
+
+        if ($method instanceof Method) {
+            $parsedMethod = $method->value;
+        } else {
+            $parsedMethod = $method;
+        }
+
+        if (!in_array($parsedMethod, ['create', 'update', 'delete'])) {
+            throw new InvalidWebhookMethodException();
+        }
 
         $routeParameters = array_merge($parameters, [
             'model' => $self->getEndpoint(),
-            'method' => $method,
+            'method' => $parsedMethod,
         ]);
 
         $url = route('handle-igdb-webhook', $routeParameters);
-
-        $reflectionClass = new ReflectionClass(Method::class);
-        $allowedMethods = array_values($reflectionClass->getConstants());
-
-        if (!in_array($method, $allowedMethods, true)) {
-            throw new InvalidWebhookMethodException();
-        }
 
         $endpoint = $self->endpoint . '/webhooks';
 
@@ -470,11 +355,11 @@ abstract class Model implements ModelInterface, ArrayAccess, Arrayable, Jsonable
             'Client-ID' => config('igdb.credentials.client_id'),
             'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
         ])
-        ->asForm();
+            ->asForm();
 
         $response = $client->post($endpoint, [
             'url' => $url,
-            'method' => $method,
+            'method' => $parsedMethod,
             'secret' => config('igdb.webhook_secret'),
         ])->throw()->json();
 

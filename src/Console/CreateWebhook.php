@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MarcReichel\IGDBLaravel\Console;
 
 use Exception;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
+use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Models\Model;
 
@@ -20,9 +23,6 @@ class CreateWebhook extends Command
      */
     protected $description = 'Create a webhook at IGDB.';
 
-    /**
-     * @return int
-     */
     public function handle(): int
     {
         $modelQuestionString = 'For which model you want to create a webhook?';
@@ -56,16 +56,26 @@ class CreateWebhook extends Command
 
         $methods = ['create', 'update', 'delete'];
 
-        $method = $this->option('method') ?? $this->choice('For which event do you want to create the webhook?',
-                $methods, 'update');
+        $method = $this->option('method') ?? $this->choice(
+            'For which event do you want to create the webhook?',
+            $methods,
+            'update',
+        );
 
         if (!in_array($method, $methods, true)) {
             $this->error((new InvalidWebhookMethodException())->getMessage());
+
             return 1;
         }
 
+        $mappedMethod = match ($method) {
+            'create' => Method::CREATE,
+            'update' => Method::UPDATE,
+            'delete' => Method::DELETE,
+        };
+
         try {
-            $class::createWebhook($method);
+            $class::createWebhook($mappedMethod);
         } catch (Exception $e) {
             $this->error($e->getMessage());
 
@@ -77,9 +87,6 @@ class CreateWebhook extends Command
         return 0;
     }
 
-    /**
-     * @return array
-     */
     private function getModels(): array
     {
         $pattern = '/\/(?:Model|Search|Webhook|Image)\.php$/';
@@ -92,17 +99,10 @@ class CreateWebhook extends Command
         $grep = preg_grep($pattern, $glob, PREG_GREP_INVERT);
 
         return collect($grep ?: [])
-            ->map(function ($path) {
-                return basename($path, '.php');
-            })
+            ->map(fn ($path) => basename($path, '.php'))
             ->toArray();
     }
 
-    /**
-     * @param string $model
-     *
-     * @return string
-     */
     private function getClosestModel(string $model): string
     {
         return collect($this->getModels())->map(function ($m) use ($model) {
@@ -110,12 +110,10 @@ class CreateWebhook extends Command
                 'model' => $m,
                 'levenshtein' => levenshtein($m, $model),
             ];
-        })->filter(function ($m) {
-            return $m['levenshtein'] <= 5;
-        })->sortBy(function ($m) {
-            return $m['levenshtein'];
-        })->map(function ($m) {
-            return $m['model'];
-        })->first();
+        })
+            ->filter(fn ($m) => $m['levenshtein'] <= 5)
+            ->sortBy(fn ($m) => $m['levenshtein'])
+            ->map(fn ($m) => $m['model'])
+            ->first();
     }
 }
