@@ -2,42 +2,52 @@ name: Code coverage
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths-ignore:
-      - 'LICENSE'
-      - 'README.md'
+      - LICENSE
+      - README.md
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: true
       matrix:
-        os: [ ubuntu-latest ]
-        php: [ 8.2 ]
-        laravel: [ 10.* ]
-        stability: [ prefer-lowest ]
+        os: [ubuntu-latest]
+        php: [8.2]
+        laravel: ['10.*', '11.*']
+        stability: [prefer-lowest]
         include:
           - laravel: 10.*
             testbench: 8.*
+          - laravel: 11.*
+            testbench: 9.*
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
           coverage: xdebug
+
       - name: Setup problem matchers
         run: |
           echo "::add-matcher::${{ runner.tool_cache }}/php.json"
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
       - name: Install dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+
       - name: Run tests
         run: vendor/bin/phpunit --coverage-clover coverage.xml
+
       - name: Upload
         uses: codecov/codecov-action@v1
         with:
