@@ -1,67 +1,67 @@
 {
-  "name": "marcreichel/igdb-laravel",
-  "description": "A Laravel wrapper for version 4 of the IGDB API (Apicalypse) including webhook handling",
-  "keywords": [
-    "laravel",
-    "api-wrapper",
-    "igdb",
-    "igdb-api",
-    "apicalypse",
-    "wrapper"
-  ],
-  "type": "library",
-  "minimum-stability": "stable",
-  "require": {
-    "php": "^8.1",
-    "laravel/framework": "^8.40.0|^9.0|^10.0",
-    "guzzlehttp/guzzle": "~6.0|~7.0",
-    "nesbot/carbon": "^2.53.1",
-    "ext-json": "*"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^9.5.4 || ^10.0.0",
-    "orchestra/testbench": "^6.23|^7.0|^8.0",
-    "nunomaduro/collision": "^5.3|^6.1|^7.0",
-    "roave/security-advisories": "dev-latest",
-    "nunomaduro/larastan": "^1.0|^2.0",
-    "laravel/pint": "^1.13"
-  },
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Marc Reichel",
-      "email": "mail@marcreichel.de"
-    }
-  ],
-  "scripts": {
-    "pint": "./vendor/bin/pint --test -v",
-    "test": "./vendor/bin/testbench package:test",
-    "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
-    "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
-    "test:coverage": [
-      "@putenv XDEBUG_MODE=coverage",
-      "./vendor/bin/phpunit --coverage-clover=\"build/clover.xml\""
+    "name": "marcreichel/igdb-laravel",
+    "description": "A Laravel wrapper for version 4 of the IGDB API (Apicalypse) including webhook handling",
+    "keywords": [
+        "laravel",
+        "api-wrapper",
+        "igdb",
+        "igdb-api",
+        "apicalypse",
+        "wrapper"
     ],
-    "test:coverage-html": [
-      "@putenv XDEBUG_MODE=coverage",
-      "./vendor/bin/phpunit --color=always --coverage-html=\"report\""
-    ]
-  },
-  "autoload": {
-    "psr-4": {
-      "MarcReichel\\IGDBLaravel\\": "src"
+    "type": "library",
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.1",
+        "laravel/framework": "^8.40.0|^9.0|^10.0|^11.0",
+        "guzzlehttp/guzzle": "~6.0|~7.0",
+        "nesbot/carbon": "^2.53.1|^3.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5.4 || ^10.0.0",
+        "orchestra/testbench": "^6.23|^7.0|^8.0|^9.0",
+        "nunomaduro/collision": "^5.3|^6.1|^7.0|^8.0",
+        "roave/security-advisories": "dev-latest",
+        "nunomaduro/larastan": "^1.0|^2.0",
+        "laravel/pint": "^1.13"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marc Reichel",
+            "email": "mail@marcreichel.de"
+        }
+    ],
+    "scripts": {
+        "pint": "./vendor/bin/pint --test -v",
+        "test": "./vendor/bin/testbench package:test",
+        "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
+        "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
+        "test:coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "./vendor/bin/phpunit --coverage-clover=\"build/clover.xml\""
+        ],
+        "test:coverage-html": [
+            "@putenv XDEBUG_MODE=coverage",
+            "./vendor/bin/phpunit --color=always --coverage-html=\"report\""
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "MarcReichel\\IGDBLaravel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MarcReichel\\IGDBLaravel\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MarcReichel\\IGDBLaravel\\IGDBLaravelServiceProvider"
+            ]
+        }
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "MarcReichel\\IGDBLaravel\\Tests\\": "tests"
-    }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "MarcReichel\\IGDBLaravel\\IGDBLaravelServiceProvider"
-      ]
-    }
-  }
 }
