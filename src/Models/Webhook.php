@@ -204,7 +204,7 @@ class Webhook
 
     private function mapToModel(\Illuminate\Support\Collection $collection): \Illuminate\Support\Collection
     {
-        return $collection->map(function ($item) {
+        return $collection->map(function (array $item) {
             $webhook = new self(...$item);
 
             unset($webhook->client);

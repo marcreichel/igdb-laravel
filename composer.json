@@ -25,7 +25,8 @@
         "roave/security-advisories": "dev-latest",
         "larastan/larastan": "^2.9.2",
         "laravel/pint": "^1.13",
-        "pestphp/pest": "^2"
+        "pestphp/pest": "^2",
+        "pestphp/pest-plugin-type-coverage": "2.x-dev"
     },
     "license": "MIT",
     "authors": [
@@ -36,15 +37,19 @@
     ],
     "scripts": {
         "pint": "./vendor/bin/pint --test -v",
-        "test": "./vendor/bin/pest --parallel -v",
+        "test": "./vendor/bin/pest --parallel",
         "stan": "./vendor/bin/phpstan --memory-limit=2G",
         "test:coverage": [
             "@putenv XDEBUG_MODE=coverage",
-            "@test --coverage-clover build/clover.xml"
+            "@test --coverage --min=90 --coverage-clover build/clover.xml"
         ],
         "test:coverage-html": [
             "@putenv XDEBUG_MODE=coverage",
-            "@test --coverage-html build/coverage"
+            "@test --coverage --min=90 --coverage-html build/coverage"
+        ],
+        "test:type-coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "@test -- --type-coverage --min=100"
         ]
     },
     "autoload": {
