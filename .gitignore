@@ -3,6 +3,7 @@ vendor/
 build/
 report/
 composer.lock
+.phpunit.cache
 .phpunit.result.cache
 cghooks.lock
 

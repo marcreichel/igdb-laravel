@@ -2,11 +2,9 @@ name: Tests
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - LICENSE
-      - README.md
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   run-tests:
@@ -17,15 +15,13 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php: [8.3, 8.2, 8.1]
-        laravel: ['8.*', '9.*', '10.*', '11.*']
+        laravel: ['9.*', '10.*', '11.*']
         stability: [prefer-stable]
         include:
           - laravel: 10.*
             testbench: 8.*
           - laravel: 9.*
             testbench: 7.*
-          - laravel: 8.*
-            testbench: 6.*
           - laravel: 11.*
             testbench: 9.*
         exclude:
