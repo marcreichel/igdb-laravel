@@ -24,7 +24,8 @@
         "nunomaduro/collision": "^5.3|^6.1|^7.0|^8.0",
         "roave/security-advisories": "dev-latest",
         "larastan/larastan": "^2.9.2",
-        "laravel/pint": "^1.13"
+        "laravel/pint": "^1.13",
+        "pestphp/pest": "2.x-dev"
     },
     "license": "MIT",
     "authors": [
@@ -62,6 +63,11 @@
             "providers": [
                 "MarcReichel\\IGDBLaravel\\IGDBLaravelServiceProvider"
             ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
         }
     }
 }
