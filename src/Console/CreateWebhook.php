@@ -95,19 +95,19 @@ class CreateWebhook extends Command
         $grep = preg_grep($pattern, $glob, PREG_GREP_INVERT);
 
         return collect($grep ?: [])
-            ->map(fn ($path) => basename($path, '.php'))
+            ->map(fn (string $path): string => basename($path, '.php'))
             ->toArray();
     }
 
     private function getClosestModel(string $model): ?string
     {
-        return collect($this->getModels())->map(fn ($m) => [
+        return collect($this->getModels())->map(fn (string $m): array => [
             'model' => $m,
             'levenshtein' => levenshtein($m, $model),
         ])
-            ->filter(fn ($m) => $m['levenshtein'] <= 5)
-            ->sortBy(fn ($m) => $m['levenshtein'])
-            ->map(fn ($m) => $m['model'])
+            ->filter(fn (array $m) => $m['levenshtein'] <= 5)
+            ->sortBy(fn (array $m) => $m['levenshtein'])
+            ->map(fn (array $m) => $m['model'])
             ->first();
     }
 }

@@ -77,7 +77,7 @@ class Builder
             $collection->push('*');
         }
 
-        $collection = $collection->filter(fn ($field) => !strpos($field, '.'))->flatten();
+        $collection = $collection->filter(fn (string $field) => !strpos($field, '.'))->flatten();
 
         if ($collection->isEmpty()) {
             $collection->push('*');
@@ -186,6 +186,7 @@ class Builder
      *
      * @throws ReflectionException
      * @throws InvalidParamsException
+     * @throws JsonException
      */
     public function fuzzySearch(
         mixed $key,
@@ -196,7 +197,7 @@ class Builder
         $tokenizedQuery = explode(' ', $query);
         $keys = collect($key)->crossJoin($tokenizedQuery)->toArray();
 
-        return $this->whereNested(function ($query) use ($keys, $caseSensitive): void {
+        return $this->whereNested(function (Builder $query) use ($keys, $caseSensitive): void {
             foreach ($keys as $v) {
                 if (is_array($v)) {
                     $query->whereLike($v[0], $v[1], $caseSensitive, '|');
@@ -458,7 +459,7 @@ class Builder
         string $boolean,
         string $method = 'where',
     ): self {
-        return $this->whereNested(function ($query) use (
+        return $this->whereNested(function (Builder $query) use (
             $arrayOfWheres,
             $method,
             $boolean
@@ -526,7 +527,7 @@ class Builder
 
         $where = $this->query->get('where', new Collection());
 
-        $valuesString = collect($values)->map(fn ($value) => !is_numeric($value) ? '"' . $value . '"' : $value)->implode(',');
+        $valuesString = collect($values)->map(fn (mixed $value) => !is_numeric($value) ? '"' . $value . '"' : $value)->implode(',');
 
         $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $valuesString . $suffix);
 
@@ -694,6 +695,7 @@ class Builder
      *
      * @throws ReflectionException
      * @throws InvalidParamsException
+     * @throws JsonException
      */
     public function whereBetween(
         string $key,
@@ -707,7 +709,7 @@ class Builder
             $second = $this->castDate($second);
         }
 
-        $this->whereNested(function ($query) use (
+        $this->whereNested(function (Builder $query) use (
             $key,
             $first,
             $second,
@@ -741,6 +743,7 @@ class Builder
      *
      * @throws ReflectionException
      * @throws InvalidParamsException
+     * @throws JsonException
      */
     public function whereNotBetween(
         string $key,
@@ -754,7 +757,7 @@ class Builder
             $second = $this->castDate($second);
         }
 
-        $this->whereNested(function ($query) use (
+        $this->whereNested(function (Builder $query) use (
             $key,
             $first,
             $second,
@@ -1046,20 +1049,20 @@ class Builder
     public function with(array $relationships): self
     {
         $relationships = collect($relationships)->mapWithKeys(function (
-            $fields,
-            $relationship,
+            mixed $fields,
+            mixed $relationship,
         ) {
             if (is_numeric($relationship)) {
                 return [$fields => ['*']];
             }
 
             return [$relationship => $fields];
-        })->map(function ($fields, $relationship) {
+        })->map(function (mixed $fields, mixed $relationship) {
             if (collect($fields)->count() === 0) {
                 $fields = ['*'];
             }
 
-            return collect($fields)->map(fn ($field) => $relationship . '.' . $field)->implode(',');
+            return collect($fields)->map(fn (mixed $field) => $relationship . '.' . $field)->implode(',');
         })
             ->values()
             ->toArray();
@@ -1088,16 +1091,16 @@ class Builder
      */
     public function getQuery(): string
     {
-        return $this->query->map(function ($value, $key) {
+        return $this->query->map(function (mixed $value, string $key) {
             if ($key === 'where') {
                 return collect($value)->unique()->implode(' ');
             }
             if ($key === 'fields') {
-                return collect($value)->unique()->sortBy(fn ($field) => count(explode('.', $field)))->implode(',');
+                return collect($value)->unique()->sortBy(fn (mixed $field) => count(explode('.', $field)))->implode(',');
             }
 
             return $value;
-        })->map(fn ($value, $key) => Str::finish($key . ' ' . $value, ';'))->unique()->sort()->implode("\n");
+        })->map(fn (mixed $value, string $key) => Str::finish($key . ' ' . $value, ';'))->unique()->sort()->implode("\n");
     }
 
     /**
@@ -1176,7 +1179,7 @@ class Builder
         $data = $this->fetchApi();
 
         if (isset($this->class) && $this->class) {
-            $data = collect($data)->map(fn ($result) => $this->mapToModel($result));
+            $data = collect($data)->map(fn (mixed $result) => $this->mapToModel($result));
         }
 
         $this->init();

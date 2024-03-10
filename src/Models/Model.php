@@ -9,7 +9,7 @@ use BadMethodCallException;
 use Carbon\Carbon;
 use Error;
 use Exception;
-use Illuminate\Contracts\Support\{Arrayable, Jsonable};
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -81,7 +81,7 @@ use ReflectionException;
  * @method static \Illuminate\Support\Collection all()
  * @method static Paginator paginate(int $limit = 10)
  */
-abstract class Model implements Arrayable, ArrayAccess, Jsonable
+abstract class Model implements Arrayable, ArrayAccess
 {
     public ?string $identifier;
     public Builder $builder;
@@ -175,13 +175,13 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
 
     protected function setAttributes(array $attributes): void
     {
-        $this->attributes = collect($attributes)->filter(function ($value) {
+        $this->attributes = collect($attributes)->filter(function (mixed $value) {
             if (is_array($value)) {
-                return collect($value)->filter(fn ($value) => is_object($value))->isEmpty();
+                return collect($value)->filter(fn (mixed $value) => is_object($value))->isEmpty();
             }
 
             return !is_object($value);
-        })->map(function ($value, $key) {
+        })->map(function (mixed $value, string $key) {
             $dates = collect($this->dates);
             if ($dates->contains($key)) {
                 return Carbon::createFromTimestamp($value);
@@ -194,10 +194,10 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
     protected function setRelations(array $attributes): void
     {
         $this->relations = collect($attributes)
-            ->filter(fn ($value, $key) => array_key_exists($key, $this->casts))
-            ->map(function ($value, $key) {
+            ->filter(fn (mixed $value, string $key) => array_key_exists($key, $this->casts))
+            ->map(function (mixed $value, string $key) {
                 if (is_array($value) && array_is_list($value)) {
-                    return collect($value)->map(fn ($value) => $this->mapToModel($key, $value))->filter();
+                    return collect($value)->map(fn (mixed $value) => $this->mapToModel($key, $value))->filter();
                 }
 
                 return $this->mapToModel($key, $value);
@@ -243,7 +243,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
         }
 
         if (is_array($value)) {
-            return collect($value)->map(function ($single) use ($class) {
+            return collect($value)->map(function (mixed $single) use ($class) {
                 if (!is_object($single)) {
                     return $single;
                 }
@@ -305,7 +305,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
     public function toArray(): array
     {
         $attributes = collect($this->attributes);
-        $relations = $this->relations->map(function ($relation) {
+        $relations = $this->relations->map(function (mixed $relation) {
             if (!$relation instanceof Arrayable) {
                 return $relation;
             }
@@ -318,10 +318,8 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
 
     /**
      * Convert the object to its JSON representation.
-     *
-     * @param int $options
      */
-    public function toJson($options = 0): string
+    public function toJson(int $options = 0): string
     {
         return collect($this->toArray())->toJson($options);
     }
