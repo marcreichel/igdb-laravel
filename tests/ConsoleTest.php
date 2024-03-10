@@ -10,6 +10,9 @@ use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use Symfony\Component\Console\Command\Command;
 
+/**
+ * @internal
+ */
 class ConsoleTest extends TestCase
 {
     public function testItShouldShowWarningForEmptyWebhooks(): void
