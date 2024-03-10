@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use MarcReichel\IGDBLaravel\Models\Game;
+use MarcReichel\IGDBLaravel\Models\Model;
 
 /**
  * @internal
@@ -421,5 +422,17 @@ class ModelTest extends TestCase
         $this->expectException(BadMethodCallException::class);
 
         Game::foo();
+    }
+
+    /**
+     * @dataProvider modelsDataProvider
+     */
+    public function testItShouldNotHaveInvalidCasts(string $className): void
+    {
+        /** @var class-string<Model> $fqcn */
+        $fqcn = 'MarcReichel\IGDBLaravel\Models\\' . $className;
+
+        $this->assertTrue(class_exists($fqcn));
+        $this->assertInstanceOf($fqcn, new $fqcn());
     }
 }

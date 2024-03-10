@@ -93,7 +93,7 @@ class ImageTest extends TestCase
 
     public function testItShouldGenerateDefaultImageUrlWithoutAttributes(): void
     {
-        $url = Artwork::first()->getUrl();
+        $url = Artwork::first()?->getUrl();
 
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_thumb/abc.jpg', $url);
     }
@@ -103,7 +103,7 @@ class ImageTest extends TestCase
      */
     public function testItShouldGenerateDesiredImageUrlWithParameter(Size | string $size, string $value): void
     {
-        $url = Artwork::first()->getUrl($size);
+        $url = Artwork::first()?->getUrl($size);
 
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '/abc.jpg', $url);
     }
@@ -113,7 +113,7 @@ class ImageTest extends TestCase
      */
     public function testItShouldGenerateRetinaImageUrl(Size | string $size, string $value): void
     {
-        $url = Artwork::first()->getUrl($size, true);
+        $url = Artwork::first()?->getUrl($size, true);
 
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '_2x/abc.jpg', $url);
     }
@@ -122,6 +122,6 @@ class ImageTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        Artwork::first()->getUrl('foo');
+        Artwork::first()?->getUrl('foo');
     }
 }

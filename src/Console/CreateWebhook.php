@@ -43,10 +43,10 @@ class CreateWebhook extends Command
             $this->error('Model "' . $model . '" does not exist.');
             $closestModel = $this->getClosestModel($model);
             if (!$closestModel) {
-                return 1;
+                return self::FAILURE;
             }
             if (!$this->confirm('Did you mean <comment>' . $closestModel . '</comment>?')) {
-                return 1;
+                return self::FAILURE;
             }
             $fullQualifiedName = $namespace . $closestModel;
         }
@@ -65,7 +65,7 @@ class CreateWebhook extends Command
         if (!in_array($method, $methods, true)) {
             $this->error((new InvalidWebhookMethodException())->getMessage());
 
-            return 1;
+            return self::FAILURE;
         }
 
         $mappedMethod = match ($method) {
@@ -79,23 +79,19 @@ class CreateWebhook extends Command
         } catch (Exception $e) {
             $this->error($e->getMessage());
 
-            return 1;
+            return self::FAILURE;
         }
 
         $this->info('Webhook created successfully!');
 
-        return 0;
+        return self::SUCCESS;
     }
 
     private function getModels(): array
     {
+        $glob = glob(__DIR__ . '/../Models/*.php') ?? [];
+
         $pattern = '/\/(?:Model|Search|Webhook|Image)\.php$/';
-        $glob = glob(__DIR__ . '/../Models/*.php');
-
-        if (!$glob) {
-            return [];
-        }
-
         $grep = preg_grep($pattern, $glob, PREG_GREP_INVERT);
 
         return collect($grep ?: [])
@@ -103,14 +99,12 @@ class CreateWebhook extends Command
             ->toArray();
     }
 
-    private function getClosestModel(string $model): string
+    private function getClosestModel(string $model): ?string
     {
-        return collect($this->getModels())->map(function ($m) use ($model) {
-            return [
-                'model' => $m,
-                'levenshtein' => levenshtein($m, $model),
-            ];
-        })
+        return collect($this->getModels())->map(fn ($m) => [
+            'model' => $m,
+            'levenshtein' => levenshtein($m, $model),
+        ])
             ->filter(fn ($m) => $m['levenshtein'] <= 5)
             ->sortBy(fn ($m) => $m['levenshtein'])
             ->map(fn ($m) => $m['model'])

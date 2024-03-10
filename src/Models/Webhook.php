@@ -15,9 +15,8 @@ use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
-use MarcReichel\IGDBLaravel\Interfaces\WebhookInterface;
 
-class Webhook implements WebhookInterface
+class Webhook
 {
     public int $id;
     public string $url;
@@ -34,7 +33,7 @@ class Webhook implements WebhookInterface
     /**
      * @throws AuthenticationException
      */
-    public function __construct(mixed ...$parameters)
+    final public function __construct(mixed ...$parameters)
     {
         $this->client = Http::withOptions([
             'base_uri' => ApiHelper::IGDB_BASE_URI,
@@ -54,13 +53,13 @@ class Webhook implements WebhookInterface
         $response = $self->client->get('webhooks');
 
         if ($response->failed()) {
-            return new \Illuminate\Support\Collection();
+            return \Illuminate\Support\Collection::make();
         }
 
         return $self->mapToModel(collect($response->json()));
     }
 
-    public static function find(int $id): mixed
+    public static function find(int $id): ?self
     {
         $self = new static();
         $response = $self->client->get('webhooks/' . $id);

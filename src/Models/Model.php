@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Contracts\Support\{Arrayable, Jsonable};
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\ApiHelper;
@@ -21,8 +22,6 @@ use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
-use MarcReichel\IGDBLaravel\Interfaces\ModelInterface;
-use MarcReichel\IGDBLaravel\Traits\{HasAttributes, HasRelationships};
 use ReflectionException;
 
 /**
@@ -74,21 +73,33 @@ use ReflectionException;
  * @method static Builder with(array $relationships)
  * @method static Builder cache(int $seconds)
  * @method static mixed|string get()
- * @method static mixed find(int $id)
- * @method static mixed findOrFail(int $id)
- * @method static mixed first()
- * @method static mixed firstOrFail()
+ * @method static static|null find(int $id)
+ * @method static static findOrFail(int $id)
+ * @method static static|null first()
+ * @method static static firstOrFail()
  * @method static int|null count()
  * @method static \Illuminate\Support\Collection all()
  * @method static Paginator paginate(int $limit = 10)
  */
-abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
+abstract class Model implements Arrayable, ArrayAccess, Jsonable
 {
-    use HasAttributes;
-    use HasRelationships;
-
     public ?string $identifier;
     public Builder $builder;
+    public Collection $relations;
+    public array $attributes = [];
+    protected array $casts = [];
+
+    /**
+     * @var string[]
+     */
+    protected array $dates = [
+        'created_at',
+        'updated_at',
+        'change_date',
+        'start_date',
+        'published_at',
+        'first_release_date',
+    ];
 
     protected string $endpoint;
 
@@ -96,7 +107,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
      * @throws ReflectionException
      * @throws InvalidParamsException
      */
-    public function __construct(array $properties = [])
+    final public function __construct(array $properties = [])
     {
         $this->builder = new Builder($this);
 
@@ -191,7 +202,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
 
                 return $this->mapToModel($key, $value);
             })
-            ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof \Illuminate\Support\Collection && !$value->isEmpty()));
+            ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof Collection && !$value->isEmpty()));
     }
 
     public function forwardCallTo(mixed $object, mixed $method, mixed $parameters): mixed
@@ -251,7 +262,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
         if (collect($this->casts)->has($property)) {
             $class = collect($this->casts)->get($property);
 
-            if (null !== $class && class_exists($class)) {
+            if (is_string($class) && class_exists($class)) {
                 return $class;
             }
         }
@@ -294,7 +305,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
     public function toArray(): array
     {
         $attributes = collect($this->attributes);
-        $relations = collect($this->relations)->map(function ($relation) {
+        $relations = $this->relations->map(function ($relation) {
             if (!$relation instanceof Arrayable) {
                 return $relation;
             }
@@ -364,7 +375,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable, ModelInterface
         ])->throw()->json();
 
         if (!is_array($response)) {
-            throw new Exception('An error occured while trying to create the webhook.');
+            throw new Exception('An error occurred while trying to create the webhook.');
         }
 
         return new Webhook(...$response);

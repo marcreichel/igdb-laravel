@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +21,7 @@ use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use MarcReichel\IGDBLaravel\Traits\{DateCasts, Operators};
 use ReflectionClass;
 use ReflectionException;
+use stdClass;
 
 class Builder
 {
@@ -1124,17 +1124,14 @@ class Builder
 
         if (is_object($model)) {
             $class = $model::class;
-            $parents = class_parents($model) ? collect(class_parents($model)) : collect();
+            $classParents = class_parents($model);
+            $parents = $classParents ? collect($classParents) : collect();
 
             if ($parents->isEmpty()) {
                 $parents->push($class);
             }
 
-            if (!$parents->last()) {
-                throw new InvalidParamsException('Last parent element is either null or false. String or {} required.');
-            }
-
-            $reflectionClass = new ReflectionClass($parents->last());
+            $reflectionClass = new ReflectionClass($parents->last() ?? new stdClass());
             $reflectionNamespace = $reflectionClass->getNamespaceName();
 
             if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
@@ -1302,21 +1299,10 @@ class Builder
      */
     public function paginate(int $limit = 10): Paginator
     {
-        $page = 1;
-
-        $request = request();
-
-        if ($request instanceof Request) {
-            $page = $request->get('page', 1);
-        }
-
-        if (!is_int($page) && !is_string($page)) {
-            $page = 1;
-        }
-
-        $data = $this->forPage((int) $page, $limit)->get();
-
-        return new Paginator($data, $limit);
+        return new Paginator(
+            $this->forPage((int) (request()->query('page', '1') ?? 1), $limit)->get(),
+            $limit,
+        );
     }
 
     /**

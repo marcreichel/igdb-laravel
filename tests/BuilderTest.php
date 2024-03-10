@@ -7,6 +7,7 @@ namespace MarcReichel\IGDBLaravel\Tests;
 use Carbon\Carbon;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 use JsonException;
@@ -15,6 +16,7 @@ use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use ReflectionException;
+use stdClass;
 
 /**
  * @internal
@@ -131,7 +133,9 @@ class BuilderTest extends TestCase
 
         $this->igdb->where('first_release_date', '>=', $timestamp)->get();
 
-        Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'games', "where first_release_date >= $timestamp;"));
+        Http::assertSent(
+            fn (Request $request) => $this->isApiCall($request, 'games', "where first_release_date >= $timestamp;"),
+        );
     }
 
     /**
@@ -153,6 +157,95 @@ class BuilderTest extends TestCase
                 "where (first_release_date >= $now & first_release_date <= $nextYear) | name = \"Fortnite\";",
             );
         });
+    }
+
+    /**
+     * @throws MissingEndpointException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
+     * @throws JsonException
+     */
+    public function testItShouldThrowExceptionForInvalidWhereKey(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->igdb->where(123, 'Fortnite')->get();
+
+        Http::assertNotSent(fn (Request $request) => $this->isApiCall($request, 'games', 'where 123 = "Fortnite";'));
+    }
+
+    /**
+     * @throws MissingEndpointException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
+     * @throws JsonException
+     */
+    public function testItShouldThrowExceptionForInvalidOperator(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->igdb->where('name', 123, 'Fortnite')->get();
+
+        Http::assertNotSent(fn (Request $request) => $this->isApiCall($request, 'games', 'where name 123 "Fortnite";'));
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws InvalidParamsException
+     */
+    public function testItShouldThrowExceptionForInvalidModel(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Builder(new stdClass());
+    }
+
+    public static function datesDataProvider(): array
+    {
+        return [
+            ['created_at'],
+            ['updated_at'],
+            ['change_date'],
+            ['start_date'],
+            ['published_at'],
+            ['first_release_date'],
+        ];
+    }
+
+    /**
+     * @dataProvider datesDataProvider
+     *
+     * @throws ReflectionException
+     * @throws InvalidParamsException
+     * @throws JsonException
+     * @throws MissingEndpointException
+     */
+    public function testItShouldCastDateStrings(string $key): void
+    {
+        $dateString = '2024-01-01';
+        $timestamp = Carbon::parse($dateString)->timestamp;
+
+        $this->igdb->where($key, '2024-01-01')->get();
+
+        Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'games', 'where ' . $key . ' = ' . $timestamp . ';'));
+    }
+
+    /**
+     * @dataProvider datesDataProvider
+     *
+     * @throws MissingEndpointException
+     * @throws ReflectionException
+     * @throws InvalidParamsException
+     * @throws JsonException
+     */
+    public function testItShouldCastCarbonInstances(string $key): void
+    {
+        $now = Carbon::now();
+        $timestamp = $now->timestamp;
+
+        $this->igdb->where($key, $now)->get();
+
+        Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'games', 'where ' . $key . ' = ' . $timestamp . ';'));
     }
 
     /**
@@ -866,6 +959,15 @@ class BuilderTest extends TestCase
         $this->igdb->find(1905);
 
         Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'games', "limit 1;\noffset 0;\nwhere id = 1905;"));
+    }
+
+    public function testItShouldThrowExceptionForInvalidCacheLifetime(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Config::set('igdb.cache_lifetime', 'foo');
+
+        new Builder('games');
     }
 
     /**

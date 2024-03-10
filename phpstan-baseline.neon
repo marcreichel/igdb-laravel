@@ -1,0 +1,21 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: src/Console/CreateWebhook.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of function preg_grep expects array, array\\<int, string\\>\\|false given\\.$#"
+			count: 1
+			path: src/Console/CreateWebhook.php
+
+		-
+			message: "#^Cannot call method assertExitCode\\(\\) on Illuminate\\\\Testing\\\\PendingCommand\\|int\\.$#"
+			count: 12
+			path: tests/ConsoleTest.php
+
+		-
+			message: "#^Cannot call method expectsQuestion\\(\\) on Illuminate\\\\Testing\\\\PendingCommand\\|int\\.$#"
+			count: 7
+			path: tests/ConsoleTest.php
