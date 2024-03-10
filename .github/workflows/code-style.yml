@@ -13,5 +13,4 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --dev
-      - name: Run pint
-        run: composer pint
+      - run: composer pint

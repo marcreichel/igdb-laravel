@@ -36,16 +36,15 @@
     ],
     "scripts": {
         "pint": "./vendor/bin/pint --test -v",
-        "test": "./vendor/bin/testbench package:test",
-        "stan": "./vendor/bin/phpstan analyse -c phpstan.neon",
-        "stan-2g": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
+        "test": "./vendor/bin/pest --parallel -v",
+        "stan": "./vendor/bin/phpstan --memory-limit=2G",
         "test:coverage": [
             "@putenv XDEBUG_MODE=coverage",
-            "./vendor/bin/phpunit --coverage-clover=\"build/clover.xml\""
+            "@test --coverage-clover build/clover.xml"
         ],
         "test:coverage-html": [
             "@putenv XDEBUG_MODE=coverage",
-            "./vendor/bin/phpunit --color=always --coverage-html=\"report\""
+            "@test --coverage-html build/coverage"
         ]
     },
     "autoload": {

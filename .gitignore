@@ -6,4 +6,5 @@ composer.lock
 .phpunit.cache
 .phpunit.result.cache
 cghooks.lock
+coverage.xml
 
