@@ -15,6 +15,9 @@
     <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml">
         <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml/badge.svg?event=push" alt="Tests">
     </a>
+    <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/pint.yml">
+        <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-style.yml/badge.svg?event=push" alt="Pint">
+    </a>
     <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml">
         <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml/badge.svg?event=push" alt="PHPStan">
     </a>
