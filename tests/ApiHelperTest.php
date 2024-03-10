@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @internal
@@ -43,5 +44,21 @@ class ApiHelperTest extends TestCase
         $token = ApiHelper::retrieveAccessToken();
 
         $this->assertEquals('test-suite-token', $token);
+    }
+
+    /**
+     * @throws AuthenticationException
+     */
+    public function testItShouldThrowAuthenticationException(): void
+    {
+        $this->expectException(AuthenticationException::class);
+
+        Cache::forget('igdb_cache.access_token');
+
+        Http::fake([
+            '*/oauth2/token*' => Http::response([], Response::HTTP_INTERNAL_SERVER_ERROR),
+        ]);
+
+        ApiHelper::retrieveAccessToken();
     }
 }

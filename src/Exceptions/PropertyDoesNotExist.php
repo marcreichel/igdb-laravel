@@ -6,6 +6,7 @@ namespace MarcReichel\IGDBLaravel\Exceptions;
 
 use Exception;
 
+/** @deprecated */
 class PropertyDoesNotExist extends Exception
 {
 }

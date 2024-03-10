@@ -16,6 +16,7 @@ use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\Company;
 use MarcReichel\IGDBLaravel\Models\Game;
+use MarcReichel\IGDBLaravel\Models\Webhook;
 
 /**
  * @internal
@@ -178,5 +179,19 @@ class WebhookTest extends TestCase
             ->toArray();
 
         $this->assertContains($className, $categories);
+    }
+
+    public function testItShouldListAllWebhooks(): void
+    {
+        Webhook::all();
+
+        Http::assertSent(static fn (Request $request) => $request->url() === 'https://api.igdb.com/v4/webhooks');
+    }
+
+    public function testItShouldFindAWebhook(): void
+    {
+        Webhook::find(1337);
+
+        Http::assertSent(static fn (Request $request) => $request->url() === 'https://api.igdb.com/v4/webhooks/1337');
     }
 }
