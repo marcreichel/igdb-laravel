@@ -10,7 +10,7 @@
         "wrapper"
     ],
     "type": "library",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
         "php": "^8.1",
         "ext-json": "*",
