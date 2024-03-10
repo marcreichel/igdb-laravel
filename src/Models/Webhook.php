@@ -72,7 +72,6 @@ class Webhook
 
     public function delete(): mixed
     {
-        ray($this->id);
         if (!$this->id) {
             return false;
         }
