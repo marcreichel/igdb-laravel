@@ -7,31 +7,28 @@
 
 <p align="center">
     <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
-        <img src="https://img.shields.io/packagist/v/marcreichel/igdb-laravel" alt="Packagist Version">
+        <img src="https://img.shields.io/packagist/v/marcreichel/igdb-laravel?style=for-the-badge" alt="Packagist Version">
     </a>
     <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
-        <img src="https://img.shields.io/packagist/dt/marcreichel/igdb-laravel" alt="Packagist Downloads">
+        <img src="https://img.shields.io/packagist/dt/marcreichel/igdb-laravel?style=for-the-badge" alt="Packagist Downloads">
     </a>
     <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml">
-        <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/tests.yml/badge.svg?event=push" alt="Tests">
+        <img src="https://img.shields.io/github/actions/workflow/status/marcreichel/igdb-laravel/tests.yml?event=push&style=for-the-badge&logo=github&label=tests" alt="Tests">
     </a>
     <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/pint.yml">
-        <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-style.yml/badge.svg?event=push" alt="Pint">
+        <img src="https://img.shields.io/github/actions/workflow/status/marcreichel/igdb-laravel/code-style.yml?event=push&style=for-the-badge&logo=github&label=Code-Style" alt="Pint">
     </a>
     <a href="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml">
-        <img src="https://github.com/marcreichel/igdb-laravel/actions/workflows/code-quality.yml/badge.svg?event=push" alt="PHPStan">
+        <img src="https://img.shields.io/github/actions/workflow/status/marcreichel/igdb-laravel/code-quality.yml?event=push&style=for-the-badge&logo=github&label=Code-Quality" alt="PHPStan">
     </a>
     <a href="https://www.codefactor.io/repository/github/marcreichel/igdb-laravel">
-        <img src="https://www.codefactor.io/repository/github/marcreichel/igdb-laravel/badge" alt="CodeFactor">
+        <img src="https://img.shields.io/codefactor/grade/github/marcreichel/igdb-laravel?style=for-the-badge&logo=codefactor&label=Codefactor" alt="CodeFactor">
     </a>
     <a href="https://codecov.io/gh/marcreichel/igdb-laravel">
-        <img src="https://codecov.io/gh/marcreichel/igdb-laravel/branch/main/graph/badge.svg?token=m6FOB0CyPE" alt="codecov">
+        <img src="https://img.shields.io/codecov/c/github/marcreichel/igdb-laravel?token=m6FOB0CyPE&style=for-the-badge&logo=codecov" alt="codecov">
     </a>
     <a href="https://packagist.org/packages/marcreichel/igdb-laravel">
-        <img src="https://img.shields.io/github/license/marcreichel/igdb-laravel" alt="License">
-    </a>
-    <a href="https://gitmoji.dev">
-        <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji">
+        <img src="https://img.shields.io/github/license/marcreichel/igdb-laravel?style=for-the-badge" alt="License">
     </a>
 </p>
 
