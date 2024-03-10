@@ -33,7 +33,7 @@ class Webhook
     /**
      * @throws AuthenticationException
      */
-    public function __construct(mixed ...$parameters)
+    final public function __construct(mixed ...$parameters)
     {
         $this->client = Http::withOptions([
             'base_uri' => ApiHelper::IGDB_BASE_URI,

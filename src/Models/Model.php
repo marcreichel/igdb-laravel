@@ -107,7 +107,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
      * @throws ReflectionException
      * @throws InvalidParamsException
      */
-    public function __construct(array $properties = [])
+    final public function __construct(array $properties = [])
     {
         $this->builder = new Builder($this);
 
@@ -202,7 +202,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
 
                 return $this->mapToModel($key, $value);
             })
-            ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof \Illuminate\Support\Collection && !$value->isEmpty()));
+            ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof Collection && !$value->isEmpty()));
     }
 
     public function forwardCallTo(mixed $object, mixed $method, mixed $parameters): mixed
@@ -262,7 +262,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
         if (collect($this->casts)->has($property)) {
             $class = collect($this->casts)->get($property);
 
-            if (null !== $class && class_exists($class)) {
+            if (is_string($class) && class_exists($class)) {
                 return $class;
             }
         }
@@ -305,7 +305,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
     public function toArray(): array
     {
         $attributes = collect($this->attributes);
-        $relations = collect($this->relations)->map(function ($relation) {
+        $relations = $this->relations->map(function ($relation) {
             if (!$relation instanceof Arrayable) {
                 return $relation;
             }
