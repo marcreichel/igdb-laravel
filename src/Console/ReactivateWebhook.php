@@ -30,13 +30,13 @@ class ReactivateWebhook extends Command
         if (!$webhook) {
             $this->error('Webhook not found.');
 
-            return 1;
+            return self::FAILURE;
         }
 
         if ($webhook->active) {
             $this->info('Webhook does not need to be reactivated.');
 
-            return 0;
+            return self::SUCCESS;
         }
 
         $model = $webhook->getModel();
@@ -47,7 +47,7 @@ class ReactivateWebhook extends Command
         if (!class_exists($fullQualifiedName)) {
             $this->error('Model not found.');
 
-            return 1;
+            return self::FAILURE;
         }
 
         /** @var Model $class */
@@ -58,11 +58,11 @@ class ReactivateWebhook extends Command
         } catch (AuthenticationException | WebhookSecretMissingException $e) {
             $this->error($e->getMessage());
 
-            return 1;
+            return self::FAILURE;
         }
 
         $this->info('Webhook reactivated.');
 
-        return 0;
+        return self::SUCCESS;
     }
 }

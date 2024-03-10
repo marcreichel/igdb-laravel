@@ -375,7 +375,7 @@ abstract class Model implements Arrayable, ArrayAccess, Jsonable
         ])->throw()->json();
 
         if (!is_array($response)) {
-            throw new Exception('An error occured while trying to create the webhook.');
+            throw new Exception('An error occurred while trying to create the webhook.');
         }
 
         return new Webhook(...$response);

@@ -20,7 +20,7 @@ class ListWebhooks extends Command
         if (!$webhooks->count()) {
             $this->warn('You do not have any registered webhooks.');
 
-            return 1;
+            return self::FAILURE;
         }
         $this->table(
             ['ID', 'URL', 'Model', 'Method', 'Retries', 'Active'],
@@ -33,6 +33,6 @@ class ListWebhooks extends Command
             })->sortBy('id')->toArray(),
         );
 
-        return 0;
+        return self::SUCCESS;
     }
 }

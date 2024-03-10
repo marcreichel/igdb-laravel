@@ -31,7 +31,7 @@ class DeleteWebhook extends Command
             return $this->deleteAll();
         }
 
-        return 0;
+        return self::FAILURE;
     }
 
     private function deleteOne(int $id): int
@@ -41,18 +41,18 @@ class DeleteWebhook extends Command
         if (!$webhook instanceof Webhook) {
             $this->error('Webhook not found.');
 
-            return 1;
+            return self::FAILURE;
         }
 
         if (!$webhook->delete()) {
             $this->error('Webhook could not be deleted.');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $this->info('Webhook deleted.');
 
-        return 0;
+        return self::SUCCESS;
     }
 
     private function deleteAll(): int
@@ -62,7 +62,7 @@ class DeleteWebhook extends Command
         if (!$webhooks->count()) {
             $this->info('You do not have any registered webhooks.');
 
-            return 1;
+            return self::SUCCESS;
         }
 
         $this->comment('Deleting all your registered webhooks ...');
@@ -75,6 +75,6 @@ class DeleteWebhook extends Command
 
         $this->info('All Webhooks deleted.');
 
-        return 0;
+        return self::SUCCESS;
     }
 }
