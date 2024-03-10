@@ -2,11 +2,7 @@ name: Code coverage
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - LICENSE
-      - README.md
+    branches: [ main ]
 
 jobs:
   build:
