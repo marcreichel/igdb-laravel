@@ -25,7 +25,7 @@
         "roave/security-advisories": "dev-latest",
         "larastan/larastan": "^2.9.2",
         "laravel/pint": "^1.13",
-        "pestphp/pest": "2.x-dev"
+        "pestphp/pest": "^1|^2"
     },
     "license": "MIT",
     "authors": [
