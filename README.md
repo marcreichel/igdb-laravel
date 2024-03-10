@@ -2,7 +2,7 @@
 
 <p align="center">
     This is a Laravel wrapper for version 4 of the <a href="https://api-docs.igdb.com/">IGDB API</a> (Apicalypse)
-    including <a href="https://marcreichel.dev/docs/igdb-laravel/webhooks">webhook handling</a> since version 2.3.0.
+    including <a href="https://marcreichel.dev/docs/igdb-laravel/webhooks">webhook handling</a>.
 </p>
 
 <p align="center">
