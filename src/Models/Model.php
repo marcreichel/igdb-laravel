@@ -23,6 +23,7 @@ use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
 use ReflectionException;
+use RuntimeException;
 
 /**
  * @method static Builder select(mixed $fields)
@@ -373,7 +374,7 @@ abstract class Model implements Arrayable, ArrayAccess
         ])->throw()->json();
 
         if (!is_array($response)) {
-            throw new Exception('An error occurred while trying to create the webhook.');
+            throw new RuntimeException('An error occurred while trying to create the webhook.');
         }
 
         return new Webhook(...$response);
