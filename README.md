@@ -97,10 +97,6 @@ Run the tests with:
 composer test
 ```
 
-## Roadmap
-
-- Restructure/Optimize Builder class for better code quality
-
 ## Contribution
 
 Pull requests are welcome :)

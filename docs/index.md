@@ -12,7 +12,7 @@
 
 ![Cover](art/cover.png){style="width: 100%"}
 
-This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse) including [webhook handling](90-webhooks.md) since version 2.3.0.
+This is a Laravel wrapper for version 4 of the [IGDB API](https://api-docs.igdb.com/) (Apicalypse) including [webhook handling](90-webhooks.md).
 
 It handles authentication and caching of the IGDB API automatically.
 

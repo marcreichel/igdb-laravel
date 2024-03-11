@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Traits;
 
+/**
+ * @internal
+ */
 trait DateCasts
 {
     /**
