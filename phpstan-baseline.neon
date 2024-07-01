@@ -1,14 +1,9 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			message: "#^Unable to resolve the template type TMapValue in call to method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),mixed\\>\\:\\:map\\(\\)$#"
 			count: 1
-			path: src/Console/CreateWebhook.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function preg_grep expects array, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: src/Console/CreateWebhook.php
+			path: src/Models/Model.php
 
 		-
 			message: "#^Cannot call method assertExitCode\\(\\) on Illuminate\\\\Testing\\\\PendingCommand\\|int\\.$#"

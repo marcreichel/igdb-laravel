@@ -90,7 +90,7 @@ class TestCase extends Orchestra
     {
         $files = glob(__DIR__ . '/../src/Models/*.php');
         $classNames = [];
-        $blackList = ['Search', 'Webhook'];
+        $blackList = ['PopularityPrimitive', 'Search', 'Webhook'];
 
         if (!$files) {
             return $classNames;

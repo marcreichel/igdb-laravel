@@ -89,9 +89,9 @@ class CreateWebhook extends Command
 
     private function getModels(): array
     {
-        $glob = glob(__DIR__ . '/../Models/*.php') ?? [];
+        $glob = glob(__DIR__ . '/../Models/*.php') ?: [];
 
-        $pattern = '/\/(?:Model|Search|Webhook|Image)\.php$/';
+        $pattern = '/\/(?:Model|PopularityPrimitive|Search|Webhook|Image)\.php$/';
         $grep = preg_grep($pattern, $glob, PREG_GREP_INVERT);
 
         return collect($grep ?: [])

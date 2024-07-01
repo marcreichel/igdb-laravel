@@ -58,4 +58,5 @@ enum Category: int
     case CollectionRelationType = 1781504066;
     case LanguageSupportType = 1157224631;
     case Website = 698516688;
+    case PopularityType = 1657974190;
 }
