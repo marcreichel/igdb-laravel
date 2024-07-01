@@ -10,7 +10,7 @@
         "wrapper"
     ],
     "type": "library",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
         "php": "^8.1",
         "ext-json": "*",
@@ -26,7 +26,7 @@
         "larastan/larastan": "^2.9.2",
         "laravel/pint": "^1.13",
         "pestphp/pest": "^2",
-        "pestphp/pest-plugin-type-coverage": "2.x-dev"
+        "pestphp/pest-plugin-type-coverage": "^2.8.3"
     },
     "license": "MIT",
     "authors": [
