@@ -1,6 +1,11 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Unable to resolve the template type TMapValue in call to method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),mixed\\>\\:\\:map\\(\\)$#"
+			count: 1
+			path: src/Models/Model.php
+
+		-
 			message: "#^Cannot call method assertExitCode\\(\\) on Illuminate\\\\Testing\\\\PendingCommand\\|int\\.$#"
 			count: 12
 			path: tests/ConsoleTest.php

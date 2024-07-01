@@ -13,5 +13,5 @@ parameters:
     - '#Call to an undefined static method MarcReichel\\IGDBLaravel\\Models\\Game::foo\(\).#'
     - '#Unable to resolve the template type TValue in call to function collect#'
     - '#Unable to resolve the template type TKey in call to function collect#'
-  checkMissingIterableValueType: false
-  checkGenericClassInNonGenericObjectType: false
+    - identifier: missingType.iterableValue
+    - identifier: missingType.generics
