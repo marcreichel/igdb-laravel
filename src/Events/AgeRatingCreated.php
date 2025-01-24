@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\AgeRating;
 
 class AgeRatingCreated extends Event
 {
-    public AgeRating $data;
-
-    public function __construct(AgeRating $data, Request $request)
+    public function __construct(public AgeRating $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

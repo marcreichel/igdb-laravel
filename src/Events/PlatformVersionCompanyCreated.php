@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\PlatformVersionCompany;
 
 class PlatformVersionCompanyCreated extends Event
 {
-    public PlatformVersionCompany $data;
-
-    public function __construct(PlatformVersionCompany $data, Request $request)
+    public function __construct(public PlatformVersionCompany $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

@@ -30,7 +30,7 @@ trait HasWhereBetween
             $second = $this->castDate($second);
         }
 
-        $this->whereNested(function (Builder $query) use (
+        $this->whereNested(static function (Builder $query) use (
             $key,
             $first,
             $second,
@@ -79,7 +79,7 @@ trait HasWhereBetween
             $second = $this->castDate($second);
         }
 
-        $this->whereNested(function (Builder $query) use (
+        $this->whereNested(static function (Builder $query) use (
             $key,
             $first,
             $second,

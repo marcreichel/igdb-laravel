@@ -124,7 +124,7 @@ class Builder
      */
     public function with(array $relationships): self
     {
-        $relationships = collect($relationships)->mapWithKeys(function (
+        $relationships = collect($relationships)->mapWithKeys(static function (
             mixed $fields,
             mixed $relationship,
         ) {
@@ -133,12 +133,12 @@ class Builder
             }
 
             return [$relationship => $fields];
-        })->map(function (mixed $fields, mixed $relationship) {
+        })->map(static function (mixed $fields, mixed $relationship) {
             if (collect($fields)->count() === 0) {
                 $fields = ['*'];
             }
 
-            return collect($fields)->map(fn (mixed $field) => $relationship . '.' . $field)->implode(',');
+            return collect($fields)->map(static fn (mixed $field) => $relationship . '.' . $field)->implode(',');
         })
             ->values()
             ->toArray();
@@ -167,16 +167,16 @@ class Builder
      */
     public function getQuery(): string
     {
-        return $this->query->map(function (mixed $value, string $key) {
+        return $this->query->map(static function (mixed $value, string $key) {
             if ($key === 'where') {
                 return collect($value)->unique()->implode(' ');
             }
             if ($key === 'fields') {
-                return collect($value)->unique()->sortBy(fn (mixed $field) => count(explode('.', $field)))->implode(',');
+                return collect($value)->unique()->sortBy(static fn (mixed $field) => count(explode('.', $field)))->implode(',');
             }
 
             return $value;
-        })->map(fn (mixed $value, string $key) => Str::finish($key . ' ' . $value, ';'))->unique()->sort()->implode("\n");
+        })->map(static fn (mixed $value, string $key) => Str::finish($key . ' ' . $value, ';'))->unique()->sort()->implode("\n");
     }
 
     /**

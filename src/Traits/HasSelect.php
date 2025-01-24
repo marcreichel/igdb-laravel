@@ -21,7 +21,7 @@ trait HasSelect
             $collection->push('*');
         }
 
-        $collection = $collection->filter(fn (string $field) => !strpos($field, '.'))->flatten();
+        $collection = $collection->filter(static fn (string $field) => !strpos($field, '.'))->flatten();
 
         if ($collection->isEmpty()) {
             $collection->push('*');

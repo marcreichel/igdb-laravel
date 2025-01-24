@@ -17,14 +17,14 @@ class ListWebhooks extends Command
     {
         $webhooks = Webhook::all();
 
-        if (!$webhooks->count()) {
+        if ($webhooks->count() === 0) {
             $this->warn('You do not have any registered webhooks.');
 
             return self::FAILURE;
         }
         $this->table(
             ['ID', 'URL', 'Model', 'Method', 'Retries', 'Active'],
-            $webhooks->map(function (Webhook $webhook) {
+            $webhooks->map(static function (Webhook $webhook) {
                 $data = $webhook->toArray();
 
                 $data['active'] = $data['active'] ? '  ✅  ' : '  ❌  ';

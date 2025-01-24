@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\CollectionMembershipType;
 
 class CollectionMembershipTypeCreated extends Event
 {
-    public CollectionMembershipType $data;
-
-    public function __construct(CollectionMembershipType $data, Request $request)
+    public function __construct(public CollectionMembershipType $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

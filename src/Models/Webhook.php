@@ -72,7 +72,7 @@ class Webhook
 
     public function delete(): mixed
     {
-        if (!$this->id) {
+        if ($this->id === 0) {
             return false;
         }
 
@@ -150,7 +150,7 @@ class Webhook
     public function getModel(): string
     {
         $categories = collect(Category::cases())
-            ->mapWithKeys(fn (Category $category) => [(string) $category->value => $category->name]);
+            ->mapWithKeys(static fn (Category $category) => [(string) $category->value => $category->name]);
 
         $category = $categories->get($this->category);
 
@@ -189,7 +189,7 @@ class Webhook
 
     private function fill(mixed ...$parameters): void
     {
-        if ($parameters) {
+        if ($parameters !== []) {
             foreach ($parameters as $parameter => $value) {
                 if (property_exists($this, (string) $parameter)) {
                     if (in_array($parameter, ['created_at', 'updated_at'])) {
@@ -204,7 +204,7 @@ class Webhook
 
     private function mapToModel(\Illuminate\Support\Collection $collection): \Illuminate\Support\Collection
     {
-        return $collection->map(function (array $item) {
+        return $collection->map(static function (array $item) {
             $webhook = new self(...$item);
 
             unset($webhook->client);

@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Company;
 
 class CompanyCreated extends Event
 {
-    public Company $data;
-
-    public function __construct(Company $data, Request $request)
+    public function __construct(public Company $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

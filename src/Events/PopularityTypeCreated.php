@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\PopularityType;
 
 class PopularityTypeCreated extends Event
 {
-    public PopularityType $data;
-
-    public function __construct(PopularityType $data, Request $request)
+    public function __construct(public PopularityType $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

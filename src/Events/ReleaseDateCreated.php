@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\ReleaseDate;
 
 class ReleaseDateCreated extends Event
 {
-    public ReleaseDate $data;
-
-    public function __construct(ReleaseDate $data, Request $request)
+    public function __construct(public ReleaseDate $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

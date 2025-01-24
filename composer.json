@@ -12,21 +12,21 @@
     "type": "library",
     "minimum-stability": "stable",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-json": "*",
-        "illuminate/support": "^9.0|^10.0|^11.0",
+        "illuminate/support": "^11.0",
         "guzzlehttp/guzzle": "~6.0|~7.0",
         "nesbot/carbon": "^2.53.1|^3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5.4 || ^10.0.0",
-        "orchestra/testbench": "^6.23|^7.0|^8.0|^9.0",
-        "nunomaduro/collision": "^5.3|^6.1|^7.0|^8.0",
+        "orchestra/testbench": "^9.0",
+        "nunomaduro/collision": "^8.0",
         "roave/security-advisories": "dev-latest",
-        "larastan/larastan": "^2.9.2",
+        "larastan/larastan": "^3.0.2",
         "laravel/pint": "^1.13",
-        "pestphp/pest": "^2",
-        "pestphp/pest-plugin-type-coverage": "^2.8.3"
+        "pestphp/pest": "^3.7.4",
+        "pestphp/pest-plugin-type-coverage": "^3.2.3",
+        "rector/rector": "^2.0.7"
     },
     "license": "MIT",
     "authors": [

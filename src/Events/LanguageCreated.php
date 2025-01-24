@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Language;
 
 class LanguageCreated extends Event
 {
-    public Language $data;
-
-    public function __construct(Language $data, Request $request)
+    public function __construct(public Language $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

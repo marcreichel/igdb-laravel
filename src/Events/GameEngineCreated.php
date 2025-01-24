@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\GameEngine;
 
 class GameEngineCreated extends Event
 {
-    public GameEngine $data;
-
-    public function __construct(GameEngine $data, Request $request)
+    public function __construct(public GameEngine $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

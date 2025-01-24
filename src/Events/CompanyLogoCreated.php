@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\CompanyLogo;
 
 class CompanyLogoCreated extends Event
 {
-    public CompanyLogo $data;
-
-    public function __construct(CompanyLogo $data, Request $request)
+    public function __construct(public CompanyLogo $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

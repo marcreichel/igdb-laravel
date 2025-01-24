@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Character;
 
 class CharacterCreated extends Event
 {
-    public Character $data;
-
-    public function __construct(Character $data, Request $request)
+    public function __construct(public Character $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

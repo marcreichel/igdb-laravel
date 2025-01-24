@@ -109,7 +109,9 @@ class TestCase extends Orchestra
                 continue;
             }
 
-            $classNames[] = [class_basename($classString)];
+            $classBasename = class_basename($classString);
+
+            $classNames[$classBasename] = [$classBasename];
         }
 
         return $classNames;

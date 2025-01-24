@@ -9,12 +9,8 @@ use MarcReichel\IGDBLaravel\Models\CollectionRelation;
 
 class CollectionRelationCreated extends Event
 {
-    public CollectionRelation $data;
-
-    public function __construct(CollectionRelation $data, Request $request)
+    public function __construct(public CollectionRelation $data, Request $request)
     {
         parent::__construct($request);
-
-        $this->data = $data;
     }
 }

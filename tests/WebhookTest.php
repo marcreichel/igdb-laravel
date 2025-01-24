@@ -17,6 +17,7 @@ use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\Company;
 use MarcReichel\IGDBLaravel\Models\Game;
 use MarcReichel\IGDBLaravel\Models\Webhook;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @internal
@@ -30,7 +31,7 @@ class WebhookTest extends TestCase
     {
         parent::setUp();
 
-        $this->hash = substr(md5(config('igdb.credentials.client_id')), 0, 8);
+        $this->hash = substr(md5((string) config('igdb.credentials.client_id')), 0, 8);
         $this->prefix = 'igdb-webhook/handle/' . $this->hash;
 
         Cache::put('igdb_cache.access_token', 'some-token');
@@ -114,9 +115,7 @@ class WebhookTest extends TestCase
         Game::createWebhook(Method::CREATE);
     }
 
-    /**
-     * @dataProvider modelsDataProvider
-     */
+    #[DataProvider('modelsDataProvider')]
     public function testItShouldDispatchCreatedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Created';
@@ -132,9 +131,7 @@ class WebhookTest extends TestCase
         Event::assertDispatched($eventClassString);
     }
 
-    /**
-     * @dataProvider modelsDataProvider
-     */
+    #[DataProvider('modelsDataProvider')]
     public function testItShouldDispatchUpdatedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Updated';
@@ -150,9 +147,7 @@ class WebhookTest extends TestCase
         Event::assertDispatched($eventClassString);
     }
 
-    /**
-     * @dataProvider modelsDataProvider
-     */
+    #[DataProvider('modelsDataProvider')]
     public function testItShouldDispatchDeletedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Deleted';
@@ -168,13 +163,11 @@ class WebhookTest extends TestCase
         Event::assertDispatched($eventClassString);
     }
 
-    /**
-     * @dataProvider modelsDataProvider
-     */
+    #[DataProvider('modelsDataProvider')]
     public function testItShouldHaveACategoryCaseForEveryModel(string $className): void
     {
         $categories = collect(Category::cases())
-            ->map(fn (Category $category) => $category->name)
+            ->map(static fn (Category $category) => $category->name)
             ->values()
             ->toArray();
 

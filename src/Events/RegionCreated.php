@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Region;
 
 class RegionCreated extends Event
 {
-    public Region $data;
-
-    public function __construct(Region $data, Request $request)
+    public function __construct(public Region $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

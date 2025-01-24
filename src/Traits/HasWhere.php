@@ -90,7 +90,7 @@ trait HasWhere
      */
     public function orWhere(
         mixed $key,
-        string $operator = null,
+        ?string $operator = null,
         mixed $value = null,
         string $boolean = '|',
     ): self {
@@ -122,7 +122,7 @@ trait HasWhere
         string $boolean,
         string $method = 'where',
     ): self {
-        return $this->whereNested(function (Builder $query) use (
+        return $this->whereNested(static function (Builder $query) use (
             $arrayOfWheres,
             $method,
             $boolean

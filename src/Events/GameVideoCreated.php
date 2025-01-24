@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\GameVideo;
 
 class GameVideoCreated extends Event
 {
-    public GameVideo $data;
-
-    public function __construct(GameVideo $data, Request $request)
+    public function __construct(public GameVideo $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

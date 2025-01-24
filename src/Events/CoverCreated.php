@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Cover;
 
 class CoverCreated extends Event
 {
-    public Cover $data;
-
-    public function __construct(Cover $data, Request $request)
+    public function __construct(public Cover $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

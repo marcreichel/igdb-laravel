@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\CompanyWebsite;
 
 class CompanyWebsiteCreated extends Event
 {
-    public CompanyWebsite $data;
-
-    public function __construct(CompanyWebsite $data, Request $request)
+    public function __construct(public CompanyWebsite $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }
