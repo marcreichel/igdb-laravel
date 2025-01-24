@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\GameLocalization;
 
 class GameLocalizationCreated extends Event
 {
-    public GameLocalization $data;
-
-    public function __construct(GameLocalization $data, Request $request)
+    public function __construct(public GameLocalization $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

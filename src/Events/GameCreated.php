@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Game;
 
 class GameCreated extends Event
 {
-    public Game $data;
-
-    public function __construct(Game $data, Request $request)
+    public function __construct(public Game $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

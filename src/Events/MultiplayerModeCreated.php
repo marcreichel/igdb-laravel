@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\MultiplayerMode;
 
 class MultiplayerModeCreated extends Event
 {
-    public MultiplayerMode $data;
-
-    public function __construct(MultiplayerMode $data, Request $request)
+    public function __construct(public MultiplayerMode $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

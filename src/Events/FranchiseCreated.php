@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\Franchise;
 
 class FranchiseCreated extends Event
 {
-    public Franchise $data;
-
-    public function __construct(Franchise $data, Request $request)
+    public function __construct(public Franchise $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

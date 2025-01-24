@@ -16,6 +16,7 @@ use MarcReichel\IGDBLaravel\Models\GameEngineLogo;
 use MarcReichel\IGDBLaravel\Models\Image;
 use MarcReichel\IGDBLaravel\Models\PlatformLogo;
 use MarcReichel\IGDBLaravel\Models\Screenshot;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @internal
@@ -98,9 +99,7 @@ class ImageTest extends TestCase
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_thumb/abc.jpg', $url);
     }
 
-    /**
-     * @dataProvider imageSizeDataProvider
-     */
+    #[DataProvider('imageSizeDataProvider')]
     public function testItShouldGenerateDesiredImageUrlWithParameter(Size | string $size, string $value): void
     {
         $url = Artwork::first()?->getUrl($size);
@@ -108,9 +107,7 @@ class ImageTest extends TestCase
         self::assertEquals('//images.igdb.com/igdb/image/upload/t_' . $value . '/abc.jpg', $url);
     }
 
-    /**
-     * @dataProvider imageSizeDataProvider
-     */
+    #[DataProvider('imageSizeDataProvider')]
     public function testItShouldGenerateRetinaImageUrl(Size | string $size, string $value): void
     {
         $url = Artwork::first()?->getUrl($size, true);

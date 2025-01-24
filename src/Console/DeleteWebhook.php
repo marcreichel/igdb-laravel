@@ -23,7 +23,7 @@ class DeleteWebhook extends Command
     {
         $id = (int) $this->argument('id');
 
-        if ($id) {
+        if ($id !== 0) {
             return $this->deleteOne($id);
         }
 
@@ -59,7 +59,7 @@ class DeleteWebhook extends Command
     {
         $webhooks = Webhook::all();
 
-        if (!$webhooks->count()) {
+        if ($webhooks->count() === 0) {
             $this->info('You do not have any registered webhooks.');
 
             return self::SUCCESS;
@@ -67,7 +67,7 @@ class DeleteWebhook extends Command
 
         $this->comment('Deleting all your registered webhooks ...');
 
-        $this->withProgressBar($webhooks, function (Webhook $webhook): void {
+        $this->withProgressBar($webhooks, static function (Webhook $webhook): void {
             $webhook->delete();
         });
 

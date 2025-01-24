@@ -12,6 +12,7 @@ use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
 use MarcReichel\IGDBLaravel\Models\Game;
 use MarcReichel\IGDBLaravel\Models\Model;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @internal
@@ -274,7 +275,7 @@ class ModelTest extends TestCase
     public function testItShouldGenerateNestedWhereQuery(): void
     {
         Game::where('name', 'Fortnite')
-            ->orWhere(function ($query): void {
+            ->orWhere(static function ($query): void {
                 $query->where('aggregated_rating', '>=', 90)
                     ->where('aggregated_rating_count', '>=', 3000);
             })->get();
@@ -424,9 +425,7 @@ class ModelTest extends TestCase
         Game::foo();
     }
 
-    /**
-     * @dataProvider modelsDataProvider
-     */
+    #[DataProvider('modelsDataProvider')]
     public function testItShouldNotHaveInvalidCasts(string $className): void
     {
         /** @var class-string<Model> $fqcn */

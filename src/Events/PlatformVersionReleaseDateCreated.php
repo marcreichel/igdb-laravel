@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\PlatformVersionReleaseDate;
 
 class PlatformVersionReleaseDateCreated extends Event
 {
-    public PlatformVersionReleaseDate $data;
-
-    public function __construct(PlatformVersionReleaseDate $data, Request $request)
+    public function __construct(public PlatformVersionReleaseDate $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

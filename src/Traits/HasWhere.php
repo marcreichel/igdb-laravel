@@ -122,7 +122,7 @@ trait HasWhere
         string $boolean,
         string $method = 'where',
     ): self {
-        return $this->whereNested(function (Builder $query) use (
+        return $this->whereNested(static function (Builder $query) use (
             $arrayOfWheres,
             $method,
             $boolean

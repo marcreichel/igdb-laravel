@@ -15,6 +15,7 @@ use MarcReichel\IGDBLaravel\Builder;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionException;
 use stdClass;
 
@@ -95,13 +96,11 @@ class BuilderTest extends TestCase
     {
         $this->igdb->fuzzySearch(['name', 'company'], 'phpunit test')->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where (name ~ *"phpunit"* | name ~ *"test"* | company ~ *"phpunit"* | company ~ *"test"*);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where (name ~ *"phpunit"* | name ~ *"test"* | company ~ *"phpunit"* | company ~ *"test"*);',
+        ));
     }
 
     /**
@@ -111,13 +110,11 @@ class BuilderTest extends TestCase
     {
         $this->igdb->where('name', 'Fortnite')->orFuzzySearch(['name', 'company'], 'phpunit test')->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where name = "Fortnite" | (name ~ *"phpunit"* | name ~ *"test"* | company ~ *"phpunit"* | company ~ *"test"*);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where name = "Fortnite" | (name ~ *"phpunit"* | name ~ *"test"* | company ~ *"phpunit"* | company ~ *"test"*);',
+        ));
     }
 
     /**
@@ -145,18 +142,16 @@ class BuilderTest extends TestCase
     {
         $now = Carbon::now()->timestamp;
         $nextYear = Carbon::now()->addYear()->timestamp;
-        $this->igdb->where(function ($query) use ($now, $nextYear): void {
+        $this->igdb->where(static function ($query) use ($now, $nextYear): void {
             $query->where('first_release_date', '>=', $now)
                 ->where('first_release_date', '<=', $nextYear);
         })->orWhere('name', 'Fortnite')->get();
 
-        Http::assertSent(function (Request $request) use ($now, $nextYear) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                "where (first_release_date >= $now & first_release_date <= $nextYear) | name = \"Fortnite\";",
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            "where (first_release_date >= $now & first_release_date <= $nextYear) | name = \"Fortnite\";",
+        ));
     }
 
     /**
@@ -213,13 +208,13 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @dataProvider datesDataProvider
      *
      * @throws ReflectionException
      * @throws InvalidParamsException
      * @throws JsonException
      * @throws MissingEndpointException
      */
+    #[DataProvider('datesDataProvider')]
     public function testItShouldCastDateStrings(string $key): void
     {
         $dateString = '2024-01-01';
@@ -231,13 +226,13 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @dataProvider datesDataProvider
      *
      * @throws MissingEndpointException
      * @throws ReflectionException
      * @throws InvalidParamsException
      * @throws JsonException
      */
+    #[DataProvider('datesDataProvider')]
     public function testItShouldCastCarbonInstances(string $key): void
     {
         $now = Carbon::now();
@@ -371,43 +366,35 @@ class BuilderTest extends TestCase
     {
         $this->igdb->whereBetween('first_release_date', 1546297200, 1577833199)->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where (first_release_date >= 1546297200 & first_release_date <= 1577833199);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where (first_release_date >= 1546297200 & first_release_date <= 1577833199);',
+        ));
 
         $this->igdb->where('name', 'Fortnite')->orWhereBetween('first_release_date', 1546297200, 1577833199)->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where name = "Fortnite" | (first_release_date >= 1546297200 & first_release_date <= 1577833199);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where name = "Fortnite" | (first_release_date >= 1546297200 & first_release_date <= 1577833199);',
+        ));
 
         $this->igdb->whereNotBetween('first_release_date', 1546297200, 1577833199)->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where (first_release_date < 1546297200 | first_release_date > 1577833199);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where (first_release_date < 1546297200 | first_release_date > 1577833199);',
+        ));
 
         $this->igdb->where('name', 'Fortnite')->orWhereNotBetween('first_release_date', 1546297200, 1577833199)->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where name = "Fortnite" | (first_release_date < 1546297200 | first_release_date > 1577833199);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where name = "Fortnite" | (first_release_date < 1546297200 | first_release_date > 1577833199);',
+        ));
     }
 
     /**
@@ -417,13 +404,11 @@ class BuilderTest extends TestCase
     {
         $this->igdb->whereBetween('first_release_date', 1546297200, 1577833199, false)->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where (first_release_date > 1546297200 & first_release_date < 1577833199);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where (first_release_date > 1546297200 & first_release_date < 1577833199);',
+        ));
     }
 
     /**
@@ -549,23 +534,19 @@ class BuilderTest extends TestCase
 
         $this->igdb->whereDate('first_release_date', $date->format('Y-m-d'))->get();
 
-        Http::assertSent(function (Request $request) use ($start, $end) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                "where (first_release_date >= $start & first_release_date <= $end);",
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            "where (first_release_date >= $start & first_release_date <= $end);",
+        ));
 
         $this->igdb->where('name', 'Fortnite')->orWhereDate('first_release_date', $date->format('Y-m-d'))->get();
 
-        Http::assertSent(function (Request $request) use ($start, $end) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                "where name = \"Fortnite\" | (first_release_date >= $start & first_release_date <= $end);",
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            "where name = \"Fortnite\" | (first_release_date >= $start & first_release_date <= $end);",
+        ));
     }
 
     /**
@@ -665,23 +646,19 @@ class BuilderTest extends TestCase
 
         $this->igdb->whereYear('first_release_date', $date->year)->get();
 
-        Http::assertSent(function (Request $request) use ($start, $end) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                "where (first_release_date >= $start & first_release_date <= $end);",
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            "where (first_release_date >= $start & first_release_date <= $end);",
+        ));
 
         $this->igdb->where('name', 'Fortnite')->orWhereYear('first_release_date', $date->year)->get();
 
-        Http::assertSent(function (Request $request) use ($start, $end) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                "where name = \"Fortnite\" | (first_release_date >= $start & first_release_date <= $end);",
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            "where name = \"Fortnite\" | (first_release_date >= $start & first_release_date <= $end);",
+        ));
     }
 
     /**
@@ -770,18 +747,16 @@ class BuilderTest extends TestCase
     public function testItShouldGenerateNestedOrWhereQuery(): void
     {
         $this->igdb->where('name', 'Fortnite')
-            ->orWhere(function ($query): void {
+            ->orWhere(static function ($query): void {
                 $query->where('aggregated_rating', '>=', 90)
                     ->where('aggregated_rating_count', '>=', 3000);
             })->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where name = "Fortnite" | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where name = "Fortnite" | (aggregated_rating >= 90 & aggregated_rating_count >= 3000);',
+        ));
     }
 
     /**
@@ -795,25 +770,21 @@ class BuilderTest extends TestCase
 
         $this->igdb->where('name', 'Fortnite')->orWhere([['name', 'Call of Duty'], ['name', 'Borderlands 2']])->get();
 
-        Http::assertSent(function (Request $request) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where name = "Fortnite" | (name = "Call of Duty" & name = "Borderlands 2");',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where name = "Fortnite" | (name = "Call of Duty" & name = "Borderlands 2");',
+        ));
 
         $now = Carbon::now()->timestamp;
 
         $this->igdb->where('name', 'Fortnite')->where(['name' => 'Borderlands', 'first_release_date' => $now])->get();
 
-        Http::assertSent(function (Request $request) use ($now) {
-            return $this->isApiCall(
-                $request,
-                'games',
-                'where name = "Fortnite" & (name = "Borderlands" & first_release_date = ' . $now . ');',
-            );
-        });
+        Http::assertSent(fn(Request $request) => $this->isApiCall(
+            $request,
+            'games',
+            'where name = "Fortnite" & (name = "Borderlands" & first_release_date = ' . $now . ');',
+        ));
     }
 
     /**

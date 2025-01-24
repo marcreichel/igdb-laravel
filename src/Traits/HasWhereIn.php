@@ -31,7 +31,7 @@ trait HasWhereIn
 
         $where = $this->query->get('where', new Collection());
 
-        $valuesString = collect($values)->map(fn (mixed $value) => !is_numeric($value) ? '"' . $value . '"' : $value)->implode(',');
+        $valuesString = collect($values)->map(static fn (mixed $value) => !is_numeric($value) ? '"' . $value . '"' : $value)->implode(',');
 
         $where->push(($where->count() ? $boolean . ' ' : '') . $key . ' ' . $operator . ' ' . $prefix . $valuesString . $suffix);
 

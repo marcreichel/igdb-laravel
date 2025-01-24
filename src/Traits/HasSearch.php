@@ -40,7 +40,7 @@ trait HasSearch
         $tokenizedQuery = explode(' ', $query);
         $keys = collect($key)->crossJoin($tokenizedQuery)->toArray();
 
-        return $this->whereNested(function (Builder $query) use ($keys, $caseSensitive): void {
+        return $this->whereNested(static function (Builder $query) use ($keys, $caseSensitive): void {
             foreach ($keys as $v) {
                 if (is_array($v)) {
                     $query->whereLike($v[0], $v[1], $caseSensitive, '|');

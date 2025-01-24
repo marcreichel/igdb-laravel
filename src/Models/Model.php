@@ -176,9 +176,9 @@ abstract class Model implements Arrayable, ArrayAccess
 
     protected function setAttributes(array $attributes): void
     {
-        $this->attributes = collect($attributes)->filter(function (mixed $value) {
+        $this->attributes = collect($attributes)->filter(static function (mixed $value) {
             if (is_array($value)) {
-                return collect($value)->filter(fn (mixed $value) => is_object($value))->isEmpty();
+                return collect($value)->filter(static fn (mixed $value) => is_object($value))->isEmpty();
             }
 
             return !is_object($value);
@@ -203,7 +203,7 @@ abstract class Model implements Arrayable, ArrayAccess
 
                 return $this->mapToModel($key, $value);
             })
-            ->filter(fn (mixed $value): bool => $value instanceof Model || ($value instanceof Collection && !$value->isEmpty()));
+            ->filter(static fn (mixed $value): bool => $value instanceof Model || ($value instanceof Collection && !$value->isEmpty()));
     }
 
     public function forwardCallTo(mixed $object, mixed $method, mixed $parameters): mixed
@@ -306,7 +306,7 @@ abstract class Model implements Arrayable, ArrayAccess
     public function toArray(): array
     {
         $attributes = collect($this->attributes);
-        $relations = $this->relations->map(function (mixed $relation) {
+        $relations = $this->relations->map(static function (mixed $relation) {
             if (!$relation instanceof Arrayable) {
                 return $relation;
             }

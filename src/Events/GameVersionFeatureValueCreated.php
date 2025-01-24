@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\GameVersionFeatureValue;
 
 class GameVersionFeatureValueCreated extends Event
 {
-    public GameVersionFeatureValue $data;
-
-    public function __construct(GameVersionFeatureValue $data, Request $request)
+    public function __construct(public GameVersionFeatureValue $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

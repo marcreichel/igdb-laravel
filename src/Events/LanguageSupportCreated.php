@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\LanguageSupport;
 
 class LanguageSupportCreated extends Event
 {
-    public LanguageSupport $data;
-
-    public function __construct(LanguageSupport $data, Request $request)
+    public function __construct(public LanguageSupport $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

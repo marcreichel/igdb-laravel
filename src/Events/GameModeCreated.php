@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\GameMode;
 
 class GameModeCreated extends Event
 {
-    public GameMode $data;
-
-    public function __construct(GameMode $data, Request $request)
+    public function __construct(public GameMode $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\PlatformLogo;
 
 class PlatformLogoCreated extends Event
 {
-    public PlatformLogo $data;
-
-    public function __construct(PlatformLogo $data, Request $request)
+    public function __construct(public PlatformLogo $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }

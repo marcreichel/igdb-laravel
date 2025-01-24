@@ -9,11 +9,8 @@ use MarcReichel\IGDBLaravel\Models\PlatformWebsite;
 
 class PlatformWebsiteCreated extends Event
 {
-    public PlatformWebsite $data;
-
-    public function __construct(PlatformWebsite $data, Request $request)
+    public function __construct(public PlatformWebsite $data, Request $request)
     {
         parent::__construct($request);
-        $this->data = $data;
     }
 }
