@@ -50,7 +50,7 @@ class ReactivateWebhook extends Command
             return self::FAILURE;
         }
 
-        /** @var Model $class */
+        /** @var class-string<Model> $class */
         $class = $fullQualifiedName;
 
         try {

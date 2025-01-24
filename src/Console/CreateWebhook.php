@@ -51,7 +51,7 @@ class CreateWebhook extends Command
             $fullQualifiedName = $namespace . $closestModel;
         }
 
-        /** @var Model $class */
+        /** @var class-string<Model> $class */
         $class = $fullQualifiedName;
 
         $methods = ['create', 'update', 'delete'];

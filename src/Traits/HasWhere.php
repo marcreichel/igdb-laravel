@@ -90,7 +90,7 @@ trait HasWhere
      */
     public function orWhere(
         mixed $key,
-        string $operator = null,
+        ?string $operator = null,
         mixed $value = null,
         string $boolean = '|',
     ): self {
