@@ -20,6 +20,13 @@ return [
     'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
 
     /**
+     * The prefix used to cache the results.
+     *
+     * E.g.: `[CACHE_PREFIX].75170fc230cd88f32e475ff4087f81d9`
+     */
+    'cache_prefix' => 'igdb_cache',
+
+    /**
      * Path where the webhooks should be handled.
      */
     'webhook_path' => 'igdb-webhook/handle',

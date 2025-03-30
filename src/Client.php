@@ -39,7 +39,7 @@ final class Client
 
     private static function handleCache(string $endpoint, string $query, int $cacheLifetime): string
     {
-        $key = 'igdb_cache.' . md5($endpoint . $query);
+        $key = config('igdb.cache_prefix', 'igdb_cache') . '.' . md5($endpoint . $query);
 
         if ($cacheLifetime === 0) {
             Cache::forget($key);
