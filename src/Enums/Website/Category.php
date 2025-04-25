@@ -23,4 +23,5 @@ enum Category: int
     case EPIC_GAMES = 16;
     case GOG = 17;
     case DISCORD = 18;
+    case BLUESKY = 19;
 }
