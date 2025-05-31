@@ -24,4 +24,8 @@ enum Category: int
     case GOG = 17;
     case DISCORD = 18;
     case BLUESKY = 19;
+    case XBOX = 22;
+    case PLAYSTATION = 23;
+    case NINTENDO = 24;
+    case META = 25;
 }
