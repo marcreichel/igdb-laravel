@@ -389,7 +389,7 @@ class Builder
     public function paginate(int $limit = 10): Paginator
     {
         return new Paginator(
-            $this->forPage((int) (request()->query('page', '1') ?? 1), $limit)->get(),
+            $this->forPage((int) request()->query('page', '1'), $limit)->get(),
             $limit,
         );
     }
