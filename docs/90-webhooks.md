@@ -9,27 +9,10 @@ Since version 2.3.0 of this package you can create webhooks and handle their req
 Inside your `config/igdb.php` file you need to have a `webhook_path` and `webhook_secret` of your choice like so:
 
 ```php
-// torchlight! {"lineNumbers": false}
-// torchlight! {"summaryCollapsedIndicator": "⌄"}
 <?php
 
 return [
-    // [tl! collapse:start]
-    /*
-     * These are the credentials you got from https://dev.twitch.tv/console/apps [tl! autolink]
-     */
-    'credentials' => [
-        'client_id' => env('TWITCH_CLIENT_ID', ''),
-        'client_secret' => env('TWITCH_CLIENT_SECRET', ''),
-    ],
-
-    /*
-     * This package caches queries automatically (for 1 hour per default).
-     * Here you can set how long each query should be cached (in seconds).
-     *
-     * To turn cache off set this value to 0
-     */
-    'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600), // [tl! collapse:end]
+    // ...
 
     /*
      * Path where the webhooks should be handled.
@@ -60,7 +43,6 @@ package. New installations have this configured automatically._
 And then set a secret inside your `.env` file:
 
 ```dotenv
-// torchlight! {"lineNumbers": false}
 IGDB_WEBHOOK_SECRET=yoursecret
 ```
 
@@ -73,7 +55,6 @@ By default the webhook URL is built from your `APP_URL`. If you want IGDB to sen
 relay service like [Hookdeck](https://hookdeck.com) or a proxy, set a base URL inside your `.env` file:
 
 ```dotenv
-// torchlight! {"lineNumbers": false}
 IGDB_WEBHOOK_BASE_URL=https://hkdk.events/your-source
 ```
 
@@ -92,7 +73,6 @@ First of all we need to inform IGDB that we want to be informed.
 For this we create a webhook like so (for example inside a controller):
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Models\Game;
 use Illuminate\Routing\Controller;
@@ -114,7 +94,6 @@ For this we create a Laravel EventListener or for sake of simplicity we just lis
 method of our `app/providers/EventServiceProvider.php`:
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Events\GameCreated;
 use Illuminate\Support\Facades\Event;
 
@@ -136,14 +115,12 @@ the [official docs](https://laravel.com/docs/events).
 ### List your webhooks
 
 ```bash
-// torchlight! {"lineNumbers": false}
 $ php artisan igdb:webhooks
 ```
 
 ### Create a webhook
 
 ```bash
-// torchlight! {"lineNumbers": false}
 $ php artisan igdb:webhooks:create {model?} {--method=}
 ```
 
@@ -157,7 +134,6 @@ The `--method` option needs to be one of `create`, `update` or `delete` accordin
 ### Reactivate a webhook
 
 ```bash
-// torchlight! {"lineNumbers": false}
 $ php artisan igdb:webhooks:reactivate {id}
 ```
 
@@ -166,7 +142,6 @@ For `{id}` insert the id of the (inactive) webhook.
 ### Delete a webhook
 
 ```bash
-// torchlight! {"lineNumbers": false}
 $ php artisan igdb:webhooks:delete {id?} {--A|all}
 ```
 

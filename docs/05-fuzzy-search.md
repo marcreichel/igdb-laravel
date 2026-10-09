@@ -3,7 +3,6 @@
 The fuzzy search (since v3.1.0) acts like a "where like" chain under the hood.
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::fuzzySearch(
