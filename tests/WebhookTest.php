@@ -73,6 +73,16 @@ class WebhookTest extends TestCase
         self::assertEquals('http://localhost/' . $this->prefix . '/artworks/delete', $webhook->url);
     }
 
+    public function testItShouldGenerateWebhookWithCustomBaseUrl(): void
+    {
+        config(['igdb.webhook_base_url' => 'https://hooks.example.com/source/']);
+
+        $webhook = Game::createWebhook(Method::CREATE);
+
+        self::assertEquals('https://hooks.example.com/source/' . $this->prefix . '/games/create', $webhook->url);
+        self::assertEquals('Game', $webhook->getModel());
+    }
+
     public function testItShouldGenerateWebhookWithStringMethod(): void
     {
         $webhook = Game::createWebhook('create');

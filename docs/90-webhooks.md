@@ -43,6 +43,14 @@ return [
      * functionality.
      */
     'webhook_secret' => env('IGDB_WEBHOOK_SECRET'),
+
+    /*
+     * Base URL used for the webhook callback instead of the `APP_URL`.
+     *
+     * Useful when webhooks should be routed through a relay service
+     * (e.g. Hookdeck) or a proxy. The webhook path is appended to it.
+     */
+    'webhook_base_url' => env('IGDB_WEBHOOK_BASE_URL'),
 ];
 ```
 
@@ -58,6 +66,20 @@ IGDB_WEBHOOK_SECRET=yoursecret
 
 > Make sure your `APP_URL` (inside your `.env`) is something different than `localhost` or `127.0.0.1`. Otherwise webhooks can
 > not be created.
+
+### Custom webhook base URL
+
+By default the webhook URL is built from your `APP_URL`. If you want IGDB to send the webhooks to a different host, e.g. a
+relay service like [Hookdeck](https://hookdeck.com) or a proxy, set a base URL inside your `.env` file:
+
+```dotenv
+// torchlight! {"lineNumbers": false}
+IGDB_WEBHOOK_BASE_URL=https://hkdk.events/your-source
+```
+
+The webhook path is appended to this base URL, so the webhook above would be created for
+`https://hkdk.events/your-source/igdb-webhook/handle/{hash}/games/create`. Make sure your relay forwards this path to
+your application.
 
 That's it!
 
