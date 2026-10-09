@@ -11,7 +11,8 @@ use ReflectionMethod;
 
 /**
  * Compares the models and enums with IGDB's protobuf schema in tests/Fixtures/igdbapi.proto.
- * The weekly igdb-schema workflow refreshes that file, so a failure here means the API changed.
+ * A failure means the models/enums and the fixture disagree: either the fixture was refreshed
+ * with upstream changes, or a local model, cast, or enum drifted from it.
  *
  * @internal
  */
