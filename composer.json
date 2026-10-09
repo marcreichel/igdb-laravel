@@ -1,13 +1,20 @@
 {
     "name": "marcreichel/igdb-laravel",
-    "description": "A Laravel wrapper for version 4 of the IGDB API (Apicalypse) including webhook handling",
+    "description": "Eloquent-style models and query builder for the IGDB API in Laravel, with Twitch authentication and webhook support handled for you.",
     "keywords": [
         "laravel",
-        "api-wrapper",
+        "laravel-package",
         "igdb",
         "igdb-api",
+        "api-wrapper",
         "apicalypse",
-        "wrapper"
+        "query-builder",
+        "eloquent",
+        "webhooks",
+        "twitch",
+        "video-games",
+        "gaming",
+        "game-database"
     ],
     "type": "library",
     "minimum-stability": "stable",
