@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title">
+    <title id="title">Laravel IGDB Wrapper</title>
+    <defs>
+        <clipPath id="card">
+            <rect width="1280" height="360" rx="24"/>
+        </clipPath>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#1b1036"/>
+            <stop offset="1" stop-color="#140b22"/>
+        </linearGradient>
+        <radialGradient id="glow-purple" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#7f52ff" stop-opacity="0.75"/>
+            <stop offset="1" stop-color="#7f52ff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glow-red" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ff2d20" stop-opacity="0.6"/>
+            <stop offset="1" stop-color="#ff2d20" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="text" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c4b5ff"/>
+            <stop offset="0.5" stop-color="#ffffff"/>
+            <stop offset="1" stop-color="#ffb4a8"/>
+        </linearGradient>
+        <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.2" fill="#ffffff" fill-opacity="0.08"/>
+        </pattern>
+    </defs>
+
+    <g clip-path="url(#card)">
+        <rect width="1280" height="360" fill="url(#bg)"/>
+        <ellipse cx="160" cy="40" rx="520" ry="300" fill="url(#glow-purple)"/>
+        <ellipse cx="1160" cy="340" rx="520" ry="300" fill="url(#glow-red)"/>
+        <rect width="1280" height="360" fill="url(#dots)"/>
+    </g>
+    <rect x="0.5" y="0.5" width="1279" height="359" rx="23.5" fill="none" stroke="#ffffff" stroke-opacity="0.12"/>
+
+    <!-- IGDB -->
+    <g transform="translate(421 56)" fill="none" stroke="#ffffff" stroke-width="7">
+        <path d="M3.5 3.5H196.5V100Q100 84 3.5 100Z"/>
+        <text x="100" y="69" text-anchor="middle" fill="#ffffff" stroke="none" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="2">IGDB</text>
+    </g>
+
+    <!-- × -->
+    <g stroke="#ffffff" stroke-opacity="0.7" stroke-width="5" stroke-linecap="round">
+        <line x1="673" y1="92" x2="705" y2="124"/>
+        <line x1="705" y1="92" x2="673" y2="124"/>
+    </g>
+
+    <!-- Laravel -->
+    <g transform="translate(757 55) scale(0.46)" fill="none" stroke="#ff2d20" stroke-width="13" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M0 27L45 0L92 27V127L135 102V53L180 27L225 53V104L182 128V182L92 234L0 182Z"/>
+        <path d="M0 27L45 54L92 27M45 54V154L92 180L182 128M92 180V234M45 154L135 102M135 53L180 79L225 53M180 79V128M135 102L180 128"/>
+    </g>
+
+    <text x="640" y="238" text-anchor="middle" fill="url(#text)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="60" font-weight="800" letter-spacing="-1">Laravel IGDB Wrapper</text>
+
+    <rect x="376" y="270" width="528" height="44" rx="22" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/>
+    <text x="640" y="299" text-anchor="middle" fill="#e9e4ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18"><tspan fill="#ff7a6e">$</tspan> composer require marcreichel/igdb-laravel</text>
+</svg>

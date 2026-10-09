@@ -1,4 +1,6 @@
-<h1 align="center">Laravel IGDB Wrapper</h1>
+<p align="center">
+    <img src=".github/header.svg" alt="Laravel IGDB Wrapper">
+</p>
 
 <p align="center">
     This is a Laravel wrapper for version 4 of the <a href="https://api-docs.igdb.com/">IGDB API</a> (Apicalypse)
@@ -31,8 +33,6 @@
         <img src="https://img.shields.io/github/license/marcreichel/igdb-laravel?style=for-the-badge" alt="License">
     </a>
 </p>
-
-![Cover](docs/art/cover.png)
 
 ## Installation
 
