@@ -126,7 +126,7 @@ class ConsoleTest extends TestCase
             '*' => Http::response([
                 [
                     'id' => 1,
-                    'url' => 'https://example.com/',
+                    'url' => 'https://example.com/igdb-webhook/handle/abcd1234/games/create',
                     'category' => Category::Game,
                     'sub_category' => 0,
                     'number_of_retries' => 0,
@@ -136,7 +136,11 @@ class ConsoleTest extends TestCase
         ]);
 
         $this->artisan('igdb:webhooks')
-            ->assertExitCode(Command::SUCCESS);
+            ->assertExitCode(Command::SUCCESS)
+            ->expectsTable(
+                ['ID', 'URL', 'Model', 'Method', 'Retries', 'Active'],
+                [[1, 'https://example.com/igdb-webhook/handle/abcd1234/games/create', 'Game', 'create', 0, '  ✅  ']],
+            );
     }
 
     public function testItShouldReactivateWebhook(): void
@@ -145,7 +149,7 @@ class ConsoleTest extends TestCase
             '*' => Http::response([
                 [
                     'id' => 1337,
-                    'url' => 'https://example.com/',
+                    'url' => 'https://example.com/igdb-webhook/handle/abcd1234/games/create',
                     'category' => Category::Game,
                     'sub_category' => 0,
                     'number_of_retries' => 0,

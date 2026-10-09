@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\CompanyWebsite;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\WebsiteType} model instead. */
 enum Category: int
 {
     case OFFICIAL = 1;
@@ -23,4 +24,5 @@ enum Category: int
     case EPIC_GAMES = 16;
     case GOG = 17;
     case DISCORD = 18;
+    case BLUESKY = 19;
 }

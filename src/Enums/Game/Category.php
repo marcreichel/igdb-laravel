@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\Game;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\GameType} model instead. */
 enum Category: int
 {
     case MAIN_GAME = 0;
@@ -19,4 +20,6 @@ enum Category: int
     case EXPANDED_GAME = 10;
     case PORT = 11;
     case FORK = 12;
+    case PACK = 13;
+    case UPDATE = 14;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\Platform;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\PlatformType} model instead. */
 enum Category: int
 {
     case CONSOLE = 1;

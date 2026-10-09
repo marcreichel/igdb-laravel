@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\Webhook;
 
+/** @deprecated No longer used; {@see \MarcReichel\IGDBLaravel\Models\Webhook::getModel()} derives the model from the webhook URL. */
 enum Category: int
 {
     case AgeRating = 285072627;

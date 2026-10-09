@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\Company;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\DateFormat} model instead. */
 enum ChangeDateCategory: int
 {
     case YYYYMMMMDD = 0;

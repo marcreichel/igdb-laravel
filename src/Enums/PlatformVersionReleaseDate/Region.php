@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\PlatformVersionReleaseDate;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\ReleaseDateRegion} model instead. */
 enum Region: int
 {
     case EUROPE = 1;
@@ -14,4 +15,6 @@ enum Region: int
     case CHINA = 6;
     case ASIA = 7;
     case WORLDWIDE = 8;
+    case KOREA = 9;
+    case BRAZIL = 10;
 }

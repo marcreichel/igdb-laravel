@@ -8,8 +8,6 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookMethodException;
 use MarcReichel\IGDBLaravel\Exceptions\WebhookSecretMissingException;
@@ -119,7 +117,7 @@ class WebhookTest extends TestCase
     public function testItShouldDispatchCreatedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Created';
-        $url = $this->prefix . '/' . Str::snake($className) . '/create';
+        $url = $this->prefix . '/' . $this->endpointOf($className) . '/create';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -135,7 +133,7 @@ class WebhookTest extends TestCase
     public function testItShouldDispatchUpdatedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Updated';
-        $url = $this->prefix . '/' . Str::snake($className) . '/update';
+        $url = $this->prefix . '/' . $this->endpointOf($className) . '/update';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -151,7 +149,7 @@ class WebhookTest extends TestCase
     public function testItShouldDispatchDeletedEvent(string $className): void
     {
         $eventClassString = 'MarcReichel\IGDBLaravel\Events\\' . $className . 'Deleted';
-        $url = $this->prefix . '/' . Str::snake($className) . '/delete';
+        $url = $this->prefix . '/' . $this->endpointOf($className) . '/delete';
 
         $response = $this->withHeaders([
             'X-Secret' => 'secret',
@@ -164,14 +162,18 @@ class WebhookTest extends TestCase
     }
 
     #[DataProvider('modelsDataProvider')]
-    public function testItShouldHaveACategoryCaseForEveryModel(string $className): void
+    public function testItShouldDeriveModelFromUrl(string $className): void
     {
-        $categories = collect(Category::cases())
-            ->map(static fn (Category $category) => $category->name)
-            ->values()
-            ->toArray();
+        $webhook = new Webhook(url: 'https://example.com/' . $this->prefix . '/' . $this->endpointOf($className) . '/create', category: 0);
 
-        $this->assertContains($className, $categories);
+        $this->assertSame($className, $webhook->getModel());
+    }
+
+    public function testItShouldFallBackToCategoryForForeignUrl(): void
+    {
+        $webhook = new Webhook(url: 'https://example.com/', category: 1337);
+
+        $this->assertSame('1337', $webhook->getModel());
     }
 
     public function testItShouldListAllWebhooks(): void

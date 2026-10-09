@@ -6,4 +6,7 @@ namespace MarcReichel\IGDBLaravel\Models;
 
 class PlatformWebsite extends Model
 {
+    protected array $casts = [
+        'type' => WebsiteType::class,
+    ];
 }

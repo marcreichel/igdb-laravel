@@ -27,6 +27,8 @@ class ListWebhooks extends Command
             $webhooks->map(static function (Webhook $webhook) {
                 $data = $webhook->toArray();
 
+                $data['category'] = $webhook->getModel();
+                $data['sub_category'] = $webhook->getMethod()->value;
                 $data['active'] = $data['active'] ? '  ✅  ' : '  ❌  ';
 
                 return $data;

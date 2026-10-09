@@ -11,7 +11,7 @@ class Game extends Model
         'alternative_names' => AlternativeName::class,
         'artworks' => Artwork::class,
         'bundles' => self::class,
-        'collection' => Collection::class,
+        'collection' => Collection::class, // @deprecated upstream
         'collections' => Collection::class,
         'cover' => Cover::class,
         'dlcs' => self::class,
