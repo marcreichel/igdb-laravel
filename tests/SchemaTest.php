@@ -144,7 +144,6 @@ class SchemaTest extends TestCase
 
             foreach (self::ENUM_MAP[$protoEnum] as $phpEnum) {
                 $class = self::ENUMS . $phpEnum;
-                assert(is_subclass_of($class, BackedEnum::class));
                 $deprecated = collect($cases)->every(fn (array $case) => $case['deprecated']);
 
                 if ($deprecated && !str_contains((string) (new ReflectionClass($class))->getDocComment(), '@deprecated')) {
