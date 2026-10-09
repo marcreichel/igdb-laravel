@@ -1,0 +1,59 @@
+name: IGDB Schema
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch schema
+        run: curl --fail --silent --show-error --output tests/Fixtures/igdbapi.proto https://api.igdb.com/v4/igdbapi.proto
+
+      - name: Detect changes
+        id: schema
+        run: git diff --quiet tests/Fixtures/igdbapi.proto || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Setup PHP
+        if: steps.schema.outputs.changed
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: none
+
+      - name: Install dependencies
+        if: steps.schema.outputs.changed
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      # GITHUB_TOKEN PRs don't trigger other workflows, so the report goes into the PR body.
+      - name: Run schema check
+        if: steps.schema.outputs.changed
+        run: |
+          {
+            echo 'IGDB published a new [`igdbapi.proto`](https://api.igdb.com/v4/igdbapi.proto). Output of `SchemaTest` against it:'
+            echo
+            echo '```'
+            vendor/bin/pest --filter=SchemaTest --colors=never --no-coverage 2>&1 | head -c 60000 || true
+            echo '```'
+            echo
+            echo 'Push fixes for the models and enums to this branch. CI runs once you push.'
+          } > "$RUNNER_TEMP/report.md"
+
+      - name: Open pull request
+        if: steps.schema.outputs.changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: igdb-schema-update
+          delete-branch: true
+          add-paths: tests/Fixtures/igdbapi.proto
+          commit-message: Update IGDB schema
+          title: Update IGDB schema
+          body-path: ${{ runner.temp }}/report.md
