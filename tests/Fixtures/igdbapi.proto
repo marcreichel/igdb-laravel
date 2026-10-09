@@ -1,0 +1,1673 @@
+
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true; // Must be true because of private access in files.
+option optimize_for = CODE_SIZE;
+
+message Count {
+    int64 count = 1;
+}
+
+message MultiQueryResult {
+    string name = 1;
+    repeated bytes results = 2;
+    int64 count = 3;
+}
+
+message MultiQueryResultArray {
+    repeated MultiQueryResult result = 1;
+}
+
+message AgeRatingResult {
+    repeated AgeRating ageratings = 1;
+}
+
+message AgeRating {
+    uint64 id = 1;
+    AgeRatingCategoryEnum category = 2 [deprecated = true]; 
+    repeated AgeRatingContentDescription content_descriptions = 3 [deprecated = true]; 
+    AgeRatingRatingEnum rating = 4 [deprecated = true]; 
+    string rating_cover_url = 5; 
+    string synopsis = 6; 
+    string checksum = 7; 
+    AgeRatingOrganization organization = 8; 
+    AgeRatingCategory rating_category = 9; 
+    repeated AgeRatingContentDescriptionV2 rating_content_descriptions = 10; 
+}
+
+
+enum AgeRatingCategoryEnum {
+    AGERATING_CATEGORY_NULL = 0 [deprecated = true];
+    ESRB = 1 [deprecated = true];
+    PEGI = 2 [deprecated = true];
+    CERO = 3 [deprecated = true];
+    USK = 4 [deprecated = true];
+    GRAC = 5 [deprecated = true];
+    CLASS_IND = 6 [deprecated = true];
+    ACB = 7 [deprecated = true];
+}
+
+
+enum AgeRatingRatingEnum {
+    AGERATING_RATING_NULL = 0 [deprecated = true];
+    THREE = 1 [deprecated = true];
+    SEVEN = 2 [deprecated = true];
+    TWELVE = 3 [deprecated = true];
+    SIXTEEN = 4 [deprecated = true];
+    EIGHTEEN = 5 [deprecated = true];
+    RP = 6 [deprecated = true];
+    EC = 7 [deprecated = true];
+    E = 8 [deprecated = true];
+    E10 = 9 [deprecated = true];
+    T = 10 [deprecated = true];
+    M = 11 [deprecated = true];
+    AO = 12 [deprecated = true];
+    CERO_A = 13 [deprecated = true];
+    CERO_B = 14 [deprecated = true];
+    CERO_C = 15 [deprecated = true];
+    CERO_D = 16 [deprecated = true];
+    CERO_Z = 17 [deprecated = true];
+    USK_0 = 18 [deprecated = true];
+    USK_6 = 19 [deprecated = true];
+    USK_12 = 20 [deprecated = true];
+    USK_16 = 21 [deprecated = true];
+    USK_18 = 22 [deprecated = true];
+    GRAC_ALL = 23 [deprecated = true];
+    GRAC_TWELVE = 24 [deprecated = true];
+    GRAC_FIFTEEN = 25 [deprecated = true];
+    GRAC_EIGHTEEN = 26 [deprecated = true];
+    GRAC_TESTING = 27 [deprecated = true];
+    CLASS_IND_L = 28 [deprecated = true];
+    CLASS_IND_TEN = 29 [deprecated = true];
+    CLASS_IND_TWELVE = 30 [deprecated = true];
+    CLASS_IND_FOURTEEN = 31 [deprecated = true];
+    CLASS_IND_SIXTEEN = 32 [deprecated = true];
+    CLASS_IND_EIGHTEEN = 33 [deprecated = true];
+    ACB_G = 34 [deprecated = true];
+    ACB_PG = 35 [deprecated = true];
+    ACB_M = 36 [deprecated = true];
+    ACB_MA15 = 37 [deprecated = true];
+    ACB_R18 = 38 [deprecated = true];
+    ACB_RC = 39 [deprecated = true];
+}
+
+message AgeRatingCategoryResult {
+    repeated AgeRatingCategory ageratingcategories = 1;
+}
+
+message AgeRatingCategory {
+    uint64 id = 1;
+    string rating = 2; 
+    AgeRatingOrganization organization = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message AgeRatingContentDescriptionResult {
+    repeated AgeRatingContentDescription ageratingcontentdescriptions = 1;
+}
+
+message AgeRatingContentDescription {
+    uint64 id = 1;
+    AgeRatingContentDescriptionCategoryEnum category = 2 [deprecated = true]; 
+    string description = 3; 
+    string checksum = 4; 
+}
+
+
+enum AgeRatingContentDescriptionCategoryEnum {
+    AGERATINGCONTENTDESCRIPTION_CATEGORY_NULL = 0 [deprecated = true];
+    ESRB_ALCOHOL_REFERENCE = 1 [deprecated = true];
+    ESRB_ANIMATED_BLOOD = 2 [deprecated = true];
+    ESRB_BLOOD = 3 [deprecated = true];
+    ESRB_BLOOD_AND_GORE = 4 [deprecated = true];
+    ESRB_CARTOON_VIOLENCE = 5 [deprecated = true];
+    ESRB_COMIC_MISCHIEF = 6 [deprecated = true];
+    ESRB_CRUDE_HUMOR = 7 [deprecated = true];
+    ESRB_DRUG_REFERENCE = 8 [deprecated = true];
+    ESRB_FANTASY_VIOLENCE = 9 [deprecated = true];
+    ESRB_INTENSE_VIOLENCE = 10 [deprecated = true];
+    ESRB_LANGUAGE = 11 [deprecated = true];
+    ESRB_LYRICS = 12 [deprecated = true];
+    ESRB_MATURE_HUMOR = 13 [deprecated = true];
+    ESRB_NUDITY = 14 [deprecated = true];
+    ESRB_PARTIAL_NUDITY = 15 [deprecated = true];
+    ESRB_REAL_GAMBLING = 16 [deprecated = true];
+    ESRB_SEXUAL_CONTENT = 17 [deprecated = true];
+    ESRB_SEXUAL_THEMES = 18 [deprecated = true];
+    ESRB_SEXUAL_VIOLENCE = 19 [deprecated = true];
+    ESRB_SIMULATED_GAMBLING = 20 [deprecated = true];
+    ESRB_STRONG_LANGUAGE = 21 [deprecated = true];
+    ESRB_STRONG_LYRICS = 22 [deprecated = true];
+    ESRB_STRONG_SEXUAL_CONTENT = 23 [deprecated = true];
+    ESRB_SUGGESTIVE_THEMES = 24 [deprecated = true];
+    ESRB_TOBACCO_REFERENCE = 25 [deprecated = true];
+    ESRB_USE_OF_ALCOHOL = 26 [deprecated = true];
+    ESRB_USE_OF_DRUGS = 27 [deprecated = true];
+    ESRB_USE_OF_TOBACCO = 28 [deprecated = true];
+    ESRB_VIOLENCE = 29 [deprecated = true];
+    ESRB_VIOLENT_REFERENCES = 30 [deprecated = true];
+    ESRB_ANIMATED_VIOLENCE = 31 [deprecated = true];
+    ESRB_MILD_LANGUAGE = 32 [deprecated = true];
+    ESRB_MILD_VIOLENCE = 33 [deprecated = true];
+    ESRB_USE_OF_DRUGS_AND_ALCOHOL = 34 [deprecated = true];
+    ESRB_DRUG_AND_ALCOHOL_REFERENCE = 35 [deprecated = true];
+    ESRB_MILD_SUGGESTIVE_THEMES = 36 [deprecated = true];
+    ESRB_MILD_CARTOON_VIOLENCE = 37 [deprecated = true];
+    ESRB_MILD_BLOOD = 38 [deprecated = true];
+    ESRB_REALISTIC_BLOOD_AND_GORE = 39 [deprecated = true];
+    ESRB_REALISTIC_VIOLENCE = 40 [deprecated = true];
+    ESRB_ALCOHOL_AND_TOBACCO_REFERENCE = 41 [deprecated = true];
+    ESRB_MATURE_SEXUAL_THEMES = 42 [deprecated = true];
+    ESRB_MILD_ANIMATED_VIOLENCE = 43 [deprecated = true];
+    ESRB_MILD_SEXUAL_THEMES = 44 [deprecated = true];
+    ESRB_USE_OF_ALCOHOL_AND_TOBACCO = 45 [deprecated = true];
+    ESRB_ANIMATED_BLOOD_AND_GORE = 46 [deprecated = true];
+    ESRB_MILD_FANTASY_VIOLENCE = 47 [deprecated = true];
+    ESRB_MILD_LYRICS = 48 [deprecated = true];
+    ESRB_REALISTIC_BLOOD = 49 [deprecated = true];
+    PEGI_VIOLENCE = 50 [deprecated = true];
+    PEGI_SEX = 51 [deprecated = true];
+    PEGI_DRUGS = 52 [deprecated = true];
+    PEGI_FEAR = 53 [deprecated = true];
+    PEGI_DISCRIMINATION = 54 [deprecated = true];
+    PEGI_BAD_LANGUAGE = 55 [deprecated = true];
+    PEGI_GAMBLING = 56 [deprecated = true];
+    PEGI_ONLINE_GAMEPLAY = 57 [deprecated = true];
+    PEGI_IN_GAME_PURCHASES = 58 [deprecated = true];
+    CERO_LOVE = 59 [deprecated = true];
+    CERO_SEXUAL_CONTENT = 60 [deprecated = true];
+    CERO_VIOLENCE = 61 [deprecated = true];
+    CERO_HORROR = 62 [deprecated = true];
+    CERO_DRINKING_SMOKING = 63 [deprecated = true];
+    CERO_GAMBLING = 64 [deprecated = true];
+    CERO_CRIME = 65 [deprecated = true];
+    CERO_CONTROLLED_SUBSTANCES = 66 [deprecated = true];
+    CERO_LANGUAGES_AND_OTHERS = 67 [deprecated = true];
+    GRAC_SEXUALITY = 68 [deprecated = true];
+    GRAC_VIOLENCE = 69 [deprecated = true];
+    GRAC_FEAR_HORROR_THREATENING = 70 [deprecated = true];
+    GRAC_LANGUAGE = 71 [deprecated = true];
+    GRAC_ALCOHOL_TOBACCO_DRUG = 72 [deprecated = true];
+    GRAC_CRIME_ANTI_SOCIAL = 73 [deprecated = true];
+    GRAC_GAMBLING = 74 [deprecated = true];
+    CLASS_IND_VIOLENCIA = 75 [deprecated = true];
+    CLASS_IND_VIOLENCIA_EXTREMA = 76 [deprecated = true];
+    CLASS_IND_CONTEUDO_SEXUAL = 77 [deprecated = true];
+    CLASS_IND_NUDEZ = 78 [deprecated = true];
+    CLASS_IND_SEXO = 79 [deprecated = true];
+    CLASS_IND_SEXO_EXPLICITO = 80 [deprecated = true];
+    CLASS_IND_DROGAS = 81 [deprecated = true];
+    CLASS_IND_DROGAS_LICITAS = 82 [deprecated = true];
+    CLASS_IND_DROGAS_ILICITAS = 83 [deprecated = true];
+    CLASS_IND_LINGUAGEM_IMPROPRIA = 84 [deprecated = true];
+    CLASS_IND_ATOS_CRIMINOSOS = 85 [deprecated = true];
+}
+
+message AgeRatingContentDescriptionTypeResult {
+    repeated AgeRatingContentDescriptionType ageratingcontentdescriptiontypes = 1;
+}
+
+message AgeRatingContentDescriptionType {
+    uint64 id = 1;
+    string slug = 2; 
+    string name = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message AgeRatingContentDescriptionV2Result {
+    repeated AgeRatingContentDescriptionV2 ageratingcontentdescriptionsv2 = 1;
+}
+
+message AgeRatingContentDescriptionV2 {
+    uint64 id = 1;
+    string description = 2; 
+    AgeRatingOrganization organization = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+    AgeRatingContentDescriptionType description_type = 7; 
+}
+
+message AgeRatingOrganizationResult {
+    repeated AgeRatingOrganization ageratingorganizations = 1;
+}
+
+message AgeRatingOrganization {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message AlternativeNameResult {
+    repeated AlternativeName alternativenames = 1;
+}
+
+message AlternativeName {
+    uint64 id = 1;
+    string comment = 2; 
+    Game game = 3; 
+    string name = 4; 
+    string checksum = 5; 
+}
+
+message ExecutableResult {
+    repeated Executable executables = 1;
+}
+
+message Executable {
+    uint64 id = 1;
+    Game game = 2;
+    string name = 3;
+    string store = 4;
+    Platform platform = 5;
+    string file_path = 6;
+    string checksum = 7;
+}
+
+message ArtworkResult {
+    repeated Artwork artworks = 1;
+}
+
+message Artwork {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    Game game = 4; 
+    int32 height = 5; 
+    string image_id = 6; 
+    string url = 7; 
+    int32 width = 8; 
+    string checksum = 9; 
+    ArtworkType artwork_type = 10 [deprecated = true]; 
+    ImageType image_type = 11; 
+}
+
+message ArtworkTypeResult {
+    repeated ArtworkType artworktypes = 1;
+}
+
+message ArtworkType {
+    uint64 id = 1;
+    string slug = 2; 
+    string name = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message CharacterResult {
+    repeated Character characters = 1;
+}
+
+message Character {
+    uint64 id = 1;
+    repeated string akas = 2; 
+    string country_name = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    string description = 5; 
+    repeated Game games = 6; 
+    GenderGenderEnum gender = 7 [deprecated = true]; 
+    CharacterMugShot mug_shot = 8; 
+    string name = 9; 
+    string slug = 10; 
+    CharacterSpeciesEnum species = 11 [deprecated = true]; 
+    google.protobuf.Timestamp updated_at = 12; 
+    string url = 13; 
+    string checksum = 14; 
+    CharacterGender character_gender = 15; 
+    CharacterSpecie character_species = 16; 
+}
+
+
+enum GenderGenderEnum {
+    MALE = 0 [deprecated = true];
+    FEMALE = 1 [deprecated = true];
+    OTHER = 2 [deprecated = true];
+}
+
+
+enum CharacterSpeciesEnum {
+    CHARACTER_SPECIES_NULL = 0 [deprecated = true];
+    HUMAN = 1 [deprecated = true];
+    ALIEN = 2 [deprecated = true];
+    ANIMAL = 3 [deprecated = true];
+    ANDROID = 4 [deprecated = true];
+    UNKNOWN = 5 [deprecated = true];
+}
+
+message CharacterGenderResult {
+    repeated CharacterGender charactergenders = 1;
+}
+
+message CharacterGender {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message CharacterMugShotResult {
+    repeated CharacterMugShot charactermugshots = 1;
+}
+
+message CharacterMugShot {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    int32 height = 4; 
+    string image_id = 5; 
+    string url = 6; 
+    int32 width = 7; 
+    string checksum = 8; 
+}
+
+message CharacterSpecieResult {
+    repeated CharacterSpecie characterspecies = 1;
+}
+
+message CharacterSpecie {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message CollectionResult {
+    repeated Collection collections = 1;
+}
+
+message Collection {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    repeated Game games = 3; 
+    string name = 4; 
+    string slug = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string url = 7; 
+    string checksum = 8; 
+    CollectionType type = 9; 
+    repeated CollectionRelation as_parent_relations = 10; 
+    repeated CollectionRelation as_child_relations = 11; 
+}
+
+message CollectionMembershipResult {
+    repeated CollectionMembership collectionmemberships = 1;
+}
+
+message CollectionMembership {
+    uint64 id = 1;
+    Game game = 2; 
+    Collection collection = 3; 
+    CollectionMembershipType type = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    google.protobuf.Timestamp created_at = 6; 
+    string checksum = 7; 
+}
+
+message CollectionMembershipTypeResult {
+    repeated CollectionMembershipType collectionmembershiptypes = 1;
+}
+
+message CollectionMembershipType {
+    uint64 id = 1;
+    string name = 2; 
+    string description = 3; 
+    CollectionType allowed_collection_type = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    google.protobuf.Timestamp created_at = 6; 
+    string checksum = 7; 
+}
+
+message CollectionRelationResult {
+    repeated CollectionRelation collectionrelations = 1;
+}
+
+message CollectionRelation {
+    uint64 id = 1;
+    Collection child_collection = 2; 
+    Collection parent_collection = 3; 
+    CollectionRelationType type = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    google.protobuf.Timestamp created_at = 6; 
+    string checksum = 7; 
+}
+
+message CollectionRelationTypeResult {
+    repeated CollectionRelationType collectionrelationtypes = 1;
+}
+
+message CollectionRelationType {
+    uint64 id = 1;
+    string name = 2; 
+    string description = 3; 
+    CollectionType allowed_child_type = 4; 
+    CollectionType allowed_parent_type = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    google.protobuf.Timestamp created_at = 7; 
+    string checksum = 8; 
+}
+
+message CollectionTypeResult {
+    repeated CollectionType collectiontypes = 1;
+}
+
+message CollectionType {
+    uint64 id = 1;
+    string name = 2; 
+    string description = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    string checksum = 6; 
+}
+
+message CompanyResult {
+    repeated Company companies = 1;
+}
+
+message Company {
+    uint64 id = 1;
+    google.protobuf.Timestamp change_date = 2; 
+    DateFormatChangeDateCategoryEnum change_date_category = 3 [deprecated = true]; 
+    Company changed_company_id = 4; 
+    int32 country = 5; 
+    google.protobuf.Timestamp created_at = 6; 
+    string description = 7; 
+    repeated Game developed = 8; 
+    CompanyLogo logo = 9; 
+    string name = 10; 
+    Company parent = 11; 
+    repeated Game published = 12; 
+    string slug = 13; 
+    google.protobuf.Timestamp start_date = 14; 
+    DateFormatChangeDateCategoryEnum start_date_category = 15 [deprecated = true]; 
+    google.protobuf.Timestamp updated_at = 16; 
+    string url = 17; 
+    repeated CompanyWebsite websites = 18; 
+    string checksum = 19; 
+    CompanyStatus status = 20; 
+    DateFormat start_date_format = 21; 
+    DateFormat change_date_format = 22; 
+    CompanySize company_size = 23; 
+    repeated CompanyTypeHistory company_type_histories = 24; 
+}
+
+
+enum DateFormatChangeDateCategoryEnum {
+    YYYYMMMMDD = 0 [deprecated = true];
+    YYYYMMMM = 1 [deprecated = true];
+    YYYY = 2 [deprecated = true];
+    YYYYQ1 = 3 [deprecated = true];
+    YYYYQ2 = 4 [deprecated = true];
+    YYYYQ3 = 5 [deprecated = true];
+    YYYYQ4 = 6 [deprecated = true];
+    TBD = 7 [deprecated = true];
+}
+
+message CompanyLogoResult {
+    repeated CompanyLogo companylogos = 1;
+}
+
+message CompanyLogo {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    int32 height = 4; 
+    string image_id = 5; 
+    string url = 6; 
+    int32 width = 7; 
+    string checksum = 8; 
+}
+
+message CompanySizeResult {
+    repeated CompanySize companysizes = 1;
+}
+
+message CompanySize {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message CompanyStatusResult {
+    repeated CompanyStatus companystatuses = 1;
+}
+
+message CompanyStatus {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message CompanyTypeResult {
+    repeated CompanyType companytypes = 1;
+}
+
+message CompanyType {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message CompanyTypeHistoryResult {
+    repeated CompanyTypeHistory companytypehistories = 1;
+}
+
+message CompanyTypeHistory {
+    uint64 id = 1;
+    Company company = 2; 
+    CompanyType company_type = 3; 
+    Company parent_company = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message CompanyWebsiteResult {
+    repeated CompanyWebsite companywebsites = 1;
+}
+
+message CompanyWebsite {
+    uint64 id = 1;
+    WebsiteCategoryEnum category = 2 [deprecated = true]; 
+    bool trusted = 3; 
+    string url = 4; 
+    string checksum = 5; 
+    WebsiteType type = 6; 
+}
+
+
+enum WebsiteCategoryEnum {
+    WEBSITE_CATEGORY_NULL = 0 [deprecated = true];
+    WEBSITE_OFFICIAL = 1 [deprecated = true];
+    WEBSITE_WIKIA = 2 [deprecated = true];
+    WEBSITE_WIKIPEDIA = 3 [deprecated = true];
+    WEBSITE_FACEBOOK = 4 [deprecated = true];
+    WEBSITE_TWITTER = 5 [deprecated = true];
+    WEBSITE_TWITCH = 6 [deprecated = true];
+    WEBSITE_INSTAGRAM = 8 [deprecated = true];
+    WEBSITE_YOUTUBE = 9 [deprecated = true];
+    WEBSITE_IPHONE = 10 [deprecated = true];
+    WEBSITE_IPAD = 11 [deprecated = true];
+    WEBSITE_ANDROID = 12 [deprecated = true];
+    WEBSITE_STEAM = 13 [deprecated = true];
+    WEBSITE_REDDIT = 14 [deprecated = true];
+    WEBSITE_ITCH = 15 [deprecated = true];
+    WEBSITE_EPICGAMES = 16 [deprecated = true];
+    WEBSITE_GOG = 17 [deprecated = true];
+    WEBSITE_DISCORD = 18 [deprecated = true];
+    WEBSITE_BLUESKY = 19 [deprecated = true];
+}
+
+message ContentSafetyRatingResult {
+    repeated ContentSafetyRating contentsafetyratings = 1;
+}
+
+message ContentSafetyRating {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message ContentSafetyRatingDimensionResult {
+    repeated ContentSafetyRatingDimension contentsafetyratingdimensions = 1;
+}
+
+message ContentSafetyRatingDimension {
+    uint64 id = 1;
+    ContentSafetyRating content_safety_rating = 2; 
+    int32 value = 3; 
+    string description = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message CoverResult {
+    repeated Cover covers = 1;
+}
+
+message Cover {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    Game game = 4; 
+    int32 height = 5; 
+    string image_id = 6; 
+    string url = 7; 
+    int32 width = 8; 
+    string checksum = 9; 
+    GameLocalization game_localization = 10; 
+    ImageType image_type = 11; 
+}
+
+message DateFormatResult {
+    repeated DateFormat dateformats = 1;
+}
+
+message DateFormat {
+    uint64 id = 1;
+    string format = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message EntityTypeResult {
+    repeated EntityType entitytypes = 1;
+}
+
+message EntityType {
+    uint64 id = 1;
+    string name = 2; 
+    string description = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message EventResult {
+    repeated Event events = 1;
+}
+
+message Event {
+    uint64 id = 1;
+    string name = 2; 
+    string description = 3; 
+    string slug = 4; 
+    EventLogo event_logo = 5; 
+    google.protobuf.Timestamp start_time = 6; 
+    string time_zone = 7; 
+    google.protobuf.Timestamp end_time = 8; 
+    string live_stream_url = 9; 
+    repeated Game games = 10; 
+    repeated GameVideo videos = 11; 
+    repeated EventNetwork event_networks = 12; 
+    google.protobuf.Timestamp created_at = 13; 
+    google.protobuf.Timestamp updated_at = 14; 
+    string checksum = 15; 
+}
+
+message EventLogoResult {
+    repeated EventLogo eventlogos = 1;
+}
+
+message EventLogo {
+    uint64 id = 1;
+    Event event = 2; 
+    bool alpha_channel = 3; 
+    bool animated = 4; 
+    int32 height = 5; 
+    string image_id = 6; 
+    string url = 7; 
+    int32 width = 8; 
+    google.protobuf.Timestamp created_at = 9; 
+    google.protobuf.Timestamp updated_at = 10; 
+    string checksum = 11; 
+}
+
+message EventNetworkResult {
+    repeated EventNetwork eventnetworks = 1;
+}
+
+message EventNetwork {
+    uint64 id = 1;
+    Event event = 2; 
+    string url = 3; 
+    NetworkType network_type = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message ExternalGameResult {
+    repeated ExternalGame externalgames = 1;
+}
+
+message ExternalGame {
+    uint64 id = 1;
+    ExternalGameCategoryEnum category = 2 [deprecated = true]; 
+    google.protobuf.Timestamp created_at = 3; 
+    Game game = 4; 
+    string name = 5; 
+    string uid = 6; 
+    google.protobuf.Timestamp updated_at = 7; 
+    string url = 8; 
+    int32 year = 9; 
+    ExternalGameMediaEnum media = 10 [deprecated = true]; 
+    Platform platform = 11; 
+    repeated int32 countries = 12; 
+    string checksum = 13; 
+    ExternalGameSource external_game_source = 14; 
+    GameReleaseFormat game_release_format = 15; 
+}
+
+
+enum ExternalGameCategoryEnum {
+    EXTERNALGAME_CATEGORY_NULL = 0 [deprecated = true];
+    EXTERNALGAME_STEAM = 1 [deprecated = true];
+    EXTERNALGAME_GOG = 5 [deprecated = true];
+    EXTERNALGAME_YOUTUBE = 10 [deprecated = true];
+    EXTERNALGAME_MICROSOFT = 11 [deprecated = true];
+    EXTERNALGAME_APPLE = 13 [deprecated = true];
+    EXTERNALGAME_TWITCH = 14 [deprecated = true];
+    EXTERNALGAME_ANDROID = 15 [deprecated = true];
+    EXTERNALGAME_AMAZON_ASIN = 20 [deprecated = true];
+    EXTERNALGAME_AMAZON_LUNA = 22 [deprecated = true];
+    EXTERNALGAME_AMAZON_ADG = 23 [deprecated = true];
+    EXTERNALGAME_EPIC_GAME_STORE = 26 [deprecated = true];
+    EXTERNALGAME_OCULUS = 28 [deprecated = true];
+    EXTERNALGAME_UTOMIK = 29 [deprecated = true];
+    EXTERNALGAME_ITCH_IO = 30 [deprecated = true];
+    EXTERNALGAME_XBOX_MARKETPLACE = 31 [deprecated = true];
+    EXTERNALGAME_KARTRIDGE = 32 [deprecated = true];
+    EXTERNALGAME_PLAYSTATION_STORE_US = 36 [deprecated = true];
+    EXTERNALGAME_FOCUS_ENTERTAINMENT = 37 [deprecated = true];
+    EXTERNALGAME_XBOX_GAME_PASS_ULTIMATE_CLOUD = 54 [deprecated = true];
+    EXTERNALGAME_GAMEJOLT = 55 [deprecated = true];
+}
+
+
+enum ExternalGameMediaEnum {
+    EXTERNALGAME_MEDIA_NULL = 0 [deprecated = true];
+    EXTERNALGAME_DIGITAL = 1 [deprecated = true];
+    EXTERNALGAME_PHYSICAL = 2 [deprecated = true];
+}
+
+message ExternalGameSourceResult {
+    repeated ExternalGameSource externalgamesources = 1;
+}
+
+message ExternalGameSource {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message FranchiseResult {
+    repeated Franchise franchises = 1;
+}
+
+message Franchise {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    repeated Game games = 3; 
+    string name = 4; 
+    string slug = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string url = 7; 
+    string checksum = 8; 
+}
+
+message GameResult {
+    repeated Game games = 1;
+}
+
+message Game {
+    uint64 id = 1;
+    repeated AgeRating age_ratings = 2; 
+    double aggregated_rating = 3; 
+    int32 aggregated_rating_count = 4; 
+    repeated AlternativeName alternative_names = 5; 
+    repeated Artwork artworks = 6; 
+    repeated Game bundles = 7; 
+    GameCategoryEnum category = 8 [deprecated = true]; 
+    Collection collection = 9 [deprecated = true]; 
+    Cover cover = 10; 
+    google.protobuf.Timestamp created_at = 11; 
+    repeated Game dlcs = 12; 
+    repeated Game expansions = 13; 
+    repeated ExternalGame external_games = 14; 
+    google.protobuf.Timestamp first_release_date = 15; 
+    int32 follows = 16 [deprecated = true]; 
+    Franchise franchise = 17; 
+    repeated Franchise franchises = 18; 
+    repeated GameEngine game_engines = 19; 
+    repeated GameMode game_modes = 20; 
+    repeated Genre genres = 21; 
+    int32 hypes = 22; 
+    repeated InvolvedCompany involved_companies = 23; 
+    repeated Keyword keywords = 24; 
+    repeated MultiplayerMode multiplayer_modes = 25; 
+    string name = 26; 
+    Game parent_game = 27; 
+    repeated Platform platforms = 28; 
+    repeated PlayerPerspective player_perspectives = 29; 
+    double rating = 30; 
+    int32 rating_count = 31; 
+    repeated ReleaseDate release_dates = 32; 
+    repeated Screenshot screenshots = 33; 
+    repeated Game similar_games = 34; 
+    string slug = 35; 
+    repeated Game standalone_expansions = 36; 
+    GameStatusEnum status = 37 [deprecated = true]; 
+    string storyline = 38; 
+    string summary = 39; 
+    repeated int32 tags = 40; 
+    repeated Theme themes = 41; 
+    double total_rating = 42; 
+    int32 total_rating_count = 43; 
+    google.protobuf.Timestamp updated_at = 44; 
+    string url = 45; 
+    Game version_parent = 46; 
+    string version_title = 47; 
+    repeated GameVideo videos = 48; 
+    repeated Website websites = 49; 
+    string checksum = 50; 
+    repeated Game remakes = 51; 
+    repeated Game remasters = 52; 
+    repeated Game expanded_games = 53; 
+    repeated Game ports = 54; 
+    repeated Game forks = 55; 
+    repeated LanguageSupport language_supports = 56; 
+    repeated GameLocalization game_localizations = 57; 
+    repeated Collection collections = 58; 
+    GameStatus game_status = 59; 
+    GameType game_type = 60; 
+    repeated Executable executables = 61;
+}
+
+
+enum GameCategoryEnum {
+    MAIN_GAME = 0 [deprecated = true];
+    DLC_ADDON = 1 [deprecated = true];
+    EXPANSION = 2 [deprecated = true];
+    BUNDLE = 3 [deprecated = true];
+    STANDALONE_EXPANSION = 4 [deprecated = true];
+    MOD = 5 [deprecated = true];
+    EPISODE = 6 [deprecated = true];
+    SEASON = 7 [deprecated = true];
+    REMAKE = 8 [deprecated = true];
+    REMASTER = 9 [deprecated = true];
+    EXPANDED_GAME = 10 [deprecated = true];
+    PORT = 11 [deprecated = true];
+    FORK = 12 [deprecated = true];
+    PACK = 13 [deprecated = true];
+    UPDATE = 14 [deprecated = true];
+}
+
+
+enum GameStatusEnum {
+    RELEASED = 0 [deprecated = true];
+    ALPHA = 2 [deprecated = true];
+    BETA = 3 [deprecated = true];
+    EARLY_ACCESS = 4 [deprecated = true];
+    OFFLINE = 5 [deprecated = true];
+    CANCELLED = 6 [deprecated = true];
+    RUMORED = 7 [deprecated = true];
+    DELISTED = 8 [deprecated = true];
+}
+
+message GameContentSafetyRatingResult {
+    repeated GameContentSafetyRating gamecontentsafetyratings = 1;
+}
+
+message GameContentSafetyRating {
+    uint64 id = 1;
+    Game game = 2; 
+    ContentSafetyRatingDimension content_safety_rating_dimension = 3; 
+    ContentSafetyRating content_safety_rating = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message GameEngineResult {
+    repeated GameEngine gameengines = 1;
+}
+
+message GameEngine {
+    uint64 id = 1;
+    repeated Company companies = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    string description = 4; 
+    GameEngineLogo logo = 5; 
+    string name = 6; 
+    repeated Platform platforms = 7; 
+    string slug = 8; 
+    google.protobuf.Timestamp updated_at = 9; 
+    string url = 10; 
+    string checksum = 11; 
+}
+
+message GameEngineLogoResult {
+    repeated GameEngineLogo gameenginelogos = 1;
+}
+
+message GameEngineLogo {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    int32 height = 4; 
+    string image_id = 5; 
+    string url = 6; 
+    int32 width = 7; 
+    string checksum = 8; 
+}
+
+message GameLocalizationResult {
+    repeated GameLocalization gamelocalizations = 1;
+}
+
+message GameLocalization {
+    uint64 id = 1;
+    string name = 2; 
+    Cover cover = 3; 
+    Game game = 4; 
+    Region region = 5; 
+    google.protobuf.Timestamp created_at = 6; 
+    google.protobuf.Timestamp updated_at = 7; 
+    string checksum = 8; 
+}
+
+message GameModeResult {
+    repeated GameMode gamemodes = 1;
+}
+
+message GameMode {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    string name = 3; 
+    string slug = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string url = 6; 
+    string checksum = 7; 
+}
+
+message GameReleaseFormatResult {
+    repeated GameReleaseFormat gamereleaseformats = 1;
+}
+
+message GameReleaseFormat {
+    uint64 id = 1;
+    string format = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message GameStatusResult {
+    repeated GameStatus gamestatuses = 1;
+}
+
+message GameStatus {
+    uint64 id = 1;
+    string status = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message GameTimeToBeatResult {
+    repeated GameTimeToBeat gametimetobeats = 1;
+}
+
+message GameTimeToBeat {
+    uint64 id = 1;
+    int32 game_id = 2; 
+    int32 hastily = 3; 
+    int32 normally = 4; 
+    int32 completely = 5; 
+    int32 count = 6; 
+    google.protobuf.Timestamp created_at = 7; 
+    google.protobuf.Timestamp updated_at = 8; 
+    string checksum = 9; 
+}
+
+message GameTypeResult {
+    repeated GameType gametypes = 1;
+}
+
+message GameType {
+    uint64 id = 1;
+    string type = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message GameVersionResult {
+    repeated GameVersion gameversions = 1;
+}
+
+message GameVersion {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    repeated GameVersionFeature features = 3; 
+    Game game = 4; 
+    repeated Game games = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string url = 7; 
+    string checksum = 8; 
+}
+
+message GameVersionFeatureResult {
+    repeated GameVersionFeature gameversionfeatures = 1;
+}
+
+message GameVersionFeature {
+    uint64 id = 1;
+    GameVersionFeatureCategoryEnum category = 2; 
+    string description = 3; 
+    int32 position = 4; 
+    string title = 5; 
+    repeated GameVersionFeatureValue values = 6; 
+    string checksum = 7; 
+}
+
+
+enum GameVersionFeatureCategoryEnum {
+    BOOLEAN = 0;
+    DESCRIPTION = 1;
+}
+
+message GameVersionFeatureValueResult {
+    repeated GameVersionFeatureValue gameversionfeaturevalues = 1;
+}
+
+message GameVersionFeatureValue {
+    uint64 id = 1;
+    Game game = 2; 
+    GameVersionFeature game_feature = 3; 
+    GameVersionFeatureValueIncludedFeatureEnum included_feature = 4; 
+    string note = 5; 
+    string checksum = 6; 
+}
+
+
+enum GameVersionFeatureValueIncludedFeatureEnum {
+    NOT_INCLUDED = 0;
+    INCLUDED = 1;
+    PRE_ORDER_ONLY = 2;
+}
+
+message GameVideoResult {
+    repeated GameVideo gamevideos = 1;
+}
+
+message GameVideo {
+    uint64 id = 1;
+    Game game = 2; 
+    string name = 3; 
+    string video_id = 4; 
+    string checksum = 5; 
+}
+
+message GenreResult {
+    repeated Genre genres = 1;
+}
+
+message Genre {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    string name = 3; 
+    string slug = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string url = 6; 
+    string checksum = 7; 
+}
+
+message ImageTypeResult {
+    repeated ImageType imagetypes = 1;
+}
+
+message ImageType {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message InvolvedCompanyResult {
+    repeated InvolvedCompany involvedcompanies = 1;
+}
+
+message InvolvedCompany {
+    uint64 id = 1;
+    Company company = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    bool developer = 4; 
+    Game game = 5; 
+    bool porting = 6; 
+    bool publisher = 7; 
+    bool supporting = 8; 
+    google.protobuf.Timestamp updated_at = 9; 
+    string checksum = 10; 
+}
+
+message KeywordResult {
+    repeated Keyword keywords = 1;
+}
+
+message Keyword {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    string name = 3; 
+    string slug = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string url = 6; 
+    string checksum = 7; 
+}
+
+message LanguageResult {
+    repeated Language languages = 1;
+}
+
+message Language {
+    uint64 id = 1;
+    string name = 2; 
+    string native_name = 3; 
+    string locale = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message LanguageSupportResult {
+    repeated LanguageSupport languagesupports = 1;
+}
+
+message LanguageSupport {
+    uint64 id = 1;
+    Game game = 2; 
+    Language language = 3; 
+    LanguageSupportType language_support_type = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message LanguageSupportTypeResult {
+    repeated LanguageSupportType languagesupporttypes = 1;
+}
+
+message LanguageSupportType {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message LogoResult {
+    repeated Logo logos = 1;
+}
+
+message Logo {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    Game game = 4; 
+    int32 height = 5; 
+    string image_id = 6; 
+    string url = 7; 
+    int32 width = 8; 
+    string checksum = 9; 
+    ImageType image_type = 10; 
+}
+
+message MultiplayerModeResult {
+    repeated MultiplayerMode multiplayermodes = 1;
+}
+
+message MultiplayerMode {
+    uint64 id = 1;
+    bool campaigncoop = 2; 
+    bool dropin = 3; 
+    Game game = 4; 
+    bool lancoop = 5; 
+    bool offlinecoop = 6; 
+    int32 offlinecoopmax = 7; 
+    int32 offlinemax = 8; 
+    bool onlinecoop = 9; 
+    int32 onlinecoopmax = 10; 
+    int32 onlinemax = 11; 
+    Platform platform = 12; 
+    bool splitscreen = 13; 
+    bool splitscreenonline = 14; 
+    string checksum = 15; 
+}
+
+message NetworkTypeResult {
+    repeated NetworkType networktypes = 1;
+}
+
+message NetworkType {
+    uint64 id = 1;
+    string name = 2; 
+    repeated EventNetwork event_networks = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message PlatformResult {
+    repeated Platform platforms = 1;
+}
+
+message Platform {
+    uint64 id = 1;
+    string abbreviation = 2; 
+    string alternative_name = 3; 
+    PlatformCategoryEnum category = 4 [deprecated = true]; 
+    google.protobuf.Timestamp created_at = 5; 
+    int32 generation = 6; 
+    string name = 7; 
+    PlatformLogo platform_logo = 8; 
+    PlatformFamily platform_family = 9; 
+    string slug = 10; 
+    string summary = 11; 
+    google.protobuf.Timestamp updated_at = 12; 
+    string url = 13; 
+    repeated PlatformVersion versions = 14; 
+    repeated PlatformWebsite websites = 15; 
+    string checksum = 16; 
+    PlatformType platform_type = 17; 
+}
+
+
+enum PlatformCategoryEnum {
+    PLATFORM_CATEGORY_NULL = 0 [deprecated = true];
+    CONSOLE = 1 [deprecated = true];
+    ARCADE = 2 [deprecated = true];
+    PLATFORM = 3 [deprecated = true];
+    OPERATING_SYSTEM = 4 [deprecated = true];
+    PORTABLE_CONSOLE = 5 [deprecated = true];
+    COMPUTER = 6 [deprecated = true];
+}
+
+message PlatformFamilyResult {
+    repeated PlatformFamily platformfamilies = 1;
+}
+
+message PlatformFamily {
+    uint64 id = 1;
+    string name = 2; 
+    string slug = 3; 
+    string checksum = 4; 
+}
+
+message PlatformLogoResult {
+    repeated PlatformLogo platformlogos = 1;
+}
+
+message PlatformLogo {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    int32 height = 4; 
+    string image_id = 5; 
+    string url = 6; 
+    int32 width = 7; 
+    string checksum = 8; 
+}
+
+message PlatformTypeResult {
+    repeated PlatformType platformtypes = 1;
+}
+
+message PlatformType {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message PlatformVersionResult {
+    repeated PlatformVersion platformversions = 1;
+}
+
+message PlatformVersion {
+    uint64 id = 1;
+    repeated PlatformVersionCompany companies = 2; 
+    string connectivity = 3; 
+    string cpu = 4; 
+    string graphics = 5; 
+    PlatformVersionCompany main_manufacturer = 6; 
+    string media = 7; 
+    string memory = 8; 
+    string name = 9; 
+    string os = 11; 
+    string output = 12; 
+    PlatformLogo platform_logo = 13; 
+    repeated PlatformVersionReleaseDate platform_version_release_dates = 14; 
+    string resolutions = 15; 
+    string slug = 16; 
+    string sound = 17; 
+    string storage = 18; 
+    string summary = 19; 
+    string url = 20; 
+    string checksum = 21; 
+}
+
+message PlatformVersionCompanyResult {
+    repeated PlatformVersionCompany platformversioncompanies = 1;
+}
+
+message PlatformVersionCompany {
+    uint64 id = 1;
+    string comment = 2; 
+    Company company = 3; 
+    bool developer = 4; 
+    bool manufacturer = 5; 
+    string checksum = 6; 
+}
+
+message PlatformVersionReleaseDateResult {
+    repeated PlatformVersionReleaseDate platformversionreleasedates = 1;
+}
+
+message PlatformVersionReleaseDate {
+    uint64 id = 1;
+    DateFormatChangeDateCategoryEnum category = 2 [deprecated = true]; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp date = 4; 
+    string human = 5; 
+    int32 m = 6; 
+    PlatformVersion platform_version = 7; 
+    RegionRegionEnum region = 8 [deprecated = true]; 
+    google.protobuf.Timestamp updated_at = 9; 
+    int32 y = 10; 
+    string checksum = 11; 
+    DateFormat date_format = 12; 
+    ReleaseDateRegion release_region = 13; 
+}
+
+
+enum RegionRegionEnum {
+    REGION_REGION_NULL = 0 [deprecated = true];
+    EUROPE = 1 [deprecated = true];
+    NORTH_AMERICA = 2 [deprecated = true];
+    AUSTRALIA = 3 [deprecated = true];
+    NEW_ZEALAND = 4 [deprecated = true];
+    JAPAN = 5 [deprecated = true];
+    CHINA = 6 [deprecated = true];
+    ASIA = 7 [deprecated = true];
+    WORLDWIDE = 8 [deprecated = true];
+    KOREA = 9 [deprecated = true];
+    BRAZIL = 10 [deprecated = true];
+}
+
+message PlatformWebsiteResult {
+    repeated PlatformWebsite platformwebsites = 1;
+}
+
+message PlatformWebsite {
+    uint64 id = 1;
+    WebsiteCategoryEnum category = 2 [deprecated = true]; 
+    bool trusted = 3; 
+    string url = 4; 
+    string checksum = 5; 
+    WebsiteType type = 6; 
+}
+
+message PlayerPerspectiveResult {
+    repeated PlayerPerspective playerperspectives = 1;
+}
+
+message PlayerPerspective {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    string name = 3; 
+    string slug = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string url = 6; 
+    string checksum = 7; 
+}
+
+message PopularityPrimitiveResult {
+    repeated PopularityPrimitive popularityprimitives = 1;
+}
+
+message PopularityPrimitive {
+    uint64 id = 1;
+    int32 game_id = 2; 
+    PopularityType popularity_type = 3; 
+    PopularitySourcePopularitySourceEnum popularity_source = 4 [deprecated = true]; 
+    double value = 5; 
+    google.protobuf.Timestamp calculated_at = 6; 
+    google.protobuf.Timestamp created_at = 7; 
+    google.protobuf.Timestamp updated_at = 8; 
+    string checksum = 9; 
+    ExternalGameSource external_popularity_source = 10; 
+}
+
+
+enum PopularitySourcePopularitySourceEnum {
+    POPULARITYSOURCE_POPULARITY_SOURCE_NULL = 0 [deprecated = true];
+    IGDB = 121 [deprecated = true];
+}
+
+message PopularityTypeResult {
+    repeated PopularityType popularitytypes = 1;
+}
+
+message PopularityType {
+    uint64 id = 1;
+    PopularitySourcePopularitySourceEnum popularity_source = 2 [deprecated = true]; 
+    string name = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+    ExternalGameSource external_popularity_source = 7; 
+}
+
+message RegionResult {
+    repeated Region regions = 1;
+}
+
+message Region {
+    uint64 id = 1;
+    string name = 2; 
+    string category = 3; 
+    string identifier = 4; 
+    google.protobuf.Timestamp created_at = 5; 
+    google.protobuf.Timestamp updated_at = 6; 
+    string checksum = 7; 
+}
+
+message ReleaseDateResult {
+    repeated ReleaseDate releasedates = 1;
+}
+
+message ReleaseDate {
+    uint64 id = 1;
+    DateFormatChangeDateCategoryEnum category = 2 [deprecated = true]; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp date = 4; 
+    Game game = 5; 
+    string human = 6; 
+    int32 m = 7; 
+    Platform platform = 8; 
+    RegionRegionEnum region = 9 [deprecated = true]; 
+    google.protobuf.Timestamp updated_at = 10; 
+    int32 y = 11; 
+    string checksum = 12; 
+    ReleaseDateStatus status = 13; 
+    DateFormat date_format = 14; 
+    ReleaseDateRegion release_region = 15; 
+    int32 d = 16; 
+}
+
+message ReleaseDateRegionResult {
+    repeated ReleaseDateRegion releasedateregions = 1;
+}
+
+message ReleaseDateRegion {
+    uint64 id = 1;
+    string region = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message ReleaseDateStatusResult {
+    repeated ReleaseDateStatus releasedatestatuses = 1;
+}
+
+message ReleaseDateStatus {
+    uint64 id = 1;
+    string name = 2; 
+    string description = 3; 
+    google.protobuf.Timestamp created_at = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string checksum = 6; 
+}
+
+message ReportResult {
+    repeated Report reports = 1;
+}
+
+message Report {
+    uint64 id = 1;
+    int32 source_item_id = 2; 
+    int32 target_item_id = 3; 
+    ReportType report_type = 4; 
+    EntityType entity_type = 5; 
+    google.protobuf.Timestamp created_at = 6; 
+    google.protobuf.Timestamp updated_at = 7; 
+    string checksum = 8; 
+}
+
+message ReportTypeResult {
+    repeated ReportType reporttypes = 1;
+}
+
+message ReportType {
+    uint64 id = 1;
+    string name = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
+
+message ScreenshotResult {
+    repeated Screenshot screenshots = 1;
+}
+
+message Screenshot {
+    uint64 id = 1;
+    bool alpha_channel = 2; 
+    bool animated = 3; 
+    Game game = 4; 
+    int32 height = 5; 
+    string image_id = 6; 
+    string url = 7; 
+    int32 width = 8; 
+    string checksum = 9; 
+}
+
+message SearchResult {
+    repeated Search searches = 1;
+}
+
+message Search {
+    uint64 id = 1;
+    string alternative_name = 2; 
+    Character character = 3; 
+    Collection collection = 4; 
+    Company company = 5; 
+    string description = 6; 
+    Game game = 7; 
+    string name = 8; 
+    Platform platform = 9; 
+    google.protobuf.Timestamp published_at = 10; 
+    TestDummy test_dummy = 11; 
+    Theme theme = 12; 
+    string checksum = 13; 
+}
+
+message TestDummyResult {
+    repeated TestDummy testdummies = 1;
+}
+
+message TestDummy {
+    uint64 id = 1;
+    bool bool_value = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    TestDummyEnumTestEnum enum_test = 4; 
+    double float_value = 5; 
+    Game game = 6; 
+    repeated int32 integer_array = 7; 
+    int32 integer_value = 8; 
+    string name = 9; 
+    int32 new_integer_value = 10; 
+    bool private = 11; 
+    string slug = 12; 
+    repeated string string_array = 13; 
+    repeated TestDummy test_dummies = 14; 
+    TestDummy test_dummy = 15; 
+    google.protobuf.Timestamp updated_at = 16; 
+    string url = 17; 
+    string checksum = 18; 
+}
+
+
+enum TestDummyEnumTestEnum {
+    TESTDUMMY_ENUM_TEST_NULL = 0;
+    ENUM1 = 1;
+    ENUM2 = 2;
+}
+
+message ThemeResult {
+    repeated Theme themes = 1;
+}
+
+message Theme {
+    uint64 id = 1;
+    google.protobuf.Timestamp created_at = 2; 
+    string name = 3; 
+    string slug = 4; 
+    google.protobuf.Timestamp updated_at = 5; 
+    string url = 6; 
+    string checksum = 7; 
+}
+
+message WebsiteResult {
+    repeated Website websites = 1;
+}
+
+message Website {
+    uint64 id = 1;
+    WebsiteCategoryEnum category = 2 [deprecated = true]; 
+    Game game = 3; 
+    bool trusted = 4; 
+    string url = 5; 
+    string checksum = 6; 
+    WebsiteType type = 7; 
+}
+
+message WebsiteTypeResult {
+    repeated WebsiteType websitetypes = 1;
+}
+
+message WebsiteType {
+    uint64 id = 1;
+    string type = 2; 
+    google.protobuf.Timestamp created_at = 3; 
+    google.protobuf.Timestamp updated_at = 4; 
+    string checksum = 5; 
+}
