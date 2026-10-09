@@ -7,7 +7,6 @@ namespace MarcReichel\IGDBLaravel\Models;
 use Carbon\Carbon;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use JsonException;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
@@ -34,14 +33,7 @@ class Webhook
      */
     final public function __construct(mixed ...$parameters)
     {
-        $this->client = Http::withOptions([
-            'base_uri' => ApiHelper::IGDB_BASE_URI,
-        ])
-            ->withHeaders([
-                'Accept' => 'application/json',
-                'Client-ID' => config('igdb.credentials.client_id'),
-                'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
-            ]);
+        $this->client = ApiHelper::client();
 
         $this->fill(...$parameters);
     }

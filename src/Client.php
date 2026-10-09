@@ -6,7 +6,6 @@ namespace MarcReichel\IGDBLaravel;
 
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 
@@ -15,20 +14,20 @@ use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
  */
 final class Client
 {
-    public static function get(string $endpoint, string $query, int $cacheLifetime): mixed
+    public static function get(string $endpoint, string $query, int $cacheLifetime, ?int $retries = null): mixed
     {
         $cacheKey = self::handleCache($endpoint, $query, $cacheLifetime);
 
-        return Cache::remember($cacheKey, $cacheLifetime, static fn () => self::request($endpoint, $query));
+        return Cache::remember($cacheKey, $cacheLifetime, static fn () => self::request($endpoint, $query, $retries));
     }
 
-    public static function count(string $endpoint, string $query, int $cacheLifetime): int
+    public static function count(string $endpoint, string $query, int $cacheLifetime, ?int $retries = null): int
     {
         $endpoint = Str::finish($endpoint, '/count');
         $cacheKey = self::handleCache($endpoint, $query, $cacheLifetime);
 
-        return Cache::remember($cacheKey, $cacheLifetime, static function () use ($endpoint, $query): int {
-            $response = self::request($endpoint, $query);
+        return Cache::remember($cacheKey, $cacheLifetime, static function () use ($endpoint, $query, $retries): int {
+            $response = self::request($endpoint, $query, $retries);
             if (is_array($response)) {
                 return (int) $response['count'];
             }
@@ -52,20 +51,10 @@ final class Client
      * @throws AuthenticationException
      * @throws RequestException
      */
-    private static function request(string $endpoint, string $query): mixed
+    private static function request(string $endpoint, string $query, ?int $retries): mixed
     {
-        $client = Http::withOptions([
-            'base_uri' => ApiHelper::IGDB_BASE_URI,
-        ])->withHeaders([
-            'Accept' => 'application/json',
-            'Client-ID' => config('igdb.credentials.client_id'),
-        ]);
-
-        return $client->withHeaders([
-            'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
-        ])
+        return ApiHelper::client($retries)
             ->withBody($query, 'plain/text')
-            ->retry(3, 100)
             ->post($endpoint)
             ->throw()
             ->json();

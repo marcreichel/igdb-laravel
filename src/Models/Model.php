@@ -13,7 +13,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Builder;
@@ -362,16 +361,7 @@ abstract class Model implements Arrayable, ArrayAccess
 
         $endpoint = $self->endpoint . '/webhooks';
 
-        $client = Http::withOptions([
-            'base_uri' => ApiHelper::IGDB_BASE_URI,
-        ])->withHeaders([
-            'Accept' => 'application/json',
-            'Client-ID' => config('igdb.credentials.client_id'),
-            'Authorization' => 'Bearer ' . ApiHelper::retrieveAccessToken(),
-        ])
-            ->asForm();
-
-        $response = $client->post($endpoint, [
+        $response = ApiHelper::client(onlyUnauthorized: true)->asForm()->post($endpoint, [
             'url' => $url,
             'method' => $parsedMethod,
             'secret' => config('igdb.webhook_secret'),

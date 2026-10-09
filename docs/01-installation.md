@@ -53,6 +53,14 @@ return [
      */
     'cache_prefix' => 'igdb_cache',
 
+    /**
+     * How often a failed request should be attempted in total. If the access
+     * token got rejected, a new one is requested before the next attempt.
+     *
+     * Can be overwritten per query via `->retries()`.
+     */
+    'retries' => env('IGDB_RETRIES', 3),
+
     /*
      * Path where the webhooks should be handled.
      */
