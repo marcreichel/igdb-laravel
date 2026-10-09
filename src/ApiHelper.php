@@ -20,11 +20,12 @@ class ApiHelper
 
     /**
      * Builds an IGDB client which retries failed requests and refreshes the
-     * access token if it got rejected.
+     * access token if it got rejected. Non-idempotent requests should pass
+     * `$onlyUnauthorized` so they are only retried after a token refresh.
      *
      * @throws AuthenticationException
      */
-    public static function client(?int $retries = null): PendingRequest
+    public static function client(?int $retries = null, bool $onlyUnauthorized = false): PendingRequest
     {
         $token = self::retrieveAccessToken();
 
@@ -32,8 +33,10 @@ class ApiHelper
             ->acceptJson()
             ->withHeaders(['Client-ID' => config('igdb.credentials.client_id')])
             ->withToken($token)
-            ->retry($retries ?? (int) config('igdb.retries'), 100, static function (Throwable $exception, PendingRequest $request) use (&$token): bool {
-                if ($exception instanceof RequestException && $exception->response->unauthorized()) {
+            ->retry($retries ?? (int) config('igdb.retries'), 100, static function (Throwable $exception, PendingRequest $request) use (&$token, $onlyUnauthorized): bool {
+                $unauthorized = $exception instanceof RequestException && $exception->response->unauthorized();
+
+                if ($unauthorized) {
                     // Another request may already have refreshed the token.
                     if (Cache::get(self::ACCESS_TOKEN_CACHE_KEY) === $token) {
                         Cache::forget(self::ACCESS_TOKEN_CACHE_KEY);
@@ -42,7 +45,7 @@ class ApiHelper
                     $request->withToken($token);
                 }
 
-                return true;
+                return $unauthorized || !$onlyUnauthorized;
             }, false);
     }
 

@@ -361,7 +361,7 @@ abstract class Model implements Arrayable, ArrayAccess
 
         $endpoint = $self->endpoint . '/webhooks';
 
-        $response = ApiHelper::client()->asForm()->post($endpoint, [
+        $response = ApiHelper::client(onlyUnauthorized: true)->asForm()->post($endpoint, [
             'url' => $url,
             'method' => $parsedMethod,
             'secret' => config('igdb.webhook_secret'),

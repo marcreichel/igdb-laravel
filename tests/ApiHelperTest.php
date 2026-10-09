@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\ApiHelper;
 use MarcReichel\IGDBLaravel\Builder;
+use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use MarcReichel\IGDBLaravel\Models\Game;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -99,6 +101,23 @@ class ApiHelperTest extends TestCase
             $this->fail('Expected RequestException.');
         } catch (RequestException) {
             Http::assertSentCount(2);
+        }
+    }
+
+    public function testItShouldOnlyRetryWebhookCreationAfterRejectedToken(): void
+    {
+        config(['igdb.webhook_secret' => 'secret']);
+        Cache::put('igdb_cache.access_token', 'some-token');
+
+        Http::fake([
+            '*/games/webhooks' => Http::response([], Response::HTTP_INTERNAL_SERVER_ERROR),
+        ]);
+
+        try {
+            Game::createWebhook(Method::CREATE);
+            $this->fail('Expected RequestException.');
+        } catch (RequestException) {
+            Http::assertSentCount(1);
         }
     }
 }
