@@ -9,7 +9,7 @@ class Game extends Model
     protected array $casts = [
         'age_ratings' => AgeRating::class,
         'alternative_names' => AlternativeName::class,
-        'artwork' => Artwork::class,
+        'artworks' => Artwork::class,
         'bundles' => self::class,
         'collection' => Collection::class,
         'collections' => Collection::class,
@@ -39,7 +39,6 @@ class Game extends Model
         'screenshots' => Screenshot::class,
         'similar_games' => self::class,
         'standalone_expansions' => self::class,
-        'tags' => null,
         'themes' => Theme::class,
         'version_parent' => self::class,
         'videos' => GameVideo::class,

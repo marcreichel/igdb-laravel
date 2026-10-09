@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
+use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\Game;
 use MarcReichel\IGDBLaravel\Models\Model;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -393,6 +394,19 @@ class ModelTest extends TestCase
         Game::with(['involved_companies', 'involved_companies.company'])->get();
 
         Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'games', 'fields *,involved_companies.*,involved_companies.company.*;'));
+    }
+
+    public function testItShouldMapArtworksAsRelationAndTagsAsAttribute(): void
+    {
+        $game = new Game([
+            'id' => 1,
+            'artworks' => [['id' => 2, 'image_id' => 'abc']],
+            'tags' => [1, 2, 3],
+        ]);
+
+        self::assertInstanceOf(Artwork::class, $game->relations->get('artworks')->first());
+        self::assertFalse($game->relations->has('tags'));
+        self::assertSame([1, 2, 3], $game->getAttribute('tags'));
     }
 
     public function testItShouldRequestCountEndpoint(): void
