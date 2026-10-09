@@ -9,3 +9,16 @@ use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::cache(0)->get();
 ```
+
+## Retries
+
+Failed requests are attempted 3 times in total by default (`igdb.retries`). If
+the access token got rejected, a new one is requested before the next attempt.
+You can overwrite the number of attempts for one specific query:
+
+```php
+// torchlight! {"lineNumbers": false}
+use MarcReichel\IGDBLaravel\Models\Game;
+
+$games = Game::retries(5)->get();
+```

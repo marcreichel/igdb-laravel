@@ -66,6 +66,11 @@ class Builder
     private int $cacheLifetime;
 
     /**
+     * The number of request attempts. Falls back to `igdb.retries` if null.
+     */
+    private ?int $retries = null;
+
+    /**
      * @throws ReflectionException|InvalidParamsException
      */
     public function __construct(mixed $model = null)
@@ -162,6 +167,16 @@ class Builder
     }
 
     /**
+     * Overwrite the number of request attempts for this query.
+     */
+    public function retries(int $times): self
+    {
+        $this->retries = $times;
+
+        return $this;
+    }
+
+    /**
      * Get the resulting query.
      */
     public function getQuery(): string
@@ -240,7 +255,7 @@ class Builder
             throw new MissingEndpointException();
         }
 
-        $data = Client::get($this->endpoint, $this->getQuery(), $this->cacheLifetime);
+        $data = Client::get($this->endpoint, $this->getQuery(), $this->cacheLifetime, $this->retries);
 
         if (isset($this->class) && $this->class) {
             $data = collect($data)->map(fn (mixed $result) => $this->mapToModel($result));
@@ -348,7 +363,7 @@ class Builder
             throw new MissingEndpointException();
         }
 
-        $data = Client::count($this->endpoint, $this->getQuery(), $this->cacheLifetime);
+        $data = Client::count($this->endpoint, $this->getQuery(), $this->cacheLifetime, $this->retries);
 
         $this->init();
 
