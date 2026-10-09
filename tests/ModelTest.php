@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
+use MarcReichel\IGDBLaravel\Models\AgeRatingContentDescriptionV2;
 use MarcReichel\IGDBLaravel\Models\Artwork;
 use MarcReichel\IGDBLaravel\Models\Game;
 use MarcReichel\IGDBLaravel\Models\Model;
@@ -46,6 +47,13 @@ class ModelTest extends TestCase
         Game::select(['name'])->get();
 
         Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'games', 'fields name;'));
+    }
+
+    public function testItShouldUseTheModelsEndpoint(): void
+    {
+        AgeRatingContentDescriptionV2::select(['name'])->get();
+
+        Http::assertSent(fn (Request $request) => $this->isApiCall($request, 'age_rating_content_descriptions_v2', 'fields name;'));
     }
 
     public function testItShouldGenerateSearchQuery(): void

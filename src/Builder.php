@@ -13,6 +13,7 @@ use JsonException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidParamsException;
 use MarcReichel\IGDBLaravel\Exceptions\MissingEndpointException;
 use MarcReichel\IGDBLaravel\Exceptions\ModelNotFoundException;
+use MarcReichel\IGDBLaravel\Models\Model;
 use MarcReichel\IGDBLaravel\Traits\{DateCasts,
     HasLimits,
     HasNestedWhere,
@@ -26,9 +27,7 @@ use MarcReichel\IGDBLaravel\Traits\{DateCasts,
     HasWhereLike,
     Operators,
     ValuePreparer};
-use ReflectionClass;
 use ReflectionException;
-use stdClass;
 
 class Builder
 {
@@ -196,36 +195,19 @@ class Builder
     /**
      * Set the endpoint from model or string.
      *
-     * @throws ReflectionException
      * @throws InvalidParamsException
      */
     protected function setEndpoint(mixed $model): void
     {
-        $neededNamespace = __NAMESPACE__ . '\\Models';
-
-        if (is_object($model)) {
-            $class = $model::class;
-            $classParents = class_parents($model);
-            $parents = $classParents ? collect($classParents) : collect();
-
-            if ($parents->isEmpty()) {
-                $parents->push($class);
-            }
-
-            $reflectionClass = new ReflectionClass($parents->last() ?? new stdClass());
-            $reflectionNamespace = $reflectionClass->getNamespaceName();
-
-            if (Str::startsWith($reflectionNamespace, $neededNamespace)) {
-                $this->class = $model::class;
-                $class = class_basename($this->class);
-                $this->endpoint = Str::snake(Str::plural($class));
-            }
+        if ($model instanceof Model) {
+            $this->class = $model::class;
+            $this->endpoint = $model->getEndpoint();
         } elseif (is_string($model)) {
             $this->endpoint = $model;
         }
 
         if (!isset($this->endpoint)) {
-            $message = 'Construction-Parameter of Builder must be a string or a Class which extends ' . $neededNamespace . '\\Model. ' . ucfirst(gettype($model)) . ' given.';
+            $message = 'Construction-Parameter of Builder must be a string or a Class which extends ' . Model::class . '. ' . ucfirst(gettype($model)) . ' given.';
 
             throw new InvalidArgumentException($message);
         }

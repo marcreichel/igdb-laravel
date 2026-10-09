@@ -8,5 +8,6 @@ class PlatformVersionReleaseDate extends Model
 {
     protected array $casts = [
         'platform_version' => PlatformVersion::class,
+        'release_region' => ReleaseDateRegion::class,
     ];
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\PlatformVersionReleaseDate;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\DateFormat} model instead. */
 enum Category: int
 {
     case YYYYMMMMDD = 0;

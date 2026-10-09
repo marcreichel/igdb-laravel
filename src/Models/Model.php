@@ -110,12 +110,12 @@ abstract class Model implements Arrayable, ArrayAccess
      */
     final public function __construct(array $properties = [])
     {
+        $this->setEndpoint();
         $this->builder = new Builder($this);
 
         $this->setAttributes($properties);
         $this->setRelations($properties);
         $this->setIdentifier();
-        $this->setEndpoint();
     }
 
     public function __get(string $field): mixed

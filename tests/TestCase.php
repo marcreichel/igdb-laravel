@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\IGDBLaravelServiceProvider;
+use MarcReichel\IGDBLaravel\Models\Model;
 use Orchestra\Testbench\TestCase as Orchestra;
 use ReflectionClass;
 
@@ -77,6 +78,14 @@ class TestCase extends Orchestra
             'created_at' => now()->toIso8601String(),
             'updated_at' => now()->toIso8601String(),
         ]);
+    }
+
+    protected function endpointOf(string $className): string
+    {
+        /** @var Model $model */
+        $model = new ('MarcReichel\IGDBLaravel\Models\\' . $className)();
+
+        return $model->getEndpoint();
     }
 
     public static function modelsDataProvider(): array

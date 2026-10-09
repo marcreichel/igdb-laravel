@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\PlatformWebsite;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\WebsiteType} model instead. */
 enum Category: int
 {
     case OFFICIAL = 1;

@@ -8,13 +8,12 @@ use Carbon\Carbon;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use JsonException;
 use MarcReichel\IGDBLaravel\ApiHelper;
-use MarcReichel\IGDBLaravel\Enums\Webhook\Category;
 use MarcReichel\IGDBLaravel\Enums\Webhook\Method;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
 use MarcReichel\IGDBLaravel\Exceptions\InvalidWebhookSecretException;
+use ReflectionClass;
 
 class Webhook
 {
@@ -103,12 +102,13 @@ class Webhook
             return $data;
         }
 
-        $className = Str::singular(Str::studly($endpoint));
-        $fullClassName = 'MarcReichel\\IGDBLaravel\\Models\\' . $className;
+        $fullClassName = self::modelForEndpoint($endpoint);
 
-        if (!class_exists($fullClassName)) {
+        if (!$fullClassName) {
             return $data;
         }
+
+        $className = class_basename($fullClassName);
 
         /** @var string $method */
         $method = $request->route('method');
@@ -149,16 +149,21 @@ class Webhook
 
     public function getModel(): string
     {
-        $categories = collect(Category::cases())
-            ->mapWithKeys(static fn (Category $category) => [(string) $category->value => $category->name]);
+        // Our callback URLs end in /{endpoint}/{method}, see Model::createWebhook().
+        $segments = explode('/', trim((string) parse_url($this->url, PHP_URL_PATH), '/'));
+        $model = self::modelForEndpoint($segments[count($segments) - 2] ?? '');
 
-        $category = $categories->get($this->category);
+        return $model ? class_basename($model) : (string) $this->category;
+    }
 
-        if (!is_string($category)) {
-            return (string) $this->category;
-        }
-
-        return $category;
+    private static function modelForEndpoint(string $endpoint): ?string
+    {
+        // Match on the model's own endpoint; reversing the string breaks on e.g. character_species or *_v2.
+        return collect(glob(__DIR__ . '/*.php') ?: [])
+            ->map(static fn (string $file): string => __NAMESPACE__ . '\\' . basename($file, '.php'))
+            ->first(static fn (string $class): bool => is_subclass_of($class, Model::class)
+                && (new ReflectionClass($class))->isInstantiable()
+                && (new $class())->getEndpoint() === $endpoint);
     }
 
     public function getMethod(): Method

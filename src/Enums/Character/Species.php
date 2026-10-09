@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarcReichel\IGDBLaravel\Enums\Character;
 
+/** @deprecated Use the {@see \MarcReichel\IGDBLaravel\Models\CharacterSpecie} model instead. */
 enum Species: int
 {
     case HUMAN = 1;
