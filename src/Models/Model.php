@@ -354,7 +354,11 @@ abstract class Model implements Arrayable, ArrayAccess
             'method' => $parsedMethod,
         ]);
 
-        $url = route('handle-igdb-webhook', $routeParameters);
+        $baseUrl = config('igdb.webhook_base_url');
+
+        $url = is_string($baseUrl) && $baseUrl !== ''
+            ? rtrim($baseUrl, '/') . route('handle-igdb-webhook', $routeParameters, false)
+            : route('handle-igdb-webhook', $routeParameters);
 
         $endpoint = $self->endpoint . '/webhooks';
 

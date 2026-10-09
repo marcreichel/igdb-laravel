@@ -38,4 +38,12 @@ return [
      * functionality.
      */
     'webhook_secret' => env('IGDB_WEBHOOK_SECRET'),
+
+    /**
+     * Base URL used for the webhook callback instead of the `APP_URL`.
+     *
+     * Useful when webhooks should be routed through a relay service
+     * (e.g. Hookdeck) or a proxy. The webhook path is appended to it.
+     */
+    'webhook_base_url' => env('IGDB_WEBHOOK_BASE_URL'),
 ];
