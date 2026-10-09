@@ -8,10 +8,8 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use MarcReichel\IGDBLaravel\IGDBLaravelServiceProvider;
-use MarcReichel\IGDBLaravel\Models\Webhook;
 use Orchestra\Testbench\TestCase as Orchestra;
 use ReflectionClass;
 
@@ -25,11 +23,6 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Event::fake();
-
-        Route::post(
-            'igdb-webhook/handle/{model}/{method}',
-            static fn (\Illuminate\Http\Request $request) => Webhook::handle($request),
-        )->name('handle-igdb-webhook');
     }
 
     protected function getPackageProviders($app): array
