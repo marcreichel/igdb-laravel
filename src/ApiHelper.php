@@ -10,6 +10,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use MarcReichel\IGDBLaravel\Exceptions\AuthenticationException;
+use Throwable;
 
 class ApiHelper
 {
@@ -31,7 +32,7 @@ class ApiHelper
             ->acceptJson()
             ->withHeaders(['Client-ID' => config('igdb.credentials.client_id')])
             ->withToken($token)
-            ->retry($retries ?? (int) config('igdb.retries'), 100, static function (Exception $exception, PendingRequest $request) use (&$token): bool {
+            ->retry($retries ?? (int) config('igdb.retries'), 100, static function (Throwable $exception, PendingRequest $request) use (&$token): bool {
                 if ($exception instanceof RequestException && $exception->response->unauthorized()) {
                     // Another request may already have refreshed the token.
                     if (Cache::get(self::ACCESS_TOKEN_CACHE_KEY) === $token) {
