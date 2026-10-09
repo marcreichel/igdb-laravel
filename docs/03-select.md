@@ -5,7 +5,6 @@ skip this method as the query builder will select `*` by default. (**Attention**
 the Apicalypse API)
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Models\Game;
 
 $games = Game::select(['*'])->get();

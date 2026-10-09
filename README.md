@@ -2,7 +2,7 @@
 
 <p align="center">
     This is a Laravel wrapper for version 4 of the <a href="https://api-docs.igdb.com/">IGDB API</a> (Apicalypse)
-    including <a href="https://marcreichel.dev/docs/igdb-laravel/webhooks">webhook handling</a>.
+    including <a href="docs/90-webhooks.md">webhook handling</a>.
 </p>
 
 <p align="center">
@@ -34,75 +34,43 @@
 
 ![Cover](docs/art/cover.png)
 
-## Basic installation
+## Installation
 
-You can install this package via composer using:
+[Create](https://dev.twitch.tv/console/apps/create) a Twitch Developer App, then install the package via composer:
 
 ```bash
 composer require marcreichel/igdb-laravel
 ```
 
-The package will automatically register its service provider.
-
-To publish the config file to `config/igdb.php` run:
+Publish the config file to `config/igdb.php` and set your `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`:
 
 ```bash
 php artisan igdb:publish
 ```
 
-This is the default content of the config file:
+## Example
 
 ```php
-return [
-    /*
-     * These are the credentials you got from https://dev.twitch.tv/console/apps
-     */
-    'credentials' => [
-        'client_id' => env('TWITCH_CLIENT_ID', ''),
-        'client_secret' => env('TWITCH_CLIENT_SECRET', ''),
-    ],
+use MarcReichel\IGDBLaravel\Models\Game;
 
-    /*
-     * This package caches queries automatically (for 1 hour per default).
-     * Here you can set how long each query should be cached (in seconds).
-     *
-     * To turn cache off set this value to 0
-     */
-    'cache_lifetime' => env('IGDB_CACHE_LIFETIME', 3600),
-    
-    /**
-     * The prefix used to cache the results.
-     *
-     * E.g.: `[CACHE_PREFIX].75170fc230cd88f32e475ff4087f81d9`
-     */
-    'cache_prefix' => 'igdb_cache',
-
-    /**
-     * How often a failed request should be attempted in total. If the access
-     * token got rejected, a new one is requested before the next attempt.
-     *
-     * Can be overwritten per query via `->retries()`.
-     */
-    'retries' => env('IGDB_RETRIES', 3),
-
-    /*
-     * Path where the webhooks should be handled.
-     */
-    'webhook_path' => 'igdb-webhook/handle',
-
-    /*
-     * The webhook secret.
-     *
-     * This needs to be a string of your choice in order to use the webhook
-     * functionality.
-     */
-    'webhook_secret' => env('IGDB_WEBHOOK_SECRET', null),
-];
+$game = Game::where('name', 'Fortnite')->first();
 ```
 
 ## Documentation
 
-You will find the full documentation on [the dedicated documentation site](https://marcreichel.dev/docs/igdb-laravel).
+1. [Installation](docs/01-installation.md)
+2. [Getting started](docs/02-getting-started.md)
+3. [Select (Fields)](docs/03-select.md)
+4. [Search](docs/04-search.md)
+5. [Fuzzy Search](docs/05-fuzzy-search.md)
+6. [Where clauses](docs/06-where-clauses.md)
+7. [Ordering, Limit, & Offset](docs/07-order-limit-offset.md)
+8. [Cache](docs/08-cache.md)
+9. [Relationships (Extends)](docs/09-relationships.md)
+10. [Fetch results](docs/10-fetch-results.md)
+11. [Reading properties](docs/11-properties.md)
+12. [Images](docs/12-images.md)
+13. [Webhooks](docs/90-webhooks.md)
 
 ## Testing
 

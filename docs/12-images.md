@@ -19,7 +19,6 @@ This is supported for:
 ### Default image
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Enums\Image\Size;
 use MarcReichel\IGDBLaravel\Models\Game;
 
@@ -36,7 +35,6 @@ As the first parameter the method receives your desired image size. Simply use t
 of the `MarcReichel\IGDBLaravel\Enums\Image\Size` enum.
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Enums\Image\Size;
 use MarcReichel\IGDBLaravel\Models\Game;
 
@@ -52,7 +50,6 @@ $game->cover->getUrl(Size::COVER_BIG);
 If you want to get retina images simply set the second parameter to `true`.
 
 ```php
-// torchlight! {"lineNumbers": false}
 use MarcReichel\IGDBLaravel\Enums\Image\Size;
 use MarcReichel\IGDBLaravel\Models\Game;
 
